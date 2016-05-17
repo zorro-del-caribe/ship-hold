@@ -1,0 +1,26 @@
+{
+  "name": "ship-hold",
+  "version": "1.0.0",
+  "description": "postgresql orm",
+  "main": "index.js",
+  "scripts": {
+    "test": "node ./test | tap-spec"
+  },
+  "keywords": [
+    "postgresql",
+    "orm",
+    "database",
+    "model"
+  ],
+  "author": "Laurent RENARD",
+  "license": "MIT",
+  "dependencies": {
+    "pg": "^4.5.5",
+    "stampit": "^2.1.1",
+    "ship-hold-querybuilder": "https://github.com/zorro-del-caribe/ship-hold-querybuilder.git"
+  },
+  "devDependencies": {
+    "tap-spec": "^4.1.1",
+    "tape": "^4.5.1"
+  }
+}
