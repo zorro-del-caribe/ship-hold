@@ -16,7 +16,6 @@
   "license": "MIT",
   "dependencies": {
     "pg": "^4.5.5",
-    "stampit": "^2.1.1",
     "ship-hold-querybuilder": "https://github.com/zorro-del-caribe/ship-hold-querybuilder.git"
   },
   "devDependencies": {

@@ -1,48 +1,40 @@
 const models = require('./lib/model');
 const url = require('url');
+const adapters = require('./lib/adapterExtensions');
+const shipHoldQueryBuilder = require('ship-hold-querybuilder');
 
-const shipHold = function (connect) {
+module.exports = function (connect = {}) {
   const connection = Object.assign({}, {
     protocol: 'postgres',
-    slashses: true,
+    slashes: true,
     hostname: 'localhost',
     port: 5432
   }, connect);
+
   if (connect.username && connect.password) {
     const {username, password} = connect;
     connection.auth = [username, password].join(':')
   }
-  connection.pathname = connect.database;
+
+  connection.pathname = '/' + connect.database;
   const connectionString = url.format(connection);
+
   const registry = Object.create(null);
-  return {
+  const sh = {
     model: function (key, definition) {
       if (definition) {
-        registry.set(key, definition);
+        registry[key] = models(Object.assign({}, {definition, connectionString, shiphold: this}));
       }
-      if (registry.has(key) === false) {
+      if (registry[key] === undefined) {
         throw new Error('could not find the model %s', key);
       }
-      return models(Object.assign({}, definition, {connectionString}));
-    }
-  }
+      return registry[key];
+    },
+    models(){
+      return Object.keys(registry);
+    },
+    adapters,
+    query: shipHoldQueryBuilder
+  };
+  return sh;
 };
-
-const shipHoldStamp = stampit()
-  .init(function () {
-    const connection = '';
-    const connectionString = this.connectionString;
-    const registry = new Map();
-    delete this.connection;
-    this.model = function (key, definition) {
-      if (definition) {
-        registry.set(key, definition);
-      }
-      if (registry.has(key) === false) {
-        throw new Error('could not find the model %s', key);
-      }
-      return models(Object.assign({}, definition, {connectionString}));
-    }
-  });
-
-module.exports = shipHoldStamp;

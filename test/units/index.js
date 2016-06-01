@@ -1,8 +1,17 @@
 const test = require('tape');
 const models = require('../../lib/model');
+const shiphold = require('../../shiphold');
+
+test('service registry', t=> {
+  const sh = shiphold();
+  const Users = sh.model('Users', {table: 'users', columns: {}});
+  const Users2 = sh.model('Users');
+  t.equal(Users, Users2, 'services should be singletons');
+  t.end();
+});
 
 test('query model table', t=> {
-  const model = models({table: 'users'});
+  const model = shiphold().model('Users',{definition: {table: 'users', columns:{}}});
   const query = model.select().build().text;
   const expected = 'SELECT * FROM "users"';
   t.equal(query, expected);
@@ -10,7 +19,7 @@ test('query model table', t=> {
 });
 
 test('query some fields only', t=> {
-  const model = models({table: 'users'});
+  const model = models({definition: {table: 'users'}});
   const query = model.select('foo', {value: 'bar', as: 'b'}).build().text;
   const expected = 'SELECT "foo", "bar" AS "b" FROM "users"';
   t.equal(query, expected);
@@ -18,7 +27,7 @@ test('query some fields only', t=> {
 });
 
 test('query with where clause', t=> {
-  const model = models({table: 'users'});
+  const model = models({definition: {table: 'users'}});
   const query = model.select()
     .where('foo', 'bar')
     .and('blah', '<', 'woot')
@@ -30,7 +39,7 @@ test('query with where clause', t=> {
 });
 
 test('insert values as defined by value', t=> {
-  const model = models({table: 'users'});
+  const model = models({definition: {table: 'users'}});
   const query = model.insert()
     .value('foo', 'bar')
     .value('age', 4)
@@ -41,7 +50,7 @@ test('insert values as defined by value', t=> {
 });
 
 test('insert hash map value object', t=> {
-  const model = models({table: 'users'});
+  const model = models({definition: {table: 'users'}});
   const actual = model.insert({foo: 'bar', age: 4})
     .build().text;
   const expected = 'INSERT INTO "users" ( "foo", "age" ) VALUES ( \'bar\', \'4\' )';
@@ -50,7 +59,7 @@ test('insert hash map value object', t=> {
 });
 
 test('fill with default if not value is provided', t=> {
-  const model = models({table: 'users'});
+  const model = models({definition: {table: 'users'}});
   const query = model.insert()
     .value('foo')
     .value('age', 4)
@@ -63,7 +72,7 @@ test('fill with default if not value is provided', t=> {
 });
 
 test('basic update', t=> {
-  const model = models({table: 'users'});
+  const model = models({definition: {table: 'users'}});
   const actual = model.update()
     .set('foo', 'bar')
     .set('woot', 4)
@@ -75,7 +84,7 @@ test('basic update', t=> {
 });
 
 test('update with map value', t=> {
-  const model = models({table: 'users'});
+  const model = models({definition: {table: 'users'}});
   const actual = model.update()
     .set({
       foo: 'bar',
@@ -88,7 +97,7 @@ test('update with map value', t=> {
 });
 
 test('update with where clause', t=> {
-  const model = models({table: 'users'});
+  const model = models({definition: {table: 'users'}});
   const actual = model.update()
     .set('foo', 'bar')
     .set('woot', 4)
@@ -101,7 +110,7 @@ test('update with where clause', t=> {
 });
 
 test('basic delete', t=> {
-  const model = models({table: 'users'});
+  const model = models({definition: {table: 'users'}});
   const actual = model.delete()
     .build().text;
   const expected = 'DELETE FROM "users"';
@@ -110,7 +119,7 @@ test('basic delete', t=> {
 });
 
 test('delete with where clause', t=> {
-  const model = models({table: 'users'});
+  const model = models({definition: {table: 'users'}});
   const actual = model.delete()
     .where('foo', '<', 'bar')
     .and('woot', 6)
