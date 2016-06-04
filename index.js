@@ -25,6 +25,77 @@ const Products = sh.model('products', {
     userId: 'integer'
   }
 });
+
+// const sequelize = require('sequelize');
+//
+// const seq = new sequelize('postgres://docker:docker@192.168.99.100/dev');
+//
+// const Users = seq.define('users', {
+//   id: {
+//     type: sequelize.INTEGER,
+//     primaryKey: true
+//   },
+//   age: sequelize.INTEGER,
+//   name: sequelize.STRING
+// });
+//
+// const Products = seq.define('products', {
+//   id: {
+//     type: sequelize.INTEGER,
+//     primaryKey: true
+//   },
+//   price: sequelize.FLOAT,
+//   title: sequelize.STRING
+// });
+//
+// Products.belongsTo(Users);
+// Users.hasMany(Products);
+//
+// Products
+//   .findAll({
+//     // order:[['id','ASC']],
+//     // limit:1,
+//     include:[{model:Users,attributes:['name','age','id']}],
+//     attributes:['price','id','title']
+//   })
+//   .then(result=>console.log(result.map(r=>r.dataValues)))
+
+
+// var knex = require('knex')({
+//   client: 'postgres',
+//   connection: {
+//     host: '192.168.99.100',
+//     user: 'docker',
+//     password: 'docker',
+//     database: 'dev',
+//     charset: 'utf8'
+//   }
+// });
+//
+// var bookshelf = require('bookshelf')(knex);
+//
+// var Users = bookshelf.Model.extend({
+//   tableName: 'users',
+//   products: function () {
+//     return this.hasMany(Products)
+//   }
+// });
+//
+// var Products = bookshelf.Model.extend({
+//   tableName: 'products',
+//   user: function () {
+//     return this.belongsTo(Users);
+//   }
+// });
+// //
+// Users
+//   // .query()
+//   .fetchAll()
+//   .then(function (res) {
+//     console.log(res);
+//   })
+
+
 //
 // function mixin (target, behaviour) {
 //   Object.assign(Object.getPrototypeOf(target), behaviour);
@@ -55,16 +126,16 @@ const Products = sh.model('products', {
 //  */
 //
 // //api adapter (select, update, insert, delete of every model service)
-// Object.assign(sh.runner, {
-//   logRows: function (params = {}) {
-//     return this.stream(params, function * () {
-//       while (true) {
-//         const row = yield;
-//         console.log(row);
-//       }
-//     })
-//   }
-// });
+Object.assign(sh.adapters, {
+  logRows: function (params = {}) {
+    return this.stream(params, function * () {
+      while (true) {
+        const row = yield;
+        console.log(row);
+      }
+    })
+  }
+});
 //
 // Users
 //   .select()
@@ -107,22 +178,22 @@ const Products = sh.model('products', {
 
 
 // api adapter (select, update, insert, delete of every model service)
-Object.assign(sh.adapters, {
-  logRows: function (params = {}) {
-    return this.stream(params, function * () {
-      try {
-        while (true) {
-          const row = yield;
-          console.log(row);
-        }
-      } catch (e) {
-        console.error(e)
-      } finally {
-        console.log('DONE');
-      }
-    })
-  }
-});
+// Object.assign(sh.adapters, {
+//   logRows: function (params = {}) {
+//     return this.stream(params, function * () {
+//       try {
+//         while (true) {
+//           const row = yield;
+//           console.log(row);
+//         }
+//       } catch (e) {
+//         console.error(e)
+//       } finally {
+//         console.log('DONE');
+//       }
+//     })
+//   }
+// });
 
 const Rx = require('rx');
 
@@ -144,16 +215,15 @@ Object.assign(sh.adapters, {
     });
   }
 });
-
-// const u= Users.new({id:1})
-//   .fetch()
-//   .then(r=>console.log(r))
-
+//
+// // const u= Users.new({id:1})
+// //   .fetch()
+// //   .then(r=>console.log(r))
+//
 const userQ = Users
-  .select()
-  .include('products')
+  .select( 'name')
+  .include('products.title')
   .logRows();
-
 
 // console.log(userQ);
 
