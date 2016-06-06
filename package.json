@@ -4,7 +4,9 @@
   "description": "postgresql orm",
   "main": "index.js",
   "scripts": {
-    "test": "node ./test | tap-spec"
+    "test": "npm run test:unit && npm run test:int",
+    "test:int": "node ./test/integrations/setup.js && node ./test/integrations/select_simple.js | tap-summary",
+    "test:unit": "node ./test/units/index.js | tap-summary"
   },
   "keywords": [
     "postgresql",
@@ -19,7 +21,7 @@
     "ship-hold-querybuilder": "https://github.com/zorro-del-caribe/ship-hold-querybuilder.git"
   },
   "devDependencies": {
-    "tap-spec": "^4.1.1",
+    "tap-summary": "^2.1.1",
     "tape": "^4.5.1"
   }
 }

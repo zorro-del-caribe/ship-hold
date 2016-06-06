@@ -2,6 +2,8 @@ const models = require('./lib/model');
 const url = require('url');
 const adapters = require('./lib/adapterExtensions');
 const shipHoldQueryBuilder = require('ship-hold-querybuilder');
+const schemaHelper = require('./lib/schemaHelper');
+const pg = require('pg');
 
 module.exports = function (connect = {}) {
   const connection = Object.assign({}, {
@@ -20,9 +22,10 @@ module.exports = function (connect = {}) {
   const connectionString = url.format(connection);
 
   const registry = Object.create(null);
-  const sh = {
-    model: function (key, definition) {
-      if (definition) {
+  return {
+    model: function (key, defFunc) {
+      if (defFunc) {
+        const definition = defFunc(schemaHelper);
         registry[key] = models(Object.assign({}, {definition, connectionString, shiphold: this}));
       }
       if (registry[key] === undefined) {
@@ -34,7 +37,9 @@ module.exports = function (connect = {}) {
       return Object.keys(registry);
     },
     adapters,
-    query: shipHoldQueryBuilder
+    query: shipHoldQueryBuilder,
+    stop: function () {
+      pg.end();
+    }
   };
-  return sh;
 };

@@ -7,27 +7,54 @@ const sh = shipHold({
   database: 'dev'
 });
 
-const Users = sh.model('users', {
-  table: 'users',
-  columns: {
-    id: 'integer',
-    age: 'integer',
-    name: 'string'
+const Users = sh.model('users', function (sc) {
+  return {
+    table: 'users',
+    columns: {
+      id: 'integer',
+      age: 'integer',
+      name: 'string'
+    },
+    relations: {
+      products: sc.hasMany('products'),
+      phone: sc.hasOne('phones')
+    }
   }
 });
 
-const Products = sh.model('products', {
-  table: 'products',
-  columns: {
-    id: 'integer',
-    price: 'double',
-    title: 'string',
-    userId: 'integer'
+const Products = sh.model('products', function (sc) {
+  return {
+    table: 'products',
+    columns: {
+      id: 'integer',
+      price: 'double',
+      title: 'string',
+      userId: 'integer'
+    },
+    relations: {
+      user: sc.belongsTo('users', 'userId')
+    }
   }
 });
 
-// const sequelize = require('sequelize');
-//
+const Phones = sh.model('phones', function (sc) {
+  return {
+    table: 'phones',
+    columns: {
+      id: 'integer',
+      number: 'string',
+      createdAt: 'timestamp',
+      updatedAt: 'timestamp',
+      userId: 'integer'
+    },
+    relations: {
+      owner: sc.belongsTo('users', 'userId')
+    }
+  }
+});
+
+const sequelize = require('sequelize');
+
 // const seq = new sequelize('postgres://docker:docker@192.168.99.100/dev');
 //
 // const Users = seq.define('users', {
@@ -48,53 +75,44 @@ const Products = sh.model('products', {
 //   title: sequelize.STRING
 // });
 //
+// const Phones = seq.define('phones', {
+//   number: sequelize.STRING
+// });
+//
+// const Stocks = seq.define('stocks', {
+//   quantity: sequelize.INTEGER
+// });
+//
+// const Posts = seq.define('posts', {
+//   content: sequelize.TEXT
+// });
+//
+//
+// Posts.belongsToMany(Users, {through: 'users_projects'})
+// Users.belongsToMany(Posts, {through: 'users_projects'})
+//
+// Stocks.belongsTo(Products);
+// Products.hasMany(Stocks);
+//
+// Phones.belongsTo(Users);
+// Users.hasMany(Phones);
+//
 // Products.belongsTo(Users);
 // Users.hasMany(Products);
 //
-// Products
-//   .findAll({
-//     // order:[['id','ASC']],
-//     // limit:1,
-//     include:[{model:Users,attributes:['name','age','id']}],
-//     attributes:['price','id','title']
+// Promise.all([Posts.find(), Users.find({attributes:['id','age','name']})])
+//   .then(([post, user])=> {
+//     return user.addPost(post)
 //   })
-//   .then(result=>console.log(result.map(r=>r.dataValues)))
+//   .catch(e=>console.log(e))
+//
 
-
-// var knex = require('knex')({
-//   client: 'postgres',
-//   connection: {
-//     host: '192.168.99.100',
-//     user: 'docker',
-//     password: 'docker',
-//     database: 'dev',
-//     charset: 'utf8'
-//   }
-// });
-//
-// var bookshelf = require('bookshelf')(knex);
-//
-// var Users = bookshelf.Model.extend({
-//   tableName: 'users',
-//   products: function () {
-//     return this.hasMany(Products)
-//   }
-// });
-//
-// var Products = bookshelf.Model.extend({
-//   tableName: 'products',
-//   user: function () {
-//     return this.belongsTo(Users);
-//   }
-// });
-// //
-// Users
-//   // .query()
-//   .fetchAll()
-//   .then(function (res) {
-//     console.log(res);
+// const start = Date.now();
+// Users.findAll({
+//     attributes: ['id', 'name', 'age'],
+//     include: [{model: Products, attributes: ['id', 'title', 'price', 'userId']}, Phones]
 //   })
-
+//   .then(result=>console.log('DONE ', Date.now() - start, ' ms'))
 
 //
 // function mixin (target, behaviour) {
@@ -126,16 +144,16 @@ const Products = sh.model('products', {
 //  */
 //
 // //api adapter (select, update, insert, delete of every model service)
-Object.assign(sh.adapters, {
-  logRows: function (params = {}) {
-    return this.stream(params, function * () {
-      while (true) {
-        const row = yield;
-        console.log(row);
-      }
-    })
-  }
-});
+// Object.assign(sh.adapters, {
+//   logRows: function (params = {}) {
+//     return this.stream(params, function * () {
+//       while (true) {
+//         const row = yield;
+//         console.log(row);
+//       }
+//     })
+//   }
+// });
 //
 // Users
 //   .select()
@@ -177,54 +195,64 @@ Object.assign(sh.adapters, {
 //////////////////////////////////////////////////////////////////////////////////
 
 
-// api adapter (select, update, insert, delete of every model service)
-// Object.assign(sh.adapters, {
-//   logRows: function (params = {}) {
-//     return this.stream(params, function * () {
-//       try {
-//         while (true) {
-//           const row = yield;
-//           console.log(row);
-//         }
-//       } catch (e) {
-//         console.error(e)
-//       } finally {
-//         console.log('DONE');
-//       }
-//     })
-//   }
-// });
-
-const Rx = require('rx');
+//api adapter(select, update, insert, delete of every model service)
 
 Object.assign(sh.adapters, {
-  observable: function (params = {}) {
-    return Rx.Observable.create(observer => {
-      this.stream(params, function * () {
-        try {
-          while (true) {
-            const row = yield;
-            observer.onNext(row);
-          }
-        } catch (e) {
-          observer.onError(e);
-        } finally {
-          observer.onCompleted();
+  logRows: function (params = {}) {
+    const start = Date.now();
+    return this.stream(params, function * () {
+      try {
+        while (true) {
+          const row = yield;
+          console.log(row);
         }
-      })
-    });
+      } catch (e) {
+        console.error(e)
+      } finally {
+        console.log('DONE ', Date.now() - start, ' ms');
+      }
+    })
   }
 });
+
+// const Rx = require('rx');
+
+// Object.assign(sh.adapters, {
+//   observable: function (params = {}) {
+//     return Rx.Observable.create(observer => {
+//       this.stream(params, function * () {
+//         try {
+//           while (true) {
+//             const row = yield;
+//             observer.onNext(row);
+//           }
+//         } catch (e) {
+//           observer.onError(e);
+//         } finally {
+//           observer.onCompleted();
+//         }
+//       })
+//     });
+//   }
+// });
 //
-// // const u= Users.new({id:1})
-// //   .fetch()
-// //   .then(r=>console.log(r))
-//
-const userQ = Users
-  .select( 'name')
-  .include('products.title')
-  .logRows();
+// const products = Products
+//   .select()
+//   .include('user')
+//   .logRows();
 
-// console.log(userQ);
+const users = Users
+  .select()
+  .build()
+
+console.log(users)
+
+// sh.stop();
 
 
+// console.log(users)
+
+// Phones
+//   .select()
+//   .include('owner')
+//   .logRows()
