@@ -4,56 +4,56 @@ const sh = shipHold({
   hostname: '192.168.99.100',
   username: 'docker',
   password: 'docker',
-  database: 'dev'
+  database: 'ship-hold-test'
 });
 
 const Users = sh.model('users', function (sc) {
   return {
-    table: 'users',
+    table: 'user_simple_select',
     columns: {
       id: 'integer',
       age: 'integer',
       name: 'string'
     },
-    relations: {
-      products: sc.hasMany('products'),
-      phone: sc.hasOne('phones')
-    }
+    // relations: {
+    //   products: sc.hasMany('products'),
+    //   phone: sc.hasOne('phones')
+    // }
   }
 });
 
-const Products = sh.model('products', function (sc) {
-  return {
-    table: 'products',
-    columns: {
-      id: 'integer',
-      price: 'double',
-      title: 'string',
-      userId: 'integer'
-    },
-    relations: {
-      user: sc.belongsTo('users', 'userId')
-    }
-  }
-});
+// const Products = sh.model('products', function (sc) {
+//   return {
+//     table: 'products',
+//     columns: {
+//       id: 'integer',
+//       price: 'double',
+//       title: 'string',
+//       userId: 'integer'
+//     },
+//     relations: {
+//       user: sc.belongsTo('users', 'userId')
+//     }
+//   }
+// });
+//
+// const Phones = sh.model('phones', function (sc) {
+//   return {
+//     table: 'phones',
+//     columns: {
+//       id: 'integer',
+//       number: 'string',
+//       createdAt: 'timestamp',
+//       updatedAt: 'timestamp',
+//       userId: 'integer'
+//     },
+//     relations: {
+//       owner: sc.belongsTo('users', 'userId')
+//     }
+//   }
+// });
 
-const Phones = sh.model('phones', function (sc) {
-  return {
-    table: 'phones',
-    columns: {
-      id: 'integer',
-      number: 'string',
-      createdAt: 'timestamp',
-      updatedAt: 'timestamp',
-      userId: 'integer'
-    },
-    relations: {
-      owner: sc.belongsTo('users', 'userId')
-    }
-  }
-});
-
-const sequelize = require('sequelize');
+// const sequelize = require('sequelize');
 
 // const seq = new sequelize('postgres://docker:docker@192.168.99.100/dev');
 //
@@ -243,11 +243,12 @@ Object.assign(sh.adapters, {
 
 const users = Users
   .select()
-  .build()
+  .where('age', '>', 30)
+  .and('name','!=','Jesus')
+  .run({age: 30});
 
-console.log(users)
 
-// sh.stop();
+sh.stop();
 
 
 // console.log(users)

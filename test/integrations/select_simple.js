@@ -43,8 +43,7 @@ function createModels () {
           sh.stop();
           assertions.end();
         }
-      })
-
+      });
     }
   });
 
@@ -58,12 +57,14 @@ test('add fixture', t=> {
       ('Laurent',29),
       ('Jesus', 2016),
       ('Raymond',55),
-      ('Blandine',29)
+      ('Blandine',29),
+      ('Olivier',31),
+      ('Francoise',58)
       RETURNING *`;
 
     client.query(query, function (err, result) {
       t.error(err);
-      t.equal(result.rows.length, 4);
+      t.equal(result.rows.length, 6);
       fixtures = result.rows;
       done();
       t.end();
@@ -87,7 +88,7 @@ test('select specified fields', t=> {
     }))
 });
 
-test('support where simple where clause', t=> {
+test('support simple where clause', t=> {
   createModels()
     .select()
     .where('id', 3)
@@ -128,15 +129,19 @@ test('support sub query', t=> {
     .test({}, t, getFixtures().filter(f=>f.name === 'Blandine' || (f.name > 'J' && f.age > 30)));
 });
 
-test.skip('support sub query with parameters', t=> {
+test('support sub query with parameters', t=> {
   const model = createModels();
-  const subq = model.if('name', '>', 'J').and('age', '>', 30);
+  const subq = model.if('name', '>', '$name').and('age', '>', '$age');
 
   model
     .select()
-    .where('name', 'Blandine')
+    .where('name', '$fixName')
     .or(subq)
-    .test({}, t, getFixtures().filter(f=>f.name === 'Blandine' || (f.name > 'J' && f.age > 30)));
+    .test({
+      fixName: 'Blandine',
+      name: 'J',
+      age: 30
+    }, t, getFixtures().filter(f=>f.name === 'Blandine' || (f.name > 'J' && f.age > 30)));
 });
 
 test('support order by', t=> {
