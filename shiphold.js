@@ -2,7 +2,7 @@ const models = require('./lib/model');
 const url = require('url');
 const adapters = require('./lib/adapterExtensions');
 const shipHoldQueryBuilder = require('ship-hold-querybuilder');
-const schemaHelper = require('./lib/schemaHelper');
+const relationDefinitions = require('./lib/relations').definitions;
 const pg = require('pg');
 
 module.exports = function (connect = {}) {
@@ -25,8 +25,8 @@ module.exports = function (connect = {}) {
   return {
     model: function (key, defFunc) {
       if (defFunc) {
-        const definition = defFunc(schemaHelper);
-        registry[key] = models(Object.assign({}, {definition, connectionString, shiphold: this}));
+        const definition = defFunc(relationDefinitions);
+        registry[key] = models(Object.assign({}, {definition, connectionString, shiphold: this, name:key}));
       }
       if (registry[key] === undefined) {
         throw new Error('could not find the model %s', key);

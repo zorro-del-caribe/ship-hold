@@ -81,11 +81,11 @@ test('select all', t=> {
 
 test('select specified fields', t=> {
   createModels()
-    .select('name', 'age')
+    .select('name', 'age', 'id')
     .orderBy('id')
     .test({}, t, getFixtures().map(r=> {
-      return {name: r.name, age: r.age};
-    }))
+      return {id: r.id, name: r.name, age: r.age};
+    }));
 });
 
 test('support simple where clause', t=> {

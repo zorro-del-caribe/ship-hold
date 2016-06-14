@@ -32,7 +32,8 @@ function createModels () {
       },
       relations: {
         products: h.hasMany('Products'),
-        phone: h.hasOne('Phone')
+        phone: h.hasOne('Phones'),
+        accounts: h.belongsToMany('Accounts', 'UsersAccounts', 'user_id')
       }
     };
   });
@@ -53,7 +54,7 @@ function createModels () {
     };
   });
 
-  const Phones = sh.model('Phone', function (h) {
+  const Phones = sh.model('Phones', function (h) {
     return {
       table: 'phones_association_select',
       columns: {
@@ -63,6 +64,30 @@ function createModels () {
       },
       relations: {
         human: h.belongsTo('Users', 'user_id')
+      }
+    };
+  });
+
+  const Accounts = sh.model('Accounts', function (h) {
+    return {
+      table: 'accounts_association_select',
+      columns: {
+        id: 'integer',
+        balance: 'double'
+      },
+      relations: {
+        owners: h.belongsToMany('Users', 'UsersAccounts', 'account_id')
+      }
+    };
+  });
+
+  const UsersAccount = sh.model('UsersAccounts', function (h) {
+    return {
+      table: 'users_accounts_association_select',
+      columns: {
+        id: 'integer',
+        user_id: 'integer',
+        account_id: 'integer'
       }
     };
   });
@@ -86,7 +111,7 @@ function createModels () {
     }
   });
 
-  return {Users, Products, Phones};
+  return {Users, Products, Phones, Accounts};
 }
 
 test('add users fixture', t=> {
@@ -146,6 +171,30 @@ test('add phones fixture', t=> {
   });
 });
 
+test('add accounts fixture', t=> {
+  pg.connect(connection, function (err, client, done) {
+    const query = `INSERT INTO accounts_association_select(balance) VALUES 
+    (200.42), 
+    (-20.56) 
+    RETURNING *`;
+    const pivotq = `INSERT INTO users_accounts_association_select(user_id,account_id) VALUES 
+    (1,1),
+    (1,2)
+      RETURNING *
+    `;
+    client.query(query, function (err, result) {
+      t.error(err);
+      t.equal(result.rows.length, 2);
+      client.query(pivotq, function (err, result) {
+        t.error(err);
+        t.equal(result.rows.length, 2);
+        done();
+        t.end();
+      })
+    });
+  });
+});
+
 test('one to many: load all users with their products', t=> {
   const {Users, Products} = createModels();
   Users
@@ -167,12 +216,12 @@ test('one to many: specify fields', t=> {
   Users
     .select('id', 'name')
     .orderBy('id')
-    .include('products.sku')
+    .include('products.sku', 'products.id')
     .test({}, t, [
-      {name: 'Laurent', id: 1, products: [{sku: 'kbd'}, {sku: 'sbg'}]},
-      {name: 'Jesus', id: 2, products: [{sku: 'sgl'}]},
+      {name: 'Laurent', id: 1, products: [{sku: 'kbd', id: 2}, {id: 3, sku: 'sbg'}]},
+      {name: 'Jesus', id: 2, products: [{sku: 'sgl', id: 1}]},
       {name: 'Raymond', id: 3, products: []},
-      {name: 'Blandine', id: 4, products: [{sku: 'wdr'}]},
+      {name: 'Blandine', id: 4, products: [{sku: 'wdr', id: 5}]},
       {name: 'Olivier', id: 5, products: []},
       {name: 'Francoise', id: 6, products: []}
     ]);
@@ -183,8 +232,8 @@ test('one to many: filter on target model', t=> {
   Users
     .select('id', 'name')
     .where('name', 'Laurent')
-    .include('products.sku')
-    .test({}, t, [{id: 1, name: 'Laurent', products: [{sku: 'kbd'}, {sku: 'sbg'}]}]);
+    .include('products.sku', 'products.id')
+    .test({}, t, [{id: 1, name: 'Laurent', products: [{sku: 'kbd', id: 2}, {id: 3, sku: 'sbg'}]}]);
 });
 
 test('one to many: order and limit on target model', t=> {
@@ -194,10 +243,10 @@ test('one to many: order and limit on target model', t=> {
     .where('age', '<', 50)
     .orderBy('name', 'asc')
     .limit(2)
-    .include('products.sku')
+    .include('products.sku', 'products.id')
     .test({}, t, [
-      {id: 4, name: 'Blandine', age: 29, products: [{sku: 'wdr'}]},
-      {id: 1, name: 'Laurent', age: 29, products: [{sku: 'kbd'}, {sku: 'sbg'}]}
+      {id: 4, name: 'Blandine', age: 29, products: [{sku: 'wdr', id: 5}]},
+      {id: 1, name: 'Laurent', age: 29, products: [{sku: 'kbd', id: 2}, {sku: 'sbg', id: 3}]}
     ]);
 });
 
@@ -234,14 +283,14 @@ test('many to one: specify fields', t=> {
   for (const p of expected) {
     delete p.user_id;
     if (p.owner) {
-      p.owner = {name: p.owner.name}
+      p.owner = {name: p.owner.name, id: p.owner.id}
     }
   }
 
   Products
     .select('id', 'title')
     .orderBy('id')
-    .include('owner.name')
+    .include('owner.name', 'owner.id')
     .test({}, t, expected)
 });
 
@@ -250,8 +299,8 @@ test('many to one: filter on target model', t=> {
   Products
     .select('title', 'id')
     .where('title', 'white dress')
-    .include('owner.name')
-    .test({}, t, [{id: 5, title: 'white dress', owner: {name: 'Blandine'}}]);
+    .include('owner.name', 'owner.id')
+    .test({}, t, [{id: 5, title: 'white dress', owner: {id: 4, name: 'Blandine'}}]);
 });
 
 test('many to one: order and limit on target model', t=> {
@@ -261,10 +310,10 @@ test('many to one: order and limit on target model', t=> {
     .orderBy('price')
     .limit(2)
     .where('price', '<=', 20)
-    .include('owner.name')
+    .include({association: 'owner', attributes: ['name', 'id']})
     .test({}, t, [
       {id: 6, title: 'teddy bear', price: 5.75, owner: null},
-      {id: 1, title: 'sun glasses', price: 9.99, owner: {name: 'Jesus'}}
+      {id: 1, title: 'sun glasses', price: 9.99, owner: {id: 2, name: 'Jesus'}}
     ]);
 });
 
@@ -273,11 +322,69 @@ test('include multiple models', t=> {
   Users
     .select('name', 'id')
     .where('id', 1)
-    .include('products.title', 'phone.number')
+    .include('products.title', 'products.id', 'phone.number', 'phone.id')
     .test({}, t, [{
       id: 1,
       name: 'Laurent',
-      phone: {number: '123456789'},
-      products: [{title: 'key board'}, {title: 'small bag'}]
+      phone: {id: 1, number: '123456789'},
+      products: [{id: 2, title: 'key board'}, {id: 3, title: 'small bag'}]
     }]);
+});
+
+test('many to many', t=> {
+  const {Users} =createModels();
+  Users
+    .select('id', 'name')
+    .where('id', 1)
+    .include('accounts.balance', 'accounts.id')
+    .test({}, t, [
+      {id: 1, name: 'Laurent', accounts: [{id: 1, balance: 200.42}, {id: 2, balance: -20.56}]}
+    ]);
+});
+
+test('many to many filter on include', t=> {
+  const {Users}=createModels();
+  Users
+    .select('id', 'name')
+    .orderBy('id')
+    .include({
+      association: 'accounts', where: Users.if('balance', '>', 0)
+    })
+    .test({}, t, [
+      {id: 1, name: 'Laurent', accounts: [{id: 1, balance: 200.42}]},
+      {id: 2, name: 'Jesus', accounts: []},
+      {id: 3, name: 'Raymond', accounts: []},
+      {id: 4, name: 'Blandine', accounts: []},
+      {id: 5, name: 'Olivier', accounts: []},
+      {id: 6, name: 'Francoise', accounts: []}
+    ]);
+})
+;
+
+test('combo', t=> {
+  const {Users}=createModels();
+  Users
+    .select('id', 'name')
+    .where('id', 1)
+    .include('products', 'phone', 'accounts')
+    .test({}, t, [{
+        accounts: [
+          {balance: 200.42, id: 1}, 
+          {balance: -20.56, id: 2} 
+        ],
+        id: 1,
+        name: 'Laurent',
+        phone: {id: 1, number: '123456789', user_id: 1},
+        products: [
+          {id: 2, price: 49.5, sku: 'kbd', title: 'key board', user_id: 1},
+          {
+            id: 3,
+            price: 20,
+            sku: 'sbg',
+            title: 'small bag',
+            user_id: 1
+          }
+        ]
+      }]
+    );
 });

@@ -6,19 +6,25 @@ const sh = shipHold({
   password: 'docker',
   database: 'ship-hold-test'
 });
-
+//
 const Users = sh.model('users', function (sc) {
   return {
-    table: 'user_simple_select',
+    table: 'users',
     columns: {
       id: 'integer',
       age: 'integer',
-      name: 'string'
-    },
-    // relations: {
-    //   products: sc.hasMany('products'),
-    //   phone: sc.hasOne('phones')
-    // }
+      name: 'string',
+      email: 'string',
+      username: 'string',
+      country: 'string',
+      createdAt: 'date',
+      updatedAt: 'date',
+      deletedAt: 'date'
+    }
+// relations: {
+//   products: sc.hasMany('products'),
+//   phone: sc.hasOne('phones')
+// }
   }
 });
 
@@ -53,18 +59,27 @@ const Users = sh.model('users', function (sc) {
 //   }
 // });
 
-// const sequelize = require('sequelize');
+const sequelize = require('sequelize');
 
-// const seq = new sequelize('postgres://docker:docker@192.168.99.100/dev');
-//
-// const Users = seq.define('users', {
-//   id: {
-//     type: sequelize.INTEGER,
-//     primaryKey: true
-//   },
-//   age: sequelize.INTEGER,
-//   name: sequelize.STRING
-// });
+const seq = new sequelize('postgres://docker:docker@192.168.99.100/ship-hold-test');
+
+const sequelizeUsers = seq.define('users', {
+  id: {
+    type: sequelize.INTEGER,
+    primaryKey: true
+  },
+  age: sequelize.INTEGER,
+  name: sequelize.STRING,
+  email: sequelize.STRING,
+  username: sequelize.STRING,
+  country: sequelize.STRING
+});
+
+const start = Date.now();
+// sequelizeUsers.findAll()
+//   .then(result => console.log(Date.now() - start));
+
+
 //
 // const Products = seq.define('products', {
 //   id: {
@@ -204,7 +219,6 @@ Object.assign(sh.adapters, {
       try {
         while (true) {
           const row = yield;
-          console.log(row);
         }
       } catch (e) {
         console.error(e)
@@ -214,6 +228,14 @@ Object.assign(sh.adapters, {
     })
   }
 });
+
+
+Users
+  .select()
+  .where('country','FR')
+  .run()
+  .then(res=>console.log(Date.now()-start))
+  // .logRows();
 
 // const Rx = require('rx');
 
@@ -241,14 +263,14 @@ Object.assign(sh.adapters, {
 //   .include('user')
 //   .logRows();
 
-const users = Users
-  .select()
-  .where('age', '>', 30)
-  .and('name','!=','Jesus')
-  .run({age: 30});
-
-
-sh.stop();
+// const users = Users
+//   .select()
+//   .where('age', '>', 30)
+//   .and('name', '!=', 'Jesus')
+//   .run({age: 30});
+//
+//
+// sh.stop();
 
 
 // console.log(users)

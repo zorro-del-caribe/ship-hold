@@ -44,7 +44,13 @@ pg.connect(connection, function (err, client, done) {
     throw err;
   }
 
-  const dropq = 'DROP TABLE IF EXISTS users_association_select, products_association_select, phones_association_select';
+  const dropq = `DROP TABLE IF EXISTS 
+  users_association_select, 
+  products_association_select, 
+  phones_association_select, 
+  accounts_association_select,
+  users_accounts_association_select
+  ;`;
   client.query(dropq, function (err, result) {
 
     if (err) {
@@ -72,6 +78,19 @@ pg.connect(connection, function (err, client, done) {
     id serial PRIMARY KEY,
     number varchar(100),
     user_id integer REFERENCES users_association_select
+    );
+    
+    CREATE TABLE accounts_association_select
+    (
+    id serial PRIMARY KEY,
+    balance double precision
+    );
+    
+    CREATE TABLE users_accounts_association_select
+    (
+    id serial PRIMARY KEY,
+    user_id integer REFERENCES users_association_select,
+    account_id integer REFERENCES accounts_association_select
     );
     `;
 
