@@ -91,15 +91,15 @@ const sequelizeProducts = seq.define('products', {
 
 sequelizeProducts.belongsTo(sequelizeUsers);
 sequelizeUsers.hasMany(sequelizeProducts);
-
+const start = Date.now();
 const users = Users
   .select('id', 'age', 'username')
   .where('age', '>', 60)
-  .limit(25)
+  .limit(50)
   .include('products')
-  .logRows();
+  .run()
+  .then(r=>console.log(Date.now()-start));
 
-// const start = Date.now()
 // sequelizeUsers
 //   .findAll({
 //     attributes: ['id', 'age', 'username'],

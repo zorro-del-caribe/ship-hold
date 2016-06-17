@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "npm run test:unit && npm run test:int",
-    "test:int": "node ./test/integrations/setup.js && node ./test/integrations/index.js | tap-summary",
+    "test:int": "node ./test/integrations/setup.js && node ./test/integrations/index.js | tap-spec",
     "test:unit": "node ./test/units/index.js | tap-summary"
   },
   "keywords": [

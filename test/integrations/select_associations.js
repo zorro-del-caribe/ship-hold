@@ -421,3 +421,30 @@ test('nested include', t=> {
       user_id: 3
     }]);
 });
+
+test('nested include with string notation', t=> {
+  const {Phones} = createModels();
+  const result = Phones
+    .select()
+    .include('human.id', 'human.name', 'human.products.id', 'human.products.sku')
+    .test({}, t, [{
+      id: 1,
+      number: '123456789',
+      user_id: 1,
+      human: {
+        id: 1, name: 'Laurent', products: [
+          {id: 3, sku: 'sbg'},
+          {id: 2, sku: 'kbd'}
+        ]
+      }
+    }, {
+      human: {
+        id: 3,
+        name: 'Raymond',
+        products: []
+      },
+      id: 2,
+      number: '987654321',
+      user_id: 3
+    }]);
+});
