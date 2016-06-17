@@ -18,46 +18,49 @@ const Users = sh.model('users', function (sc) {
       username: 'string',
       country: 'string',
       createdAt: 'date',
-      updatedAt: 'date',
-      deletedAt: 'date'
+      updatedAt: 'date'
+    },
+    relations: {
+      products: sc.hasMany('products')
+      // phone: sc.hasOne('phones')
     }
-// relations: {
-//   products: sc.hasMany('products'),
-//   phone: sc.hasOne('phones')
-// }
+  }
+});
+const Products = sh.model('products', function (sc) {
+  return {
+    table: 'products',
+    columns: {
+      id: 'integer',
+      price: 'double',
+      title: 'string',
+      userId: 'integer',
+      sku: 'string',
+      stock: 'integer',
+      createdAt: 'date',
+      updatedAt: 'date'
+    },
+    relations: {
+      user: sc.belongsTo('users', 'userId')
+    }
   }
 });
 
-// const Products = sh.model('products', function (sc) {
-//   return {
-//     table: 'products',
-//     columns: {
-//       id: 'integer',
-//       price: 'double',
-//       title: 'string',
-//       userId: 'integer'
-//     },
-//     relations: {
-//       user: sc.belongsTo('users', 'userId')
-//     }
-//   }
-// });
-//
-// const Phones = sh.model('phones', function (sc) {
-//   return {
-//     table: 'phones',
-//     columns: {
-//       id: 'integer',
-//       number: 'string',
-//       createdAt: 'timestamp',
-//       updatedAt: 'timestamp',
-//       userId: 'integer'
-//     },
-//     relations: {
-//       owner: sc.belongsTo('users', 'userId')
-//     }
-//   }
-// });
+Object.assign(sh.adapters, {
+  logRows: function (params = {}) {
+    const start = Date.now();
+    return this.stream(params, function * () {
+      try {
+        while (true) {
+          const row = yield;
+        }
+      } catch (e) {
+        console.error(e)
+      } finally {
+        console.log('DONE ', Date.now() - start, ' ms');
+      }
+    })
+  }
+});
 
 const sequelize = require('sequelize');
 
@@ -75,61 +78,40 @@ const sequelizeUsers = seq.define('users', {
   country: sequelize.STRING
 });
 
-const start = Date.now();
-// sequelizeUsers.findAll()
-//   .then(result => console.log(Date.now() - start));
+const sequelizeProducts = seq.define('products', {
+  id: {
+    type: sequelize.INTEGER,
+    primaryKey: true
+  },
+  sku: sequelize.STRING,
+  title: sequelize.STRING,
+  stock: sequelize.INTEGER,
+  price: sequelize.FLOAT
+});
 
+sequelizeProducts.belongsTo(sequelizeUsers);
+sequelizeUsers.hasMany(sequelizeProducts);
 
-//
-// const Products = seq.define('products', {
-//   id: {
-//     type: sequelize.INTEGER,
-//     primaryKey: true
-//   },
-//   price: sequelize.FLOAT,
-//   title: sequelize.STRING
-// });
-//
-// const Phones = seq.define('phones', {
-//   number: sequelize.STRING
-// });
-//
-// const Stocks = seq.define('stocks', {
-//   quantity: sequelize.INTEGER
-// });
-//
-// const Posts = seq.define('posts', {
-//   content: sequelize.TEXT
-// });
-//
-//
-// Posts.belongsToMany(Users, {through: 'users_projects'})
-// Users.belongsToMany(Posts, {through: 'users_projects'})
-//
-// Stocks.belongsTo(Products);
-// Products.hasMany(Stocks);
-//
-// Phones.belongsTo(Users);
-// Users.hasMany(Phones);
-//
-// Products.belongsTo(Users);
-// Users.hasMany(Products);
-//
-// Promise.all([Posts.find(), Users.find({attributes:['id','age','name']})])
-//   .then(([post, user])=> {
-//     return user.addPost(post)
+const users = Users
+  .select('id', 'age', 'username')
+  .where('age', '>', 60)
+  .limit(25)
+  .include('products')
+  .logRows();
+
+// const start = Date.now()
+// sequelizeUsers
+//   .findAll({
+//     attributes: ['id', 'age', 'username'],
+//     where: {age: {$gt: 60}},
+//     // order: ['username'],
+//     include: [sequelizeProducts],
+//     limit: 25
 //   })
-//   .catch(e=>console.log(e))
-//
+//   .then(r=> {
+//     console.log('DONE SEQ ', Date.now() - start)
+//   });
 
-// const start = Date.now();
-// Users.findAll({
-//     attributes: ['id', 'name', 'age'],
-//     include: [{model: Products, attributes: ['id', 'title', 'price', 'userId']}, Phones]
-//   })
-//   .then(result=>console.log('DONE ', Date.now() - start, ' ms'))
-
-//
 // function mixin (target, behaviour) {
 //   Object.assign(Object.getPrototypeOf(target), behaviour);
 // }
@@ -212,30 +194,6 @@ const start = Date.now();
 
 //api adapter(select, update, insert, delete of every model service)
 
-Object.assign(sh.adapters, {
-  logRows: function (params = {}) {
-    const start = Date.now();
-    return this.stream(params, function * () {
-      try {
-        while (true) {
-          const row = yield;
-        }
-      } catch (e) {
-        console.error(e)
-      } finally {
-        console.log('DONE ', Date.now() - start, ' ms');
-      }
-    })
-  }
-});
-
-
-Users
-  .select()
-  .where('country','FR')
-  .run()
-  .then(res=>console.log(Date.now()-start))
-  // .logRows();
 
 // const Rx = require('rx');
 
@@ -264,10 +222,12 @@ Users
 //   .logRows();
 
 // const users = Users
-//   .select()
-//   .where('age', '>', 30)
-//   .and('name', '!=', 'Jesus')
-//   .run({age: 30});
+//   .select('id', 'age', 'username')
+//   .where('age', '>', '$age')
+//   .limit('$limit')
+//   .orderBy('username')
+//   .include('products')
+//   .logRows({age: 90, limit: 10});
 //
 //
 // sh.stop();

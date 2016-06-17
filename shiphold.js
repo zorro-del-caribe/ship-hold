@@ -26,10 +26,10 @@ module.exports = function (connect = {}) {
     model: function (key, defFunc) {
       if (defFunc) {
         const definition = defFunc(relationDefinitions);
-        registry[key] = models(Object.assign({}, {definition, connectionString, shiphold: this, name:key}));
+        registry[key] = models(Object.assign({}, {definition, connectionString, shiphold: this, name: key}));
       }
       if (registry[key] === undefined) {
-        throw new Error('could not find the model %s', key);
+        throw new Error('could not find the model ' + key);
       }
       return registry[key];
     },

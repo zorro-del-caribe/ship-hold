@@ -101,7 +101,7 @@ function createModels () {
             assertions.deepEqual(row, expected.shift());
           }
         } catch (e) {
-          assertions.fail(e);
+          assertions.fail(e.stack);
         }
         finally {
           sh.stop();
@@ -161,10 +161,10 @@ test('add products fixture', t=> {
 test('add phones fixture', t=> {
   pg.connect(connection, function (err, client, done) {
     const query = `INSERT INTO phones_association_select(number,user_id) 
-      VALUES ('123456789',1) RETURNING *`;
+      VALUES ('123456789',1),('987654321',3) RETURNING *`;
     client.query(query, function (err, result) {
       t.error(err);
-      t.equal(result.rows.length, 1);
+      t.equal(result.rows.length, 2);
       done();
       t.end();
     });
@@ -358,8 +358,7 @@ test('many to many filter on include', t=> {
       {id: 5, name: 'Olivier', accounts: []},
       {id: 6, name: 'Francoise', accounts: []}
     ]);
-})
-;
+});
 
 test('combo', t=> {
   const {Users}=createModels();
@@ -369,8 +368,8 @@ test('combo', t=> {
     .include('products', 'phone', 'accounts')
     .test({}, t, [{
         accounts: [
-          {balance: 200.42, id: 1}, 
-          {balance: -20.56, id: 2} 
+          {balance: 200.42, id: 1},
+          {balance: -20.56, id: 2}
         ],
         id: 1,
         name: 'Laurent',
@@ -387,4 +386,38 @@ test('combo', t=> {
         ]
       }]
     );
+});
+
+test('nested include', t=> {
+  const {Phones} = createModels();
+  const result = Phones
+    .select()
+    .include({
+      attributes: ['id', 'name'],
+      association: 'human',
+      nested: [{
+        association: 'products',
+        attributes: ['id', 'sku']
+      }]
+    })
+    .test({}, t, [{
+      id: 1,
+      number: '123456789',
+      user_id: 1,
+      human: {
+        id: 1, name: 'Laurent', products: [
+          {id: 3, sku: 'sbg'},
+          {id: 2, sku: 'kbd'}
+        ]
+      }
+    }, {
+      human: {
+        id: 3,
+        name: 'Raymond',
+        products: []
+      },
+      id: 2,
+      number: '987654321',
+      user_id: 3
+    }]);
 });

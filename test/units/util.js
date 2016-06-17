@@ -2,40 +2,6 @@ const test = require('tape');
 const shiphold = require('../../shiphold');
 const util = require('../../lib/util');
 
-
-test('jsonPointer get an existing value', t=> {
-  const pointer = util.jsonPointer('foo.bar.woot');
-  const actual = pointer.get({foo: {bar: {woot: 'blah'}}});
-  const expected = 'blah';
-  t.equal(actual, expected);
-  t.end();
-});
-
-test('jsonPointer get undefined if ther is no value', t=> {
-  const pointer = util.jsonPointer('foo.bar.woot');
-  const actual = pointer.get({foo: {nope: {woot: 'blah'}}});
-  const expected = undefined;
-  t.equal(actual, expected);
-  t.end();
-});
-
-test('jsonPointer set to existing path', t=> {
-  const pointer = util.jsonPointer('foo.bar.woot');
-  const context = {foo: {bar: {}}};
-  pointer.set(context, 'wootVal');
-  t.deepEqual(context, {foo: {bar: {woot: 'wootVal'}}});
-  t.end();
-});
-
-test('jsonPointer set to non exisiting path', t=> {
-  const pointer = util.jsonPointer('foo.bar.woot');
-  const context = {foo: {}};
-  pointer.set(context, 'wootVal');
-  t.deepEqual(context, {foo: {bar: {woot: 'wootVal'}}});
-  t.end();
-
-});
-
 // function createDefaultModels (sh) {
 //   const Users = sh.model('Users', function (s) {
 //     return {
