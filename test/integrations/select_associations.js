@@ -81,7 +81,7 @@ function createModels () {
     };
   });
 
-  const UsersAccount = sh.model('UsersAccounts', function (h) {
+  const UsersAccounts = sh.model('UsersAccounts', function (h) {
     return {
       table: 'users_accounts_association_select',
       columns: {
@@ -448,3 +448,24 @@ test('nested include with string notation', t=> {
       user_id: 3
     }]);
 });
+
+test('multiple model at nested level', t=> {
+  const {Products} = createModels();
+  Products
+    .select('title', 'id')
+    .where('id', 2)
+    .include('owner', 'owner.phone.*', 'owner.accounts.*')
+    .test({}, t, [{
+      owner: {
+        accounts: [{balance: 200.42, id: 1}, {balance: -20.56, id: 2}],
+        age: 29,
+        id: 1,
+        name: 'Laurent',
+        phone: {id: 1, number: '123456789', user_id: 1}
+      },
+      title: 'key board',
+      id:2
+    }
+    ]);
+});
+

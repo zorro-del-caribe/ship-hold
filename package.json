@@ -2,7 +2,7 @@
   "name": "ship-hold",
   "version": "1.0.0",
   "description": "postgresql orm",
-  "main": "index.js",
+  "main": "shiphold.js",
   "scripts": {
     "test": "npm run test:unit && npm run test:int",
     "test:int": "node ./test/integrations/setup.js && node ./test/integrations/index.js | tap-spec",
