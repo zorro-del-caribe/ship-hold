@@ -26,41 +26,42 @@ const Users = sh.model('users', function (sc) {
     }
   }
 });
-const Products = sh.model('products', function (sc) {
-  return {
-    table: 'products',
-    columns: {
-      id: 'integer',
-      price: 'double',
-      title: 'string',
-      userId: 'integer',
-      sku: 'string',
-      stock: 'integer',
-      createdAt: 'date',
-      updatedAt: 'date'
-    },
-    relations: {
-      user: sc.belongsTo('users', 'userId')
-    }
-  }
-});
 
-Object.assign(sh.adapters, {
-  logRows: function (params = {}) {
-    const start = Date.now();
-    return this.stream(params, function * () {
-      try {
-        while (true) {
-          const row = yield;
-        }
-      } catch (e) {
-        console.error(e)
-      } finally {
-        console.log('DONE ', Date.now() - start, ' ms');
-      }
-    })
-  }
-});
+// const Products = sh.model('products', function (sc) {
+//   return {
+//     table: 'products',
+//     columns: {
+//       id: 'integer',
+//       price: 'double',
+//       title: 'string',
+//       userId: 'integer',
+//       sku: 'string',
+//       stock: 'integer',
+//       createdAt: 'date',
+//       updatedAt: 'date'
+//     },
+//     relations: {
+//       user: sc.belongsTo('users', 'userId')
+//     }
+//   }
+// });
+
+// Object.assign(sh.adapters, {
+//   logRows: function (params = {}) {
+//     const start = Date.now();
+//     return this.stream(params, function * () {
+//       try {
+//         while (true) {
+//           const row = yield;
+//         }
+//       } catch (e) {
+//         console.error(e)
+//       } finally {
+//         console.log('DONE ', Date.now() - start, ' ms');
+//       }
+//     })
+//   }
+// });
 
 const sequelize = require('sequelize');
 
@@ -92,13 +93,23 @@ const sequelizeProducts = seq.define('products', {
 sequelizeProducts.belongsTo(sequelizeUsers);
 sequelizeUsers.hasMany(sequelizeProducts);
 const start = Date.now();
-const users = Users
-  .select('id', 'age', 'username')
-  .where('age', '>', 60)
-  .limit(50)
-  .include('products')
-  .run()
-  .then(r=>console.log(Date.now()-start));
+
+Users
+  .select('id', 'name')
+  .limit(25)
+  ._stream({}, function * () {
+    try {
+      while (true) {
+        const row = yield;
+        console.log(row);
+      }
+    } catch (e) {
+      console.log(e)
+    } finally {
+      console.log('done')
+    }
+  });
+
 
 // sequelizeUsers
 //   .findAll({

@@ -1,9 +1,9 @@
-const models = require('./lib/model');
 const url = require('url');
+const modelRegistry = require('./lib/modelRegistry');
 const adapters = require('./lib/adapterExtensions');
 const shipHoldQueryBuilder = require('ship-hold-querybuilder');
-const relationDefinitions = require('./lib/relations').definitions;
-const pg = require('pg');
+const connector = require('./lib/connections');
+const runnerFactory = require('./lib/runner');
 
 module.exports = function (connect = {}) {
   const connection = Object.assign({}, {
@@ -20,26 +20,31 @@ module.exports = function (connect = {}) {
 
   connection.pathname = '/' + connect.database;
   const connectionString = url.format(connection);
+  const queries = shipHoldQueryBuilder();
 
-  const registry = Object.create(null);
-  return {
-    model: function (key, defFunc) {
-      if (defFunc) {
-        const definition = defFunc(relationDefinitions);
-        registry[key] = models(Object.assign({}, {definition, connectionString, shiphold: this, name: key}));
-      }
-      if (registry[key] === undefined) {
-        throw new Error('could not find the model ' + key);
-      }
-      return registry[key];
-    },
-    models(){
-      return Object.keys(registry);
-    },
-    adapters,
-    query: shipHoldQueryBuilder,
-    stop: function () {
-      pg.end();
+  const prototype = {};
+  ['select', 'insert', 'update', 'delete'].forEach(method=> {
+    prototype[method] = function () {
+      const builder = queries[method](...arguments);
+      return Object.assign(builder, this.runner({builder}));
     }
+  });
+
+  prototype.if = function () {
+    return queries.condition().if(...arguments);
   };
+
+  Object.assign(prototype, connector({connectionString}), modelRegistry(), runnerFactory());
+
+  return Object.create(prototype, {
+    aggregate: {
+      value: queries.aggregate
+    },
+    adapters: {
+      value: adapters
+    },
+    nodes: {
+      value: queries.nodes
+    }
+  });
 };
