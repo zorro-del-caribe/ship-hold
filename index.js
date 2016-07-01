@@ -27,41 +27,42 @@ const Users = sh.model('users', function (sc) {
   }
 });
 
-// const Products = sh.model('products', function (sc) {
-//   return {
-//     table: 'products',
-//     columns: {
-//       id: 'integer',
-//       price: 'double',
-//       title: 'string',
-//       userId: 'integer',
-//       sku: 'string',
-//       stock: 'integer',
-//       createdAt: 'date',
-//       updatedAt: 'date'
-//     },
-//     relations: {
-//       user: sc.belongsTo('users', 'userId')
-//     }
-//   }
-// });
+const Products = sh.model('products', function (sc) {
+  return {
+    table: 'products',
+    columns: {
+      id: 'integer',
+      price: 'double',
+      title: 'string',
+      userId: 'integer',
+      sku: 'string',
+      stock: 'integer',
+      createdAt: 'date',
+      updatedAt: 'date'
+    },
+    relations: {
+      user: sc.belongsTo('users', 'userId')
+    }
+  }
+});
 
-// Object.assign(sh.adapters, {
-//   logRows: function (params = {}) {
-//     const start = Date.now();
-//     return this.stream(params, function * () {
-//       try {
-//         while (true) {
-//           const row = yield;
-//         }
-//       } catch (e) {
-//         console.error(e)
-//       } finally {
-//         console.log('DONE ', Date.now() - start, ' ms');
-//       }
-//     })
-//   }
-// });
+Object.assign(sh.adapters, {
+  logRows: function (params = {}) {
+    const start = Date.now();
+    return this.stream(params, function * () {
+      try {
+        while (true) {
+          const row = yield;
+          // console.log(row.id);
+        }
+      } catch (e) {
+        console.error(e)
+      } finally {
+        console.log('DONE ', Date.now() - start, ' ms');
+      }
+    })
+  }
+});
 
 const sequelize = require('sequelize');
 
@@ -92,36 +93,22 @@ const sequelizeProducts = seq.define('products', {
 
 sequelizeProducts.belongsTo(sequelizeUsers);
 sequelizeUsers.hasMany(sequelizeProducts);
+
 const start = Date.now();
-
-Users
-  .select('id', 'name')
-  .limit(25)
-  ._stream({}, function * () {
-    try {
-      while (true) {
-        const row = yield;
-        console.log(row);
-      }
-    } catch (e) {
-      console.log(e)
-    } finally {
-      console.log('done')
-    }
-  });
-
 
 // sequelizeUsers
 //   .findAll({
-//     attributes: ['id', 'age', 'username'],
+//     attributes: ['id'],
 //     where: {age: {$gt: 60}},
 //     // order: ['username'],
 //     include: [sequelizeProducts],
-//     limit: 25
+//     // limit: 25
 //   })
 //   .then(r=> {
 //     console.log('DONE SEQ ', Date.now() - start)
 //   });
+
+console.log(sh.nodes.expressionNode(sh.nodes.expressionNode(Users.select())).build())
 
 // function mixin (target, behaviour) {
 //   Object.assign(Object.getPrototypeOf(target), behaviour);
@@ -151,21 +138,16 @@ Users
 //  * API ADAPTER EXTENSION
 //  */
 //
-// //api adapter (select, update, insert, delete of every model service)
-// Object.assign(sh.adapters, {
-//   logRows: function (params = {}) {
-//     return this.stream(params, function * () {
-//       while (true) {
-//         const row = yield;
-//         console.log(row);
-//       }
-//     })
-//   }
-// });
-//
+
 // Users
-//   .select()
-//   .logRows();
+//   .select('id')
+//   // .limit()
+//   .where('age','>',60)
+//   .include('products')
+//   .logRows()
+// .then(r=>console.log(JSON.stringify(r,null,true)));
+
+
 //
 // Users
 //   .update()

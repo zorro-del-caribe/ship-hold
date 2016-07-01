@@ -236,7 +236,7 @@ test('one to many: filter on target model', t=> {
     .test({}, t, [{id: 1, name: 'Laurent', products: [{sku: 'kbd', id: 2}, {id: 3, sku: 'sbg'}]}]);
 });
 
-test('one to many: order and limit on target model', t=> {
+test('one to many: order and limit on target model', t=>  {
   const {Users, Products} = createModels();
   Users
     .select('id', 'name', 'age')
