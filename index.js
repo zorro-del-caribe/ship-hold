@@ -96,19 +96,18 @@ sequelizeUsers.hasMany(sequelizeProducts);
 
 const start = Date.now();
 
-// sequelizeUsers
-//   .findAll({
-//     attributes: ['id'],
-//     where: {age: {$gt: 60}},
-//     // order: ['username'],
-//     include: [sequelizeProducts],
-//     // limit: 25
-//   })
-//   .then(r=> {
-//     console.log('DONE SEQ ', Date.now() - start)
-//   });
+sequelizeUsers
+  .findAll({
+    attributes: ['id', 'age', 'username'],
+    where: {age: {$gt: 50}},
+    // order: ['username'],
+    include: [{model: sequelizeProducts, attributes: ['id', 'price']}],
+    limit: 300
+  })
+  .then(r=> {
+    console.log('DONE SEQ ', Date.now() - start)
+  });
 
-console.log(sh.nodes.expressionNode(sh.nodes.expressionNode(Users.select())).build())
 
 // function mixin (target, behaviour) {
 //   Object.assign(Object.getPrototypeOf(target), behaviour);
@@ -218,11 +217,11 @@ console.log(sh.nodes.expressionNode(sh.nodes.expressionNode(Users.select())).bui
 //   .select('id', 'age', 'username')
 //   .where('age', '>', '$age')
 //   .limit('$limit')
-//   .orderBy('username')
-//   .include('products')
-//   .logRows({age: 90, limit: 10});
-//
-//
+//   // .orderBy('username')
+//   .include(Products.select('id', 'price'))
+//   .logRows({age: 50, limit: 300});
+
+
 // sh.stop();
 
 

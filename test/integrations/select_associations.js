@@ -195,8 +195,24 @@ test('add accounts fixture', t=> {
   });
 });
 
-test('one to many: load all users with their products', t=> {
-  const {Users, Products} = createModels();
+test('one to Many: load al users with their products (builder notation)', t=> {
+  const {Users, Products}=createModels();
+  Users
+    .select()
+    .orderBy('id')
+    .include(Products)
+    .test({}, t, [
+      Object.assign({}, getUsers()[0], {products: getProducts().filter(p=>p.user_id === 1)}),
+      Object.assign({}, getUsers()[1], {products: getProducts().filter(p=>p.user_id === 2)}),
+      Object.assign({}, getUsers()[2], {products: []}),
+      Object.assign({}, getUsers()[3], {products: getProducts().filter(p=>p.user_id === 4)}),
+      Object.assign({}, getUsers()[4], {products: []}),
+      Object.assign({}, getUsers()[5], {products: []})
+    ]);
+});
+
+test('one to Many: load al users with their products (string notation)', t=> {
+  const {Users, Phones, Products}=createModels();
   Users
     .select()
     .orderBy('id')
@@ -208,15 +224,15 @@ test('one to many: load all users with their products', t=> {
       Object.assign({}, getUsers()[3], {products: getProducts().filter(p=>p.user_id === 4)}),
       Object.assign({}, getUsers()[4], {products: []}),
       Object.assign({}, getUsers()[5], {products: []})
-    ])
+    ]);
 });
 
-test('one to many: specify fields', t=> {
+test('one to many: specify fields (builder notation)', t=> {
   const {Users, Products} = createModels();
   Users
     .select('id', 'name')
     .orderBy('id')
-    .include('products.sku', 'products.id')
+    .include(Products.select('id', 'sku'))
     .test({}, t, [
       {name: 'Laurent', id: 1, products: [{sku: 'kbd', id: 2}, {id: 3, sku: 'sbg'}]},
       {name: 'Jesus', id: 2, products: [{sku: 'sgl', id: 1}]},
@@ -232,18 +248,18 @@ test('one to many: filter on target model', t=> {
   Users
     .select('id', 'name')
     .where('name', 'Laurent')
-    .include('products.sku', 'products.id')
+    .include(Products.select('id', 'sku'))
     .test({}, t, [{id: 1, name: 'Laurent', products: [{sku: 'kbd', id: 2}, {id: 3, sku: 'sbg'}]}]);
 });
 
-test('one to many: order and limit on target model', t=>  {
+test('one to many: order and limit on target model', t=> {
   const {Users, Products} = createModels();
   Users
     .select('id', 'name', 'age')
     .where('age', '<', 50)
     .orderBy('name', 'asc')
     .limit(2)
-    .include('products.sku', 'products.id')
+    .include(Products.select('id', 'sku'))
     .test({}, t, [
       {id: 4, name: 'Blandine', age: 29, products: [{sku: 'wdr', id: 5}]},
       {id: 1, name: 'Laurent', age: 29, products: [{sku: 'kbd', id: 2}, {sku: 'sbg', id: 3}]}
@@ -255,24 +271,14 @@ test('one to many:filter on included model', t=> {
   const u = Users
     .select('id', 'name')
     .where('name', 'Laurent')
-    .include('products')
-    .where('products.price', '<', 30)
+    .include(Products.select().where('price', '<', 30))
     .test({}, t, [
       {id: 1, name: 'Laurent', products: [{id: 3, sku: 'sbg', price: 20, title: 'small bag', user_id: 1}]}
     ]);
 });
 
-test('many to one: load all products with their user', t=> {
-  const {Products}=createModels();
-  Products
-    .select()
-    .orderBy('id')
-    .include('owner')
-    .test({}, t, getProducts().map(p=>Object.assign(p, {owner: getUsers().filter(u=>u.id === p.user_id)[0] || null})));
-});
-
-test('many to one: specify fields', t=> {
-  const {Products}=createModels();
+test('many to one: specify fields (builder notation)', t=> {
+  const {Products, Users}=createModels();
   const expected = getProducts()
     .map(p=> {
       return {id: p.id, title: p.title, user_id: p.user_id}
@@ -290,27 +296,47 @@ test('many to one: specify fields', t=> {
   Products
     .select('id', 'title')
     .orderBy('id')
-    .include('owner.name', 'owner.id')
+    .include(Users.select('id', 'name'))
+    .test({}, t, expected)
+});
+
+test('many to one: specify fields (string notation)', t=> {
+  const {Products, Users}=createModels();
+  const expected = getProducts()
+    .map(p=> {
+      return {id: p.id, title: p.title, user_id: p.user_id}
+    })
+    .map(p=> {
+      return Object.assign({}, p, {owner: getUsers().filter(u=>u.id === p.user_id)[0] || null});
+    });
+  for (const p of expected) {
+    delete p.user_id;
+  }
+
+  Products
+    .select('id', 'title')
+    .orderBy('id')
+    .include('owner')
     .test({}, t, expected)
 });
 
 test('many to one: filter on target model', t=> {
-  const {Products}=createModels();
+  const {Products, Users}=createModels();
   Products
     .select('title', 'id')
     .where('title', 'white dress')
-    .include('owner.name', 'owner.id')
+    .include(Users.select('id', 'name'))
     .test({}, t, [{id: 5, title: 'white dress', owner: {id: 4, name: 'Blandine'}}]);
 });
 
 test('many to one: order and limit on target model', t=> {
-  const {Products}=createModels();
+  const {Products, Users}=createModels();
   Products
     .select('id', 'title', 'price')
     .orderBy('price')
     .limit(2)
     .where('price', '<=', 20)
-    .include({association: 'owner', attributes: ['name', 'id']})
+    .include(Users.select('name', 'id'))
     .test({}, t, [
       {id: 6, title: 'teddy bear', price: 5.75, owner: null},
       {id: 1, title: 'sun glasses', price: 9.99, owner: {id: 2, name: 'Jesus'}}
@@ -318,11 +344,11 @@ test('many to one: order and limit on target model', t=> {
 });
 
 test('include multiple models', t=> {
-  const {Users} = createModels();
+  const {Users, Products, Phones} = createModels();
   Users
     .select('name', 'id')
     .where('id', 1)
-    .include('products.title', 'products.id', 'phone.number', 'phone.id')
+    .include(Products.select('id', 'title'), Phones.select('id', 'number'))
     .test({}, t, [{
       id: 1,
       name: 'Laurent',
@@ -332,24 +358,22 @@ test('include multiple models', t=> {
 });
 
 test('many to many', t=> {
-  const {Users} =createModels();
+  const {Users, Accounts} =createModels();
   Users
     .select('id', 'name')
     .where('id', 1)
-    .include('accounts.balance', 'accounts.id')
+    .include(Accounts.select('id', 'balance'))
     .test({}, t, [
       {id: 1, name: 'Laurent', accounts: [{id: 1, balance: 200.42}, {id: 2, balance: -20.56}]}
     ]);
 });
 
 test('many to many filter on include', t=> {
-  const {Users}=createModels();
+  const {Users, Accounts}=createModels();
   Users
     .select('id', 'name')
     .orderBy('id')
-    .include({
-      association: 'accounts', where: Users.if('balance', '>', 0)
-    })
+    .include(Accounts.select().where('balance', '>', 0))
     .test({}, t, [
       {id: 1, name: 'Laurent', accounts: [{id: 1, balance: 200.42}]},
       {id: 2, name: 'Jesus', accounts: []},
@@ -361,11 +385,11 @@ test('many to many filter on include', t=> {
 });
 
 test('combo', t=> {
-  const {Users}=createModels();
+  const {Users, Products, Phones, Accounts}=createModels();
   Users
     .select('id', 'name')
     .where('id', 1)
-    .include('products', 'phone', 'accounts')
+    .include(Products, Phones, Accounts)
     .test({}, t, [{
         accounts: [
           {balance: 200.42, id: 1},
@@ -389,44 +413,13 @@ test('combo', t=> {
 });
 
 test('nested include', t=> {
-  const {Phones} = createModels();
+  const {Phones, Users, Products} = createModels();
   const result = Phones
     .select()
-    .include({
-      attributes: ['id', 'name'],
-      association: 'human',
-      nested: [{
-        association: 'products',
-        attributes: ['id', 'sku']
-      }]
-    })
-    .test({}, t, [{
-      id: 1,
-      number: '123456789',
-      user_id: 1,
-      human: {
-        id: 1, name: 'Laurent', products: [
-          {id: 3, sku: 'sbg'},
-          {id: 2, sku: 'kbd'}
-        ]
-      }
-    }, {
-      human: {
-        id: 3,
-        name: 'Raymond',
-        products: []
-      },
-      id: 2,
-      number: '987654321',
-      user_id: 3
-    }]);
-});
-
-test('nested include with string notation', t=> {
-  const {Phones} = createModels();
-  const result = Phones
-    .select()
-    .include('human.id', 'human.name', 'human.products.id', 'human.products.sku')
+    .include(
+      Users.select('id', 'name')
+        .include(Products.select('id', 'sku'))
+    )
     .test({}, t, [{
       id: 1,
       number: '123456789',
@@ -450,12 +443,12 @@ test('nested include with string notation', t=> {
 });
 
 test('multiple model at nested level', t=> {
-  const {Products} = createModels();
+  const {Products, Users, Phones, Accounts} = createModels();
   Products
-    .select('title', 'id')
-    .where('id', 2)
-    .include('owner', 'owner.phone.*', 'owner.accounts.*')
-    .test({}, t, [{
+    .select()
+    .where('id', '$id')
+    .include(Users.select().include('phone', Accounts))
+    .test({id:2}, t, [{id: 2,
       owner: {
         accounts: [{balance: 200.42, id: 1}, {balance: -20.56, id: 2}],
         age: 29,
@@ -463,9 +456,10 @@ test('multiple model at nested level', t=> {
         name: 'Laurent',
         phone: {id: 1, number: '123456789', user_id: 1}
       },
+      price: 49.5,
+      sku: 'kbd',
       title: 'key board',
-      id:2
+      user_id: 1
     }
     ]);
 });
-
