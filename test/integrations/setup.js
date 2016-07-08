@@ -2,7 +2,7 @@ const pg = require('pg');
 const connection = 'postgres://docker:docker@192.168.99.100:5432/ship-hold-test';
 const test = require('tape');
 
-let remaining = 2;
+let remaining = 5;
 function jobDone () {
   remaining--;
   if (remaining === 0) {
@@ -15,14 +15,14 @@ pg.connect(connection, function (err, client, done) {
     throw err;
   }
 
-  const dropq = `DROP TABLE IF EXISTS user_simple_select`;
+  const dropq = `DROP TABLE IF EXISTS users_simple_select`;
 
   client.query(dropq, function (err, result) {
     if (err) {
       throw err;
     }
 
-    const createq = `CREATE TABLE user_simple_select
+    const createq = `CREATE TABLE users_simple_select
     (
     id serial PRIMARY KEY,
     age integer,
@@ -37,6 +37,89 @@ pg.connect(connection, function (err, client, done) {
       jobDone();
     });
   });
+});
+
+pg.connect(connection, function (err, client, done) {
+  if (err) {
+    throw err;
+  }
+
+  const dropq = `DROP TABLE IF EXISTS users_update`;
+
+  client.query(dropq, function (err, result) {
+    if (err) {
+      throw err;
+    }
+
+    const createq = `CREATE TABLE users_update
+    (
+    id serial PRIMARY KEY,
+    age integer,
+    name varchar(100)
+    );`;
+
+    client.query(createq, function (err, result) {
+      if (err) {
+        throw err;
+      }
+      done();
+      jobDone();
+    });
+  });
+});
+
+pg.connect(connection, function (err, client, done) {
+  if (err) {
+    throw err;
+  }
+
+  const dropq = `DROP TABLE IF EXISTS users_delete`;
+
+  client.query(dropq, function (err, result) {
+    if (err) {
+      throw err;
+    }
+
+    const createq = `CREATE TABLE users_delete
+    (
+    id serial PRIMARY KEY,
+    age integer,
+    name varchar(100)
+    );`;
+
+    client.query(createq, function (err, result) {
+      if (err) {
+        throw err;
+      }
+      done();
+      jobDone();
+    });
+  });
+});
+
+pg.connect(connection, function (err, client, done) {
+  if (err) {
+    throw err;
+  }
+
+  client.query('DROP TABLE if EXISTS users_insert', function (err, result) {
+    const createQ = `CREATE TABLE users_insert
+    (
+    id serial PRIMARY KEY,
+    age integer,
+    name varchar(100)
+    );
+    `;
+    client.query(createQ, function (err, result) {
+      if (err) {
+        throw err;
+      }
+      done();
+      jobDone();
+    });
+
+  });
+
 });
 
 pg.connect(connection, function (err, client, done) {

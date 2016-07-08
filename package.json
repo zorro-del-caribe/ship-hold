@@ -1,25 +1,32 @@
 {
   "name": "ship-hold",
   "version": "1.0.0",
-  "description": "postgresql orm",
+  "description": "data access framework for postgres sql",
   "main": "shiphold.js",
   "scripts": {
     "test": "npm run test:unit && npm run test:int",
-    "test:int": "node ./test/integrations/setup.js && node ./test/integrations/index.js | tap-spec",
+    "test:int": "node ./test/integrations/setup.js && node ./test/integrations/index.js | tap-summary",
     "test:unit": "node ./test/units/index.js | tap-summary"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zorro-del-caribe/ship-hold.git"
   },
   "keywords": [
     "postgresql",
+    "postgres",
     "orm",
     "database",
-    "model"
+    "model",
+    "sql",
+    "ship-hold"
   ],
   "author": "Laurent RENARD",
   "license": "MIT",
   "dependencies": {
     "debug": "^2.2.0",
     "pg": "^4.5.5",
-    "ship-hold-querybuilder": "https://github.com/zorro-del-caribe/ship-hold-querybuilder.git"
+    "ship-hold-querybuilder": "ship-hold-querybuilder"
   },
   "devDependencies": {
     "tap-summary": "^2.1.1",
