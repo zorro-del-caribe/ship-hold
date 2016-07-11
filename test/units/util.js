@@ -1,6 +1,6 @@
 const test = require('tape');
-const shiphold = require('../../shiphold');
-const util = require('../../lib/util');
+const shiphold = require('../../src/shiphold');
+const util = require('../../src/lib/util');
 
 function createDefaultModels (sh) {
   const Users = sh.model('Users', function (s) {

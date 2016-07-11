@@ -1,4 +1,4 @@
-const shiphold = require('../../shiphold');
+const shiphold = require('../../src/shiphold');
 const test = require('tape');
 
 test('service registry', t=> {

@@ -1,0 +1,10 @@
+machine:
+  node:
+    version: 6.0.0
+  environment:
+    POSTGRESQL_DB: ship-hold-test
+    POSTGRESQL_USER: docker
+    POSTGRESQL_PASSWORD:  docker
+test:
+  override:
+    - npm run test:ci

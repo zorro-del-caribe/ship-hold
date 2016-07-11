@@ -1,5 +1,5 @@
 const test = require('tape');
-const shiphold = require('../../shiphold');
+const shiphold = require('../../src/shiphold');
 
 test('bind query to proper table', t=> {
   const model = shiphold()
@@ -12,7 +12,7 @@ test('bind query to proper table', t=> {
     .build()
     .text;
 
-  const expected = 'UPDATE "users" SET "foo"=\'bar\' RETURNING *';
+  const expected = 'UPDATE "users" SET "foo" = \'bar\' RETURNING *';
   t.equal(query, expected);
   t.end();
 });

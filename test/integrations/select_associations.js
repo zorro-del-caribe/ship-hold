@@ -192,7 +192,7 @@ module.exports = function (sh) {
   });
 
   test('one to Many: load al users with their products (string notation)', t=> {
-    const {Users, Phones, Products}=createModels();
+    const {Users}=createModels();
     Users
       .select()
       .orderBy('id')

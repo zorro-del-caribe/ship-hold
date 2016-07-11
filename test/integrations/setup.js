@@ -1,146 +1,113 @@
-const pg = require('pg');
-const connection = 'postgres://docker:docker@192.168.99.100:5432/ship-hold-test';
-const test = require('tape');
+module.exports = function (sh) {
+  return sh.getConnection()
+    .then(function ({client, done}) {
 
-let remaining = 5;
-function jobDone () {
-  remaining--;
-  if (remaining === 0) {
-    pg.end();
-  }
-}
+      return new Promise(function (resolve, reject) {
+        let remaining = 5;
 
-pg.connect(connection, function (err, client, done) {
-  if (err) {
-    throw err;
-  }
+        function jobDone () {
+          remaining--;
+          if (remaining === 0) {
+            console.log('RRRRRRRREEEEEESOOOOOOLV')
+            
+            sh.stop();
+            resolve();
+          }
+        }
 
-  const dropq = `DROP TABLE IF EXISTS users_simple_select`;
+        client.query('DROP TABLE IF EXISTS users_simple_select', function (err, result) {
+          if (err) {
+            throw err;
+          }
 
-  client.query(dropq, function (err, result) {
-    if (err) {
-      throw err;
-    }
+          const createq = `CREATE TABLE users_simple_select
+        (
+        id serial PRIMARY KEY,
+        age integer,
+        name varchar(100)
+        );`;
 
-    const createq = `CREATE TABLE users_simple_select
+          client.query(createq, function (err, result) {
+            if (err) {
+              throw err;
+            }
+            done();
+            jobDone();
+          });
+        });
+
+        client.query('DROP TABLE IF EXISTS users_update', function (err, result) {
+          if (err) {
+            throw err;
+          }
+
+          const createq = `CREATE TABLE users_update
+        (
+        id serial PRIMARY KEY,
+        age integer,
+        name varchar(100)
+        );`;
+          client.query(createq, function (err, result) {
+            if (err) {
+              throw err;
+            }
+            done();
+            jobDone();
+          });
+        });
+
+        client.query('DROP TABLE IF EXISTS users_delete', function (err, result) {
+          if (err) {
+            throw err;
+          }
+
+          const createq = `CREATE TABLE users_delete
     (
     id serial PRIMARY KEY,
     age integer,
     name varchar(100)
     );`;
 
-    client.query(createq, function (err, result) {
-      if (err) {
-        throw err;
-      }
-      done();
-      jobDone();
-    });
-  });
-});
+          client.query(createq, function (err, result) {
+            if (err) {
+              throw err;
+            }
+            done();
+            jobDone();
+          });
+        });
 
-pg.connect(connection, function (err, client, done) {
-  if (err) {
-    throw err;
-  }
-
-  const dropq = `DROP TABLE IF EXISTS users_update`;
-
-  client.query(dropq, function (err, result) {
-    if (err) {
-      throw err;
-    }
-
-    const createq = `CREATE TABLE users_update
-    (
-    id serial PRIMARY KEY,
-    age integer,
-    name varchar(100)
-    );`;
-
-    client.query(createq, function (err, result) {
-      if (err) {
-        throw err;
-      }
-      done();
-      jobDone();
-    });
-  });
-});
-
-pg.connect(connection, function (err, client, done) {
-  if (err) {
-    throw err;
-  }
-
-  const dropq = `DROP TABLE IF EXISTS users_delete`;
-
-  client.query(dropq, function (err, result) {
-    if (err) {
-      throw err;
-    }
-
-    const createq = `CREATE TABLE users_delete
-    (
-    id serial PRIMARY KEY,
-    age integer,
-    name varchar(100)
-    );`;
-
-    client.query(createq, function (err, result) {
-      if (err) {
-        throw err;
-      }
-      done();
-      jobDone();
-    });
-  });
-});
-
-pg.connect(connection, function (err, client, done) {
-  if (err) {
-    throw err;
-  }
-
-  client.query('DROP TABLE if EXISTS users_insert', function (err, result) {
-    const createQ = `CREATE TABLE users_insert
+        client.query('DROP TABLE if EXISTS users_insert', function (err, result) {
+          const createQ = `CREATE TABLE users_insert
     (
     id serial PRIMARY KEY,
     age integer,
     name varchar(100)
     );
     `;
-    client.query(createQ, function (err, result) {
-      if (err) {
-        throw err;
-      }
-      done();
-      jobDone();
-    });
+          client.query(createQ, function (err, result) {
+            if (err) {
+              throw err;
+            }
+            done();
+            jobDone();
+          });
 
-  });
+        });
 
-});
-
-pg.connect(connection, function (err, client, done) {
-  if (err) {
-    throw err;
-  }
-
-  const dropq = `DROP TABLE IF EXISTS 
+        client.query(`DROP TABLE IF EXISTS 
   users_association_select, 
   products_association_select, 
   phones_association_select, 
   accounts_association_select,
   users_accounts_association_select
-  ;`;
-  client.query(dropq, function (err, result) {
+  ;`, function (err, result) {
 
-    if (err) {
-      throw err;
-    }
+          if (err) {
+            throw err;
+          }
 
-    const createq = `CREATE TABLE users_association_select
+          const createq = `CREATE TABLE users_association_select
     (
     id serial PRIMARY KEY,
     age integer,
@@ -177,12 +144,15 @@ pg.connect(connection, function (err, client, done) {
     );
     `;
 
-    client.query(createq, function (err) {
-      if (err) {
-        throw err;
-      }
-      done();
-      jobDone();
-    });
-  });
-});
+          client.query(createq, function (err) {
+            if (err) {
+              throw err;
+            }
+            done();
+            jobDone();
+          });
+        });
+      });
+    })
+    .catch(e=>console.log(e));
+};

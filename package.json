@@ -2,11 +2,13 @@
   "name": "ship-hold",
   "version": "1.0.0",
   "description": "data access framework for postgres sql",
-  "main": "shiphold.js",
+  "main": "./src/shiphold.js",
   "scripts": {
     "test": "npm run test:unit && npm run test:int",
-    "test:int": "node ./test/integrations/setup.js && node ./test/integrations/index.js | tap-summary",
-    "test:unit": "node ./test/units/index.js | tap-summary"
+    "test:int": "node ./test/integrations/index.js",
+    "test:unit": "node ./test/units/index.js",
+    "test:ci": "DB_HOSTNAME=127.0.0.1 npm test",
+    "build": "babel src --out-dir dist -s"
   },
   "repository": {
     "type": "git",
@@ -26,10 +28,16 @@
   "dependencies": {
     "debug": "^2.2.0",
     "pg": "^4.5.5",
-    "ship-hold-querybuilder": "ship-hold-querybuilder"
+    "ship-hold-querybuilder": "^1.0.0"
+  },
+  "babel": {
+    "presets": [
+      "es2015"
+    ]
   },
   "devDependencies": {
-    "tap-summary": "^2.1.1",
+    "babel-cli": "^6.10.1",
+    "babel-preset-es2015": "^6.9.0",
     "tape": "^4.5.1"
   }
 }
