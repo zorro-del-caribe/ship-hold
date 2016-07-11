@@ -1,4 +1,4 @@
-const shiphold = require('ship-hold');
+const shiphold = require('../../src/shiphold');
 const sh = shiphold({
   hostname: process.env.DB_HOSTNAME || '192.168.99.100',
   username: process.env.DB_USERNAME || 'docker',
