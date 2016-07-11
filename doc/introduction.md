@@ -1,3 +1,5 @@
+[![CircleCI](https://circleci.com/gh/zorro-del-caribe/ship-hold.svg?style=svg)](https://circleci.com/gh/zorro-del-caribe/ship-hold)
+
 ## Introduction
 
 Shiphold is an [ORM]() for [Postgres]() relational database system, developed for the [nodejs]() platform (version > 6).
