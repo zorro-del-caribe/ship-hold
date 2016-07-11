@@ -23,6 +23,9 @@
     "sql",
     "ship-hold"
   ],
+  "engines": {
+    "node": ">=6.0.0"
+  },
   "author": "Laurent RENARD",
   "license": "MIT",
   "dependencies": {
