@@ -1,3 +1,5 @@
+# Ship-hold
+
 [![CircleCI](https://circleci.com/gh/zorro-del-caribe/ship-hold.svg?style=svg)](https://circleci.com/gh/zorro-del-caribe/ship-hold)
 
 ## Introduction
@@ -21,7 +23,7 @@ const shiphold = require('ship-hold');
 const sh = shiphold({
     hostname:'192.168.99.100'
     username:'docker',
-    password:'docker,
+    password:'docker',
     database:'dev'
 });
 ```
