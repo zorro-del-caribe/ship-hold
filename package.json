@@ -8,7 +8,10 @@
     "test:int": "node ./test/integrations/index.js",
     "test:unit": "node ./test/units/index.js",
     "test:ci": "DB_HOSTNAME=127.0.0.1 npm test",
-    "build": "babel src --out-dir dist -s"
+    "babel": "babel src --out-dir dist -s",
+    "doc":"concat-cli -f ./doc/*.md -o README.md",
+    "build":"npm run babel && npm run doc"
+
   },
   "repository": {
     "type": "git",
@@ -41,6 +44,7 @@
   "devDependencies": {
     "babel-cli": "^6.10.1",
     "babel-preset-es2015": "^6.9.0",
+    "concat-cli": "^4.0.0",
     "tape": "^4.5.1"
   }
 }
