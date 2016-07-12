@@ -1,6 +1,6 @@
 ## Query runner and API adapters
 
-All the builders (whether they are created from the shiphold instance or from the model services) are extended with a query runner which will let you communicate with the database system and parse the response into structured JSON objects.
+All the builders (whether they are created from the ship-hold instance or from the model services) are extended with a query runner which will let you communicate with the database system and parse the response into structured JSON objects.
 
 Assuming we have the following data set: 
 

@@ -1,6 +1,6 @@
 ## Query builders
 
-Ship-hold is built around few sql query builders for regular database operations (SELECT, INSERT, UPDATE, DELETE). You can access them from the shiphold instance itself of from the different [model services]() (in this case the builders will be bound to the table related to the model service).
+Ship-hold is built around few sql query builders for regular database operations (SELECT, INSERT, UPDATE, DELETE). You can access them from the ship-hold instance itself of from the different [model services]() (in this case the builders will be bound to the table related to the model service).
 All the query builders have a **build** method which will return an object with the sql statement as the **text** property and the [parameters values]() as the **values** property. This is only string manipulation so you don't need a
 real database connection to use the build method.
 
