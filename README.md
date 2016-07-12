@@ -19,7 +19,7 @@ However, ship-hold focuses on a limited set of features and a very powerful [ext
 5. [extensions](#extend-ship-hold)
 6. [performances](#performances)
 7. [sample application](#sample-application)
-8. [contributing](#contribution)
+8. [contributing](#contributing)
 
 ##Getting started
 
