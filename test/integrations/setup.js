@@ -8,8 +8,6 @@ module.exports = function (sh) {
         function jobDone () {
           remaining--;
           if (remaining === 0) {
-            console.log('RRRRRRRREEEEEESOOOOOOLV')
-            
             sh.stop();
             resolve();
           }
