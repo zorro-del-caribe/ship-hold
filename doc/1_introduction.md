@@ -12,14 +12,14 @@ However, ship-hold focuses on a limited set of features and a very powerful [ext
   
 ## table of content
 
-[getting started](#getting-started)
-[query builders](#query-builders)
-[query runner](#query-runner-and-api-adapters)
-[models](#models)
-[extensions](#extend-ship-hold)
-[performances](#performances)
-[sample application](#sample-application)
-[contributing](#contribution)
+1. [getting started](#getting-started)
+2. [query builders](#query-builders)
+3. [query runner](#query-runner-and-api-adapters)
+4. [models](#models)
+5. [extensions](#extend-ship-hold)
+6. [performances](#performances)
+7. [sample application](#sample-application)
+8. [contributing](#contribution)
 
 ##Getting started
 
