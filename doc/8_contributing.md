@@ -19,3 +19,4 @@ Please before you submit an issue or a pull request, make sure you fulfill the f
 [ ] update doc if required (not the readme.md but in the doc folder)
 
 Don't forget to have a look at the tests, there are plenty of examples there !
+

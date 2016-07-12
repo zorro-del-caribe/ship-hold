@@ -1,10 +1,10 @@
 ## Query builders
 
-Ship-hold is built around few sql query builders for regular database operations (SELECT, INSERT, UPDATE, DELETE). You can access them from the ship-hold instance itself of from the different [model services]() (in this case the builders will be bound to the table related to the model service).
-All the query builders have a **build** method which will return an object with the sql statement as the **text** property and the [parameters values]() as the **values** property. This is only string manipulation so you don't need a
+Ship-hold is built around few sql query builders for regular database operations (SELECT, INSERT, UPDATE, DELETE). You can access them from the ship-hold instance itself of from the different [model services](#models) (in this case the builders will be bound to the table related to the model service).
+All the query builders have a **build** method which will return an object with the sql statement as the **text** property and the [parameters values](query-with-parameters) as the **values** property. This is only string manipulation so you don't need a
 real database connection to use the build method.
 
-Note: query builders are extended with [query runner]() which will allow you to run the query (and parse the response) against a real database.
+Note: query builders are extended with [query runner](query-runner-and-api-adapters) which will allow you to run the query (and parse the response) against a real database.
 
 ### Select query builder.
     
@@ -66,7 +66,7 @@ Users
 
  Parameters: (leftOperand,[operator],rightOperand) if no operator is provided the default '=' operator is used.
 
- Returns: a [condition query builder]() proxied with the main select builder. You'll be able to chain with conditional builder specific methods but if you use a method of the main select builder, it will fallback to the main select builder and revoke the proxy.
+ Returns: a [condition query builder](#condition-query-builder-if) proxied with the main select builder. You'll be able to chain with conditional builder specific methods but if you use a method of the main select builder, it will fallback to the main select builder and revoke the proxy.
 
  Example:
 
@@ -346,7 +346,7 @@ sh
 
  Parameters: (leftOperand,[operator],rightOperand) if no operator is provided the default '=' operator is used.
 
- Returns: a [condition query builder]() proxied with the main update builder. You'll be able to chain with conditional builder specific methods but if you use a method of the main update builder, it will fallback to the main update builder and revoke the proxy.
+ Returns: a [condition query builder](condition-query-builder-if) proxied with the main update builder. You'll be able to chain with conditional builder specific methods but if you use a method of the main update builder, it will fallback to the main update builder and revoke the proxy.
 
  Example:
 
@@ -596,3 +596,4 @@ Users
     .build({age:20, laurent:'Laurent'}) // {text: 'SELECT * FROM "users" WHERE "age" > $1 AND "name" = $2', values:[20,'Laurent']}
 
 ```
+

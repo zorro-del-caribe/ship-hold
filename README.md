@@ -9,7 +9,7 @@
 It is based around intuitive [sql query builders]() and allows you as well to manage model definitions and relations (with eager loading, etc). It defers quite a lot from other popular libraries so called **ORM** such [sequelize](http://docs.sequelizejs.com/) or [Bookshelf](http://bookshelfjs.org/):  
 they usually come with a lot of features (schema management, migrations, validations, etc) and more complex API's / code base (few thousands of sloc). 
 However, ship-hold focuses on a limited set of features and a very powerful [extension mechanism](). As a result, [ship-hold-querybuilder](https://github.com/zorro-del-caribe/ship-hold-querybuilder) code base is less than 450 sloc and less than 600 for ship-hold itself. The idea is to build [extension modules]() with their own purposes/opinions, a little bit like popular web frameworks such [koajs](http://koajs.com/).  
-d
+
 ##Getting started
 
 ### Install
@@ -55,8 +55,9 @@ Users
   .where('name','Laurent')
   .run()
   .then(rows => {console.log(rows)}); // [{name:'Laurent',age:29}]
+```
 
-```## Query builders
+## Query builders
 
 Ship-hold is built around few sql query builders for regular database operations (SELECT, INSERT, UPDATE, DELETE). You can access them from the ship-hold instance itself of from the different [model services]() (in this case the builders will be bound to the table related to the model service).
 All the query builders have a **build** method which will return an object with the sql statement as the **text** property and the [parameters values]() as the **values** property. This is only string manipulation so you don't need a
@@ -653,7 +654,9 @@ Users
     .and('name','$laurent')
     .build({age:20, laurent:'Laurent'}) // {text: 'SELECT * FROM "users" WHERE "age" > $1 AND "name" = $2', values:[20,'Laurent']}
 
-```## Query runner and API adapters
+```
+
+## Query runner and API adapters
 
 All the builders (whether they are created from the ship-hold instance or from the model services) are extended with a query runner which will let you communicate with the database system and parse the response into structured JSON objects.
 
@@ -725,6 +728,8 @@ and compose around it to [build adapters]() following any paradigm you wish.
   // [{ id:1, name:'Laurent', email:'laurent34azerty@gmail.com',age:29 }, { id:2, name:'Blandine', email:'foo@bar.com',age:29 }]  
  
   ```
+ 
+  
 
  
  
@@ -1076,6 +1081,7 @@ Users
   .include(Products,Phones,Accounts.select().include(Banks),..)
 
 ```
+
 ## Extend ship-hold
 
 As mentioned before, ship-hold comes with a limited set of features. However it can easily be extended with other modules using traditional javascript patterns so that you can combine single purposed modules together and build your framework a la carte.
@@ -1328,18 +1334,25 @@ Users
 
 Here is a list of existing extensions. Please don't hesitate to make a pull request on this documentation to add yours. It is recommended to add the ship-hold key word in the package.json file of your extension.
 
-* [ship-hold-dao](https://github.com/zorro-del-caribe/ship-hold-dao): makes ship-hold return model instances (with behaviour) rather than plain javascript object ## Performances
+* [ship-hold-dao](https://github.com/zorro-del-caribe/ship-hold-dao): makes ship-hold return model instances (with behaviour) rather than plain javascript object
+ 
+ ## Performances
 
 As very light and using stream as base component, ship-hold performs quite well. There is a [benchmark repository](https://github.com/zorro-del-caribe/ship-hold-benchmark) you can clone and modify to test with you own use cases and hardware which test ship-hold and other libraries in "realistic" use cases.
 As any benchmark, it has to be taken with a grain of salt and you should do your own testing before making any claim !
  
 ### sample result
  
- //todo## sample appication
+ //todo
+ 
+ 
+ ## sample appication
 
 There is a whole [blog application](https://github.com/zorro-del-caribe/ship-hold-sample) build with ship hold, so you can see an almost real world example.
 
-More details coming soon...## contributing
+More details coming soon...
+
+## contributing
 
 Please before you submit an issue or a pull request, make sure you fulfill the following requirements.
 
@@ -1360,3 +1373,4 @@ Please before you submit an issue or a pull request, make sure you fulfill the f
 [ ] update doc if required (not the readme.md but in the doc folder)
 
 Don't forget to have a look at the tests, there are plenty of examples there !
+

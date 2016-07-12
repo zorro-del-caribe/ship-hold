@@ -10,14 +10,14 @@ id | name | email | age
 2|Blandine|foo@bar.com|29
 3|Jesus|jc@heaven.com|2016
 
-The basic runner provides a streaming API based on generator as consumer (I recommend the [very good book]() from @Axel) which will let you get the data as fast as possible
-and compose around it to [build adapters]() following any paradigm you wish.
+The basic runner provides a streaming API based on generator as consumer (I recommend the [very good book](http://exploringjs.com/) from [Axel Raushmayer](http://www.2ality.com/)) which will let you get the data as fast as possible
+and compose around it to [build adapters](extend-query-runner-with-more-adapters) following any paradigm you wish.
 
 ### Query runner API
  
 * #### stream
 
- Parameters: (parametersObject, sink) parametersObject will be an object whose properties will be used for [query with parameters](). sink will be a generator as data consumer
+ Parameters: (parametersObject, sink) parametersObject will be an object whose properties will be used for [query with parameters](query-with-parameters). sink will be a generator as data consumer
  
  Example:
  
@@ -52,7 +52,7 @@ and compose around it to [build adapters]() following any paradigm you wish.
 
  Note: the rows are therefore buffered, and the Promise api could be "less efficient" than the streaming api.
 
- Parameters: (parametersObject) parametersObject will be an object whose properties will be used for [query with parameters]().
+ Parameters: (parametersObject) parametersObject will be an object whose properties will be used for [query with parameters](query-with-parameters).
 
  Returns: a Promise which will resolve the rows as an array (or empty array)
 
@@ -70,6 +70,8 @@ and compose around it to [build adapters]() following any paradigm you wish.
   // [{ id:1, name:'Laurent', email:'laurent34azerty@gmail.com',age:29 }, { id:2, name:'Blandine', email:'foo@bar.com',age:29 }]  
  
   ```
+ 
+  
 
  
  

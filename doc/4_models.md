@@ -1,7 +1,7 @@
 ## Models
 
 ship-hold lets you define models so you'll have services with convenient api to query a given type of data. It is also useful to define the relations between your models
-and give you the ability to eagerly load dependant model instances without the trouble of writing sophisticated sql join queries (and parse/aggregate the response). Finally, services can easily be [extended]() to provide
+and give you the ability to eagerly load dependant model instances without the trouble of writing sophisticated sql join queries (and parse/aggregate the response). Finally, services can easily be [extended](extend-all-the-services-by-modifying-the-service-prototype) to provide
 an API that fits the best your needs.
 
 ### define a model
@@ -342,3 +342,4 @@ Users
   .include(Products,Phones,Accounts.select().include(Banks),..)
 
 ```
+
