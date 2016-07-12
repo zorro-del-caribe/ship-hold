@@ -135,7 +135,7 @@ The definition function has a relation helper as first argument to let you defin
             /* columns ... */
         },
         relations:{
-           owners:h.BelongsToMany('Users','UsersAccounts,'accountId') // target model name, model name for the join table, column which references accounts in the join table
+           owners:h.BelongsToMany('Users','UsersAccounts','accountId') // target model name, model name for the join table, column which references accounts in the join table
         }
     };
  });
