@@ -1,7 +1,7 @@
 ## Query builders
 
 Ship-hold is built around few sql query builders for regular database operations (SELECT, INSERT, UPDATE, DELETE). You can access them from the shiphold instance itself of from the different [model services]() (in this case the builders will be bound to the table related to the model service).
-All the query builders have a ** build ** method which will return an object with the sql statement as the **text** property and the [parameters values]() as the ** values ** property. This is only string manipulation so you don't need a
+All the query builders have a **build** method which will return an object with the sql statement as the **text** property and the [parameters values]() as the **values** property. This is only string manipulation so you don't need a
 real database connection to use the build method.
 
 Note: query builders are extended with [query runner]() which will allow you to run the query (and parse the response) against a real database.
@@ -30,66 +30,69 @@ Users
     
 * ##### from
 
-Will add a **FROM** clause
+ Will add a **FROM** clause.
 
-Parameters: the list of table you want to query from
-Returns: itself
-Example:
-```Javascript
-sh
-  .select('id','age','number')
-  .from('users','phones')
-  .build() // { text: 'SELECT "id", "age", "number" FROM "users", "phones"', values: [] }
-```
+ Parameters: the list of table you want to query from.
 
-Alternatively, you can pass another builder as argument
+ Returns: itself.
 
-```Javascript
-sh
-  .select()
-  .from({value:sh.select('id').from('users'),as:'users'}) //sql subquery must have an alias
-  .build() //{ text: 'SELECT * FROM (SELECT "id" FROM "users") AS "users"',values: [] }
-```
+ Example:
+
+ ```Javascript
+ sh
+   .select('id','age','number')
+   .from('users','phones')
+   .build() // { text: 'SELECT "id", "age", "number" FROM "users", "phones"', values: [] }
+ ```
+
+ Alternatively, you can pass another builder as argument
+
+ ```Javascript
+ sh
+   .select()
+   .from({value:sh.select('id').from('users'),as:'users'}) //sql subquery must have an alias
+   .build() //{ text: 'SELECT * FROM (SELECT "id" FROM "users") AS "users"',values: [] }
+ ```
 
 * ##### where 
     
-Will add a **WHERE** clause.
+ Will add a **WHERE** clause.
 
-Parameters: (leftOperand,[operator],rightOperand) if no operator is provided the default '=' operator is used.
+ Parameters: (leftOperand,[operator],rightOperand) if no operator is provided the default '=' operator is used.
 
-Returns: a [condition query builder]() proxied with the main select builder. You'll be able to chain with conditional builder specific methods but if you use a method of the main select builder, it will fallback to the main select builder and revoke the proxy.
+ Returns: a [condition query builder]() proxied with the main select builder. You'll be able to chain with conditional builder specific methods but if you use a method of the main select builder, it will fallback to the main select builder and revoke the proxy.
 
-Example:
+ Example:
 
-```Javascript
-sh
-  .select()
-  .from('users')
-  .where('name','laurent')
-  .and('age','>',20) // chain with condition builder method
-  .orderBy('name') // proxy back to main select builder
-  .build() // {text:'SELECT * FROM "users" WHERE "name" = \'laurent\' AND "age" > 20 ORDER BY "name"' ORDER BY "name", values:[]} 
-```
+ ```Javascript
+ sh
+   .select()
+   .from('users')
+   .where('name','laurent')
+   .and('age','>',20) // chain with condition builder method
+   .orderBy('name') // proxy back to main select builder
+   .build() // {text:'SELECT * FROM "users" WHERE "name" = \'laurent\' AND "age" > 20 ORDER BY "name"' ORDER BY "name", values:[]} 
+ ```
     
-alternatively you can pass another builder as operand.
+ alternatively you can pass another builder as operand.
 
-```Javascript
-sh
-  .select()
-  .from('users')
-  .where('id','in',sh.select('id').from('users').orderBy('name').limit(10))
-  .build() // {text: 'SELECT * FROM "users" WHERE "id" in (SELECT "id" FROM "users" ORDER BY "name" LIMIT 10)', values:[]}
-```
+ ```Javascript
+ sh
+   .select()
+   .from('users')
+   .where('id','in',sh.select('id').from('users').orderBy('name').limit(10))
+   .build() // {text: 'SELECT * FROM "users" WHERE "id" in (SELECT "id" FROM "users" ORDER BY "name" LIMIT 10)', values:[]}
+ ```
 
-Note: a left operand string is considered as identifier by default whereas the right operand string will be considered as value. So if you want to use an identifier instead, you will need to wrap it with quotes.
+ Note: a left operand string is considered as identifier by default whereas the right operand string will be considered as value. So if you want to use an identifier instead, you will need to wrap it with quotes.
 
-```Javascript
-sh
-  .select()
-  .from('users','products')
-  .where('users.id','"products"."userId"')
-  .build() // { text: 'SELECT * FROM "users", "products" WHERE "users"."id" = "products"."userId"', values: [] }
-```
+ ```Javascript
+ sh
+   .select()
+   .from('users','products')
+   .where('users.id','"products"."userId"')
+   .build() // { text: 'SELECT * FROM "users", "products" WHERE "users"."id" = "products"."userId"', values: [] }
+ ```
     
 * ##### orderBy
     
