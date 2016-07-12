@@ -6,14 +6,14 @@
 ## Introduction
 
 **ship-hold** is a data access framework for [Postgres](https://www.postgresql.org/) relational database system, developed for the [nodejs](https://nodejs.org/) platform (version > 6, if not transpiled).
-It is based around intuitive [sql query builders]() and allows you as well to manage model definitions and relations (with eager loading, etc). It defers quite a lot from other popular libraries so called **ORM** such [sequelize](http://docs.sequelizejs.com/) or [Bookshelf](http://bookshelfjs.org/):  
+It is based around intuitive [sql query builders](#query-builders) and allows you as well to manage model definitions and relations (with eager loading, etc). It defers quite a lot from other popular libraries so called **ORM** such [sequelize](http://docs.sequelizejs.com/) or [Bookshelf](http://bookshelfjs.org/):  
 they usually come with a lot of features (schema management, migrations, validations, etc) and more complex API's / code base (few thousands of sloc). 
-However, ship-hold focuses on a limited set of features and a very powerful [extension mechanism](). As a result, [ship-hold-querybuilder](https://github.com/zorro-del-caribe/ship-hold-querybuilder) code base is less than 450 sloc and less than 600 for ship-hold itself. The idea is to build [extension modules]() with their own purposes/opinions, a little bit like popular web frameworks such [koajs](http://koajs.com/).  
+However, ship-hold focuses on a limited set of features and a very powerful [extension mechanism](#extend-ship-hold). As a result, [ship-hold-querybuilder](https://github.com/zorro-del-caribe/ship-hold-querybuilder) code base is less than 450 sloc and less than 600 for ship-hold itself. The idea is to build [extension modules](#list-of-extension-modules) with their own purposes/opinions, a little bit like popular web frameworks such [koajs](http://koajs.com/).  
 
 ##Getting started
 
 ### Install
-run in your terminal ``npm install ship-hold`` (assuming you have [npm](npmjs.org) installed)
+run in your terminal ``npm install ship-hold`` (assuming you have [npm](https://npmjs.org) installed)
 
 ### initialisation
 
@@ -59,11 +59,11 @@ Users
 
 ## Query builders
 
-Ship-hold is built around few sql query builders for regular database operations (SELECT, INSERT, UPDATE, DELETE). You can access them from the ship-hold instance itself of from the different [model services]() (in this case the builders will be bound to the table related to the model service).
-All the query builders have a **build** method which will return an object with the sql statement as the **text** property and the [parameters values]() as the **values** property. This is only string manipulation so you don't need a
+Ship-hold is built around few sql query builders for regular database operations (SELECT, INSERT, UPDATE, DELETE). You can access them from the ship-hold instance itself of from the different [model services](#models) (in this case the builders will be bound to the table related to the model service).
+All the query builders have a **build** method which will return an object with the sql statement as the **text** property and the [parameters values](query-with-parameters) as the **values** property. This is only string manipulation so you don't need a
 real database connection to use the build method.
 
-Note: query builders are extended with [query runner]() which will allow you to run the query (and parse the response) against a real database.
+Note: query builders are extended with [query runner](query-runner-and-api-adapters) which will allow you to run the query (and parse the response) against a real database.
 
 ### Select query builder.
     
@@ -125,7 +125,7 @@ Users
 
  Parameters: (leftOperand,[operator],rightOperand) if no operator is provided the default '=' operator is used.
 
- Returns: a [condition query builder]() proxied with the main select builder. You'll be able to chain with conditional builder specific methods but if you use a method of the main select builder, it will fallback to the main select builder and revoke the proxy.
+ Returns: a [condition query builder](#condition-query-builder-if) proxied with the main select builder. You'll be able to chain with conditional builder specific methods but if you use a method of the main select builder, it will fallback to the main select builder and revoke the proxy.
 
  Example:
 
@@ -405,7 +405,7 @@ sh
 
  Parameters: (leftOperand,[operator],rightOperand) if no operator is provided the default '=' operator is used.
 
- Returns: a [condition query builder]() proxied with the main update builder. You'll be able to chain with conditional builder specific methods but if you use a method of the main update builder, it will fallback to the main update builder and revoke the proxy.
+ Returns: a [condition query builder](condition-query-builder-if) proxied with the main update builder. You'll be able to chain with conditional builder specific methods but if you use a method of the main update builder, it will fallback to the main update builder and revoke the proxy.
 
  Example:
 
@@ -668,14 +668,14 @@ id | name | email | age
 2|Blandine|foo@bar.com|29
 3|Jesus|jc@heaven.com|2016
 
-The basic runner provides a streaming API based on generator as consumer (I recommend the [very good book]() from @Axel) which will let you get the data as fast as possible
-and compose around it to [build adapters]() following any paradigm you wish.
+The basic runner provides a streaming API based on generator as consumer (I recommend the [very good book](http://exploringjs.com/) from [Axel Raushmayer](http://www.2ality.com/)) which will let you get the data as fast as possible
+and compose around it to [build adapters](extend-query-runner-with-more-adapters) following any paradigm you wish.
 
 ### Query runner API
  
 * #### stream
 
- Parameters: (parametersObject, sink) parametersObject will be an object whose properties will be used for [query with parameters](). sink will be a generator as data consumer
+ Parameters: (parametersObject, sink) parametersObject will be an object whose properties will be used for [query with parameters](query-with-parameters). sink will be a generator as data consumer
  
  Example:
  
@@ -710,7 +710,7 @@ and compose around it to [build adapters]() following any paradigm you wish.
 
  Note: the rows are therefore buffered, and the Promise api could be "less efficient" than the streaming api.
 
- Parameters: (parametersObject) parametersObject will be an object whose properties will be used for [query with parameters]().
+ Parameters: (parametersObject) parametersObject will be an object whose properties will be used for [query with parameters](query-with-parameters).
 
  Returns: a Promise which will resolve the rows as an array (or empty array)
 
@@ -740,7 +740,7 @@ and compose around it to [build adapters]() following any paradigm you wish.
 ## Models
 
 ship-hold lets you define models so you'll have services with convenient api to query a given type of data. It is also useful to define the relations between your models
-and give you the ability to eagerly load dependant model instances without the trouble of writing sophisticated sql join queries (and parse/aggregate the response). Finally, services can easily be [extended]() to provide
+and give you the ability to eagerly load dependant model instances without the trouble of writing sophisticated sql join queries (and parse/aggregate the response). Finally, services can easily be [extended](extend-all-the-services-by-modifying-the-service-prototype) to provide
 an API that fits the best your needs.
 
 ### define a model
