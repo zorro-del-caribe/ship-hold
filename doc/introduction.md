@@ -1,3 +1,5 @@
+[![CircleCI](https://circleci.com/gh/zorro-del-caribe/ship-hold.svg?style=svg)](https://circleci.com/gh/zorro-del-caribe/ship-hold)
+
 ## Introduction
 
 ** ship-hold ** is a data access framework for [Postgres]() relational database system, developed for the [nodejs]() platform (version > 6, if not transpiled).
