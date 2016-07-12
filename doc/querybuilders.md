@@ -115,65 +115,65 @@ Users
 
 * ##### limit
  
-Will add a **LIMIT** clause.
+ Will add a **LIMIT** clause.
     
-Parameters: (limit, [offset]) offset can be omitted.
+ Parameters: (limit, [offset]) offset can be omitted.
 
-Returns: itself.
+ Returns: itself.
 
-Example:
+ Example:
 
-```Javascript
-sh
-  .select()
-  .from('users')
-  .limit(10, 3)
-  .build() // {text: 'SELECT * FROM "users" LIMIT 10 OFFSET 3', values:[]}
-```
+ ```Javascript
+ sh
+   .select()
+   .from('users')
+   .limit(10, 3)
+   .build() // {text: 'SELECT * FROM "users" LIMIT 10 OFFSET 3', values:[]}
+ ```
 
 * ##### join 
 
-Will add a **JOIN** clause.
+ Will add a **JOIN** clause.
 
-Parameters: (table name). 
+ Parameters: (table name). 
 
-Returns: itself.
+ Returns: itself.
 
-Example:
+ Example:
 
-```Javascript
-sh
-  .select()
-  .from('users')
-  .join('products')
-  .on('users.id','"products"."userId"')
-  .and('price','>',50)// "on" returns a conditional query builder proxied with the main select builder in the same way as where method
-  .build()// { text: 'SELECT * FROM "users" JOIN "products" ON "users"."id" = "products"."userId" AND "price" > 50', values: [] }
-```
+ ```Javascript
+ sh
+   .select()
+   .from('users')
+   .join('products')
+   .on('users.id','"products"."userId"')
+   .and('price','>',50)// "on" returns a conditional query builder proxied with the main select builder in the same way as where method
+   .build()// { text: 'SELECT * FROM "users" JOIN "products" ON "users"."id" = "products"."userId" AND "price" > 50', values: [] }
+ ```
 
-Alternatively, you can pass another builder.
+ Alternatively, you can pass another builder.
 
-```Javascript
-sh
-  .select()
-  .from('users')
-  .join({value:sh.select().from('products').where('price','>',50).noop(),as:'high_price_products'})
-  .on('users.id','"high_price_products"."userId"')
-  .build() //{ text: 'SELECT * FROM "users" JOIN (SELECT * FROM "products" WHERE "price" > 50) AS "high_price_products" ON "users"."id" = "high_price_products"."userId"', values: [] }
-```
-Note: the "noop" method is necessary to revoke the proxy created by the where clause and make sure we actually pass a select builder as argument.
+ ```Javascript
+ sh
+   .select()
+   .from('users')
+   .join({value:sh.select().from('products').where('price','>',50).noop(),as:'high_price_products'})
+   .on('users.id','"high_price_products"."userId"')
+   .build() //{ text: 'SELECT * FROM "users" JOIN (SELECT * FROM "products" WHERE "price" > 50) AS "high_price_products" ON "users"."id" = "high_price_products"."userId"', values: [] }
+ ```
+ Note: the "noop" method is necessary to revoke the proxy created by the where clause and make sure we actually pass a select builder as argument.
 
 * ##### leftJoin
 
-Same as **join** but with left join. 
+ Same as **join** but with left join. 
 
 * ##### rightJoin
     
-Same as **join** but with right join.
+ Same as **join** but with right join.
  
 * ##### fullJoin.
     
-Same as **join** but with full join. 
+ Same as **join** but with full join. 
     
 ### Insert query builder.
 
@@ -194,72 +194,72 @@ sh
 
 * ##### into
 
-Will add the table name of the insert query. It will be done by default if you use the model service.
+ Will add the table name of the insert query. It will be done by default if you use the model service.
 
-Parameters: (table name).
+ Parameters: (table name).
 
-Returns: itself.
+ Returns: itself.
 
-Example:
+ Example:
 
-```Javascript
-sh
-  .insert({name:'Laurent',age:29})
-  .into('users')
-  .build() // { text: 'INSERT INTO "users" ( "name", "age" ) VALUES ( \'Laurent\', 29 )', values: [] }
+ ```Javascript
+ sh
+   .insert({name:'Laurent',age:29})
+   .into('users')
+   .build() // { text: 'INSERT INTO "users" ( "name", "age" ) VALUES ( \'Laurent\', 29 )', values: [] }
 
-// is equivalent to
-Users
-  .insert({name:'Laurent',age:29})
-  .build()
-```
+ // is equivalent to
+ Users
+   .insert({name:'Laurent',age:29})
+   .build()
+ ```
 
 * ##### value
 
-Add a key, value to the insert statement.
+ Add a key, value to the insert statement.
 
-Parameters: (key, [value]) if no value is provided the DEFAULT will be used.
+ Parameters: (key, [value]) if no value is provided the DEFAULT will be used.
 
-Example:
+ Example:
 
-```Javascript
-sh
-  .insert()
-  .into('users')
-  .value('name','Laurent')
-  .value('age')
-  .build() //{ text: 'INSERT INTO "users" ( "name", "age" ) VALUES ( \'Laurent\', DEFAULT )', values: [] }
-```
+ ```Javascript
+ sh
+   .insert()
+   .into('users')
+   .value('name','Laurent')
+   .value('age')
+   .build() //{ text: 'INSERT INTO "users" ( "name", "age" ) VALUES ( \'Laurent\', DEFAULT )', values: [] }
+ ```
 
 * ##### returning
  
-Add a **RETURNING** statement to the query.
+ Add a **RETURNING** statement to the query.
 
-Parameters: (property list).
+ Parameters: (property list).
 
-Example:
+ Example:
 
-```Javascript
-sh
-  .insert({
-    name:'Laurent',
-    age:29
-  })
-  .into('users')
-  .returning('id', 'name')
-  .build() // { text: 'INSERT INTO "users" ( "name", "age" ) VALUES ( \'Laurent\', 29 ) RETURNING "id", "name"', values: [] }
-```
+ ```Javascript
+ sh
+   .insert({
+     name:'Laurent',
+     age:29
+   })
+   .into('users')
+   .returning('id', 'name')
+   .build() // { text: 'INSERT INTO "users" ( "name", "age" ) VALUES ( \'Laurent\', 29 ) RETURNING "id", "name"', values: [] }
+ ```
 
-Note if you use the insert method from the model service, it automatically returns the whole object ('*')
+ Note if you use the insert method from the model service, it automatically returns the whole object ('*')
 
-```Javascript
-Users
-  .insert({
-    name:'Laurent',
-    age:29
-  })
-  .build() // { text: 'INSERT INTO "users" ( "name", "age" ) VALUES ( \'Laurent\', 29 ) RETURNING *', values: [] }
-```
+ ```Javascript
+ Users
+   .insert({
+     name:'Laurent',
+     age:29
+   })
+   .build() // { text: 'INSERT INTO "users" ( "name", "age" ) VALUES ( \'Laurent\', 29 ) RETURNING *', values: [] }
+ ```
 
 ### Update query builder
 
@@ -280,112 +280,112 @@ sh
 
 * ##### set
 
-Will add a set statement.
+ Will add a set statement.
 
-Parameters(key, value ) or (map): either a key,value pair, either an object.
+ Parameters(key, value ) or (map): either a key,value pair, either an object.
 
-Returns: itself.
+ Returns: itself.
 
-Example:
+ Example:
 
-```Javascript
-sh
-  .update('users')
-  .set('name','Laurent')
-  .set('age',29)
-  .build() // { text: 'UPDATE "users" SET "name" = \'Laurent\', "age" = 29', values: [] }
+ ```Javascript
+ sh
+   .update('users')
+   .set('name','Laurent')
+   .set('age',29)
+   .build() // { text: 'UPDATE "users" SET "name" = \'Laurent\', "age" = 29', values: [] }
   
-// is equivalent to 
+ // is equivalent to 
   
-sh
-  .update('users')
-  .set({
-    name:'Laurent',
-    age:29
-  })
-  .build()
-```
+ sh
+   .update('users')
+   .set({
+     name:'Laurent',
+     age:29
+   })
+   .build()
+ ```
 
 * ##### where
 
-Will add a **WHERE** clause.
+ Will add a **WHERE** clause.
 
-Parameters: (leftOperand,[operator],rightOperand) if no operator is provided the default '=' operator is used.
+ Parameters: (leftOperand,[operator],rightOperand) if no operator is provided the default '=' operator is used.
 
-Returns: a [condition query builder]() proxied with the main update builder. You'll be able to chain with conditional builder specific methods but if you use a method of the main update builder, it will fallback to the main update builder and revoke the proxy.
+ Returns: a [condition query builder]() proxied with the main update builder. You'll be able to chain with conditional builder specific methods but if you use a method of the main update builder, it will fallback to the main update builder and revoke the proxy.
 
-Example:
+ Example:
 
-```Javascript
-sh
-  .update('users')
-  .set('name','what')
-  .where('name','laurent')
-  .and('age','>',20) // chain with condition builder method
-  .build() // { text: 'UPDATE "users" SET "name" = \'what\' WHERE "name" = \'laurent\' AND "age" > 20', values: [] }
-```
+ ```Javascript
+ sh
+   .update('users')
+   .set('name','what')
+   .where('name','laurent')
+   .and('age','>',20) // chain with condition builder method
+   .build() // { text: 'UPDATE "users" SET "name" = \'what\' WHERE "name" = \'laurent\' AND "age" > 20', values: [] }
+ ```
     
-alternatively you can pass another builder as operand.
+ alternatively you can pass another builder as operand.
 
-```Javascript
-sh
-  .update('users')
-  .set('name','Laurent')
-  .where('id','in',sh.select('id').from('users').orderBy('name').limit(10))
-  .build() // { text: 'UPDATE "users" SET "name" = \'Laurent\' WHERE "id" in (SELECT "id" FROM "users" ORDER BY "name" LIMIT 10)', values: [] }
-```
+ ```Javascript
+ sh
+   .update('users')
+   .set('name','Laurent')
+   .where('id','in',sh.select('id').from('users').orderBy('name').limit(10))
+   .build() // { text: 'UPDATE "users" SET "name" = \'Laurent\' WHERE "id" in (SELECT "id" FROM "users" ORDER BY "name" LIMIT 10)', values: [] }
+ ```
 
-Note: a left operand string is considered as identifier by default whereas the right operand string will be considered as value. So if you want to use an identifier instead, you will need to wrap it with quotes
+ Note: a left operand string is considered as identifier by default whereas the right operand string will be considered as value. So if you want to use an identifier instead, you will need to wrap it with quotes
 
 * ##### from
 
-Add a **FROM** statement to the query (ideal if you want to add conditions on other tables).
+ Add a **FROM** statement to the query (ideal if you want to add conditions on other tables).
 
-Parameters:(table name list).
+ Parameters:(table name list).
 
-Returns: itself.
+ Returns: itself.
 
-Example:
+ Example:
 
-```Javascript
-sh
-  .update('employees')
-  .set('sales_count', 1000)
-  .from('accounts')
-  .where('accounts.name', 'Acme Corporation')
-  .and('employees.id', '"accounts"."sales_person"')
-  .build() // { text: 'UPDATE "employees" SET "sales_count" = 1000 FROM "accounts" WHERE "accounts"."name" = \'Acme Corporation\' AND "employees"."id" = "accounts"."sales_person"', values: [] }
-```
+ ```Javascript
+ sh
+   .update('employees')
+   .set('sales_count', 1000)
+   .from('accounts')
+   .where('accounts.name', 'Acme Corporation')
+   .and('employees.id', '"accounts"."sales_person"')
+   .build() // { text: 'UPDATE "employees" SET "sales_count" = 1000 FROM "accounts" WHERE "accounts"."name" = \'Acme Corporation\' AND "employees"."id" = "accounts"."sales_person"', values: [] }
+ ```
 
 * ##### returning
  
-Add a **RETURNING** statement to the query.
+ Add a **RETURNING** statement to the query.
 
-Parameters: (property list).
+ Parameters: (property list).
 
-Example:
+ Example:
 
-```Javascript
-sh
-  .update('users')
-  .set({
-    name:'Laurent',
-    age:29
-  })
-  .returning('id', 'name')
-  .build() // { text: 'UPDATE "users" SET "name" = \'Laurent\', "age" = 29 RETURNING "id", "name"', values: [] }
-```
+ ```Javascript
+ sh
+   .update('users')
+   .set({
+     name:'Laurent',
+     age:29
+   })
+   .returning('id', 'name')
+   .build() // { text: 'UPDATE "users" SET "name" = \'Laurent\', "age" = 29 RETURNING "id", "name"', values: [] }
+ ```
 
-Note if you use the update method from the model service, it automatically returns the whole object ('*')
+ Note if you use the update method from the model service, it automatically returns the whole object ('*')
 
-```Javascript
-Users
-  .update()
-  .set({
-    name:'Laurent',
-    age:29
-  })
-  .build() { text: 'UPDATE "users" SET "name" = \'Laurent\', "age" = 29 RETURNING *', values: [] }
+ ```Javascript
+ Users
+   .update()
+   .set({
+     name:'Laurent',
+     age:29
+   })
+   .build() { text: 'UPDATE "users" SET "name" = \'Laurent\', "age" = 29 RETURNING *', values: [] }
 
 ### Delete query builder
 
@@ -411,50 +411,50 @@ Users
 
 * ##### where
 
-Will add a **WHERE** clause.
+ Will add a **WHERE** clause.
 
-Parameters: (leftOperand,[operator],rightOperand) if no operator is provided the default '=' operator is used.
+ Parameters: (leftOperand,[operator],rightOperand) if no operator is provided the default '=' operator is used.
 
-Returns: a [condition query builder]() proxied with the main delete builder. You'll be able to chain with conditional builder specific methods but if you use a method of the main delete builder, it will fallback to the main delete builder and revoke the proxy.
+ Returns: a [condition query builder]() proxied with the main delete builder. You'll be able to chain with conditional builder specific methods but if you use a method of the main delete builder, it will fallback to the main delete builder and revoke the proxy.
 
-Example:
+ Example:
 
-```Javascript
-sh
-  .delete('users')
-  .where('name','laurent')
-  .and('age','>',20) // chain with condition builder method
-  .build() // { text: 'DELETE FROM "users" WHERE "name" = \'laurent\' AND "age" > 20', values: [] }
-```
+ ```Javascript
+ sh
+   .delete('users')
+   .where('name','laurent')
+   .and('age','>',20) // chain with condition builder method
+   .build() // { text: 'DELETE FROM "users" WHERE "name" = \'laurent\' AND "age" > 20', values: [] }
+ ```
     
-alternatively you can pass another builder as operand.
+ alternatively you can pass another builder as operand.
 
-```Javascript
-sh
-  .delete('users')
-  .where('id','in',sh.select('id').from('users').orderBy('name').limit(10))
-  .build() // { text: 'DELETE FROM "users" WHERE "id" in (SELECT "id" FROM "users" ORDER BY "name" LIMIT 10)', values: [] }
-```
+ ```Javascript
+ sh
+   .delete('users')
+   .where('id','in',sh.select('id').from('users').orderBy('name').limit(10))
+   .build() // { text: 'DELETE FROM "users" WHERE "id" in (SELECT "id" FROM "users" ORDER BY "name" LIMIT 10)', values: [] }
+ ```
 
-Note: a left operand string is considered as identifier by default whereas the right operand string will be considered as value. So if you want to use an identifier instead, you will need to wrap it with quotes
+ Note: a left operand string is considered as identifier by default whereas the right operand string will be considered as value. So if you want to use an identifier instead, you will need to wrap it with quotes
 
 * ##### using
 
-Will add the **USING** clause (ideal if you want to use other tables in your condition).
+ Will add the **USING** clause (ideal if you want to use other tables in your condition).
 
-Parameters: (table name list).
+ Parameters: (table name list).
 
-Returns: itself.
+ Returns: itself.
 
-Example:
+ Example:
 
-```Javascript
-sh
-  .delete('films')
-  .using('producers')
-  .where('producer_id', '"producers"."id"')
-  .and('producers.name', 'foo')
-  .build() // { text: 'DELETE FROM "films" USING "producers" WHERE "producer_id" = "producers"."id" AND "producers"."name" = \'foo\'', values: [] }
+ ```Javascript
+ sh
+   .delete('films')
+   .using('producers')
+   .where('producer_id', '"producers"."id"')
+   .and('producers.name', 'foo')
+   .build() // { text: 'DELETE FROM "films" USING "producers" WHERE "producer_id" = "producers"."id" AND "producers"."name" = \'foo\'', values: [] }
  ``` 
 
 ### Condition query builder (if)
@@ -478,37 +478,37 @@ Note: any operand can be replaced by another bulder to combine/nest conditions.
 
 * ##### and
 
-Add an **AND** part to a condition.
+ Add an **AND** part to a condition.
 
-Parameters:(leftOperand,[operator],rightOperand) if no operator is provided the default '=' operator is used.
+ Parameters:(leftOperand,[operator],rightOperand) if no operator is provided the default '=' operator is used.
 
-Returns: itself.
+ Returns: itself.
 
-Example:
+ Example:
 
-```Javascript
-sh
-  .if('age','>',50)
-  .and('name', 'ilike', '%Lau%')
-  .build() // { text: '"age" > 50 AND "name" ilike \'%Lau%\'', values: [] }
-```
+ ```Javascript
+ sh
+   .if('age','>',50)
+   .and('name', 'ilike', '%Lau%')
+   .build() // { text: '"age" > 50 AND "name" ilike \'%Lau%\'', values: [] }
+ ```
 
 * ##### or
 
-Add a **OR** part to a condition.
+ Add a **OR** part to a condition.
 
-Parameters:(leftOperand,[operator],rightOperand) if no operator is provided the default '=' operator is used.
+ Parameters:(leftOperand,[operator],rightOperand) if no operator is provided the default '=' operator is used.
 
-Returns: itself.
+ Returns: itself.
 
-Example:
+ Example:
 
-```Javascript
-sh
-  .if('age','>',50)
-  .or('name', 'ilike', '%Lau%')
-  .build() // { text: '"age" > 50 OR "name" ilike \'%Lau%\'', values: [] }
-```
+ ```Javascript
+ sh
+   .if('age','>',50)
+   .or('name', 'ilike', '%Lau%')
+   .build() // { text: '"age" > 50 OR "name" ilike \'%Lau%\'', values: [] }
+ ```
 
 ### Query with parameters
 
