@@ -18,6 +18,7 @@ Returns: the model service.
 Example:
 
 ```javascript
+
 sh.model('Users',function (h){
     return {
         table:'users' //the table name (required)
@@ -34,6 +35,7 @@ sh.model('Users',function (h){
         }
     };
 });
+
 ```
 
 Note: the columns object must declare all the properties as keys, what you put as value does not really matter. It may depend on conventions extension modules will use for
@@ -42,7 +44,9 @@ validation, etc
 If you omit the definitionFunction the **model** method becomes a getter to retrieve the model service. All services are singletons.
 
 ```javascript
+
 sh.model('Users') === sh.model('Users') // true (same object)
+
 ```
 
 ### relations definition
@@ -54,6 +58,7 @@ The definition function has a relation helper as first argument to let you defin
  Assuming a user has many products and a product belongs to a given user.
 
  ```javascript
+
  sh.model('Users',function(h){
     return {
         table:'users',
@@ -78,6 +83,7 @@ The definition function has a relation helper as first argument to let you defin
         }
     };
  });
+
  ```
 
 * #### one to one
@@ -85,6 +91,7 @@ The definition function has a relation helper as first argument to let you defin
  Assuming a user has one phone number and one phone number belongs to a given user.
 
  ```javascript
+
  sh.model('Users',function(h){
     return {
         table:'users',
@@ -109,6 +116,7 @@ The definition function has a relation helper as first argument to let you defin
         }
     };
  });
+
  ```
 
 * #### many to many
@@ -116,6 +124,7 @@ The definition function has a relation helper as first argument to let you defin
  Assuming a user has many bank accounts and a bank accounts can belong to many users. The mapping being done by a join table "users_accounts".
  
  ```javascript
+
  sh.model('Users',function(h){
     return {
         table:'users',
@@ -151,6 +160,7 @@ The definition function has a relation helper as first argument to let you defin
         }
     }
  });
+
  ```
  
  Note: in order to work, the join model must exists. However, you can use an extension to generate automatically these join models if you don't particularly need to query them. 
@@ -160,6 +170,7 @@ The definition function has a relation helper as first argument to let you defin
 All the model services will have **select**, **insert**, **update**, **delete** methods which will let you create [query builders]() bound to the related table.
 
 ```javascript
+
 Users
   .select('id','name')
   .where('id','$id')
@@ -168,6 +179,7 @@ Users
     console.log(rows);
   });
   // [{id:1, name:'Laurent'}]
+
 ```
 
 The **select** builder will be decorated with an **include** method to provide eager loading.
@@ -177,6 +189,7 @@ The **select** builder will be decorated with an **include** method to provide e
 When querying a model, you can specify its relation you want to include with the **include** method. The include method takes a list of builders which will be used to create the join sub queries.
 
 ```javascript
+
 Users
     .select('id', 'name', 'age')
     .include(Products.select('id','price','title'), Phones.select('id','number'))
@@ -200,11 +213,13 @@ Users
           }]
         }, /* ... */]
     */
+
 ```
 
 Alternatively, if you want to select all the properties of nested models, you can simply pass the related model service or even the string referring to the relation name.
 
 ```javascript
+
 Products
     .select('id','title','price')
     .include(Users)
@@ -223,12 +238,14 @@ Products
     .select('id','title','price')
     .include('owner')
     .run()
+
 ```
 
 It is important to note that include returns a **new** query builder as it needs to modify the sql query to add the required join clauses etc. So any builder method called after
 the include method will be applied to the new query builder
 
 ```Javascript
+
 Users
  .select()
  .where('age','>',18)
@@ -242,15 +259,18 @@ Users
   .include(Products)
   .where('age','>',18)
   .build() // somehow "SELECT .. FROM (SELECT * FROM users ) AS users JOIN (SELECT * FROM products) AS products ON users.id = products.userId" WHERE age > 18
+
 ```
 
 You can nest the includes.
 
 ```Javascript
+
 Products
     .select()
     .include(Users.select().include(Phones))
     .run()
+
 ```
 
 But keep in mind that the more you include the more joins you do (and therefore you ask for more data), and the efficiency of the request can decrease.
@@ -260,6 +280,7 @@ To be efficient and stream rows as fast as possible, ship-hold use a diff algori
 For example:
 
 ```Javascript
+
 Users
   .select('id','name')
   .orderBy('name')
@@ -276,30 +297,36 @@ Users
         console.log('done');
     }
   });
+
 ```
+
 will result in the following sql query:
 
 ```sql
+
 SELECT "users"."id" AS "id", "users"."name" AS "name", "products"."id" AS "products.id", "products"."price" AS "products.price", "products"."title" AS "products.title" FROM (SELECT * FROM "users" ORDER BY "name") AS "users" LEFT JOIN (SELECT * FROM "products") AS "products" ON "users"."id" = "products"."userId" ORDER BY "name"
+
 ```
 
 The database will send rows as following
 
-id|name|products.id|products.price|products.title
---|----|-----------|--------------|--------------
-3|Blandine|4|12.4|skirt
-3|Blandine|6|15|ring
-1|Laurent|1|19.9|sun glasses
-1|Laurent|8|21.6|shirt
-..|...|...|...|...|
+id | name | products.id | products.price | products.title
+---|------|-------------|----------------|---------------
+3 | Blandine | 4 | 12.4 | skirt
+3 | Blandine | 6 | 15 | ring
+1 | Laurent | 1 | 19.9 | sun glasses
+1 | Laurent | 8 | 21.6 | shirt
+... | ... | ... | ... | ... |
 
 And the result of the code above
 
 ```Javascript
+
 //{id:3,name:'Blandine',products:[{id:4,price:12.4,title:'skirt'},{id:6,price:15,title:'ring'}]} -> Blandine user is streamed out even if data is still coming from the database stream
 //{id:1,name:'Laurent',products:[{id:1,price:19.9,title:'sun glasses'},{id:8,price:21.6,title:'shirt'}]} -> Laurent user is streamed out even if data is still coming from the database stream
 //...
 // done
+
 ```
 
 The diff algorithm uses the primary keys of the different models which means
@@ -308,8 +335,10 @@ The diff algorithm uses the primary keys of the different models which means
 it will be the default query plan most of the time but in particular cases (with a lot of joins for example) you gonna have to force the order to be sure.
 
 ```Javascript
+
 Users
   .select()
   .orderBy('name') // (or id,etc) safer to add an order clause.
   .include(Products,Phones,Accounts.select().include(Banks),..)
+
 ```

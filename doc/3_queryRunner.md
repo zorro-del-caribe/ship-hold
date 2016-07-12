@@ -22,6 +22,7 @@ and compose around it to [build adapters]() following any paradigm you wish.
  Example:
  
  ```javascript
+ 
  sh
    .select()
    .from('users')
@@ -42,6 +43,7 @@ and compose around it to [build adapters]() following any paradigm you wish.
  // { id:1, name:'Laurent', email:'laurent34azerty@gmail.com',age:29 }  
  // { id:2, name:'Blandine', email:'foo@bar.com',age:29 }  
  // done in 17ms  
+ 
  ```
  
 * #### run
@@ -57,6 +59,7 @@ and compose around it to [build adapters]() following any paradigm you wish.
  Example:
 
  ```javascript
+ 
  Users
   .select()
   .where('age','$age')
@@ -65,6 +68,7 @@ and compose around it to [build adapters]() following any paradigm you wish.
     console.log(rows);
   });
   // [{ id:1, name:'Laurent', email:'laurent34azerty@gmail.com',age:29 }, { id:2, name:'Blandine', email:'foo@bar.com',age:29 }]  
+ 
   ```
 
  

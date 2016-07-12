@@ -7,6 +7,7 @@ As mentioned before, ship-hold comes with a limited set of features. However it 
 You can add method to the shared service prototype (mixin with prototype) so all the services will benefits from the extension.
 
 ```Javascript
+
 // assuming you have already defined your models (Users, Products, etc)
 
 //extension.js
@@ -37,6 +38,7 @@ Users
     .findById(66)
     
 //etc    
+
 ```
 
 ### Extend a given service
@@ -44,6 +46,7 @@ Users
 You can use the same technique (mixin on instance) on a particular service so only this particular service will benefit from the extension
 
 ```Javascript
+
 // assuming you have already defined your models (Users, Products, etc)
 
 //extension.js
@@ -75,6 +78,7 @@ Users
     })
 
 Products.sendEmail() // undefined is not a function 
+
 ```
 
 ### Decorate a builder
@@ -82,6 +86,7 @@ Products.sendEmail() // undefined is not a function
 In the same way you can decorate the builders factory to extend a given builder prototype for example.
 
 ```Javascript
+
 // assuming you have already defined your models (Users, Products, etc)
 
 //extension.js
@@ -109,6 +114,7 @@ module.exports = function (sh ,options ={}){
 Users //
 
 Products // undefined is not a function 
+
 ```
 
 
