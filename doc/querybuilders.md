@@ -1,16 +1,19 @@
 ## Query builders
 
 Ship-hold is built around few sql query builders for regular database operations (SELECT, INSERT, UPDATE, DELETE). You can access them from the shiphold instance itself of from the different [model services]() (in this case the builders will be bound to the table related to the model service).
-All the query builders have a ** build ** method which will return an object with the sql statement as the ** text ** property and the [parameters values]() as the ** values ** property. This is only string manipulation so you don't need a
+All the query builders have a ** build ** method which will return an object with the sql statement as the **text** property and the [parameters values]() as the ** values ** property. This is only string manipulation so you don't need a
 real database connection to use the build method.
 
 Note: query builders are extended with [query runner]() which will allow you to run the query (and parse the response) against a real database.
 
 ### Select query builder.
     
-Parameters: the list of field you want to return (nothing is equivalent to '*')
-Returns: a select query builder
+Parameters: the list of field you want to return (nothing is equivalent to '*').
+
+Returns: a select query builder.
+
 Example:
+
 ```Javascript
 sh
   .select('id','age')
@@ -22,13 +25,12 @@ Users
   .select('id','age')
   .build();
 ```
-        
-    
+
 #### SELECT QUERY BUILDER API
     
 * ##### from
 
-Will add a ** FROM ** clause
+Will add a **FROM** clause
 
 Parameters: the list of table you want to query from
 Returns: itself
@@ -51,11 +53,14 @@ sh
 
 * ##### where 
     
-Will add a ** WHERE ** clause
+Will add a **WHERE** clause.
 
-Parameters: (leftOperand,[operator],rightOperand) if no operator is provided the default '=' operator is used
-Returns: a [condition query builder]() proxied with the main select builder. You'll be able to chain with conditional builder specific methods but if you use a method of the main select builder, it will fallback to the main select builder and revoke the proxy
+Parameters: (leftOperand,[operator],rightOperand) if no operator is provided the default '=' operator is used.
+
+Returns: a [condition query builder]() proxied with the main select builder. You'll be able to chain with conditional builder specific methods but if you use a method of the main select builder, it will fallback to the main select builder and revoke the proxy.
+
 Example:
+
 ```Javascript
 sh
   .select()
@@ -66,7 +71,7 @@ sh
   .build() // {text:'SELECT * FROM "users" WHERE "name" = \'laurent\' AND "age" > 20 ORDER BY "name"' ORDER BY "name", values:[]} 
 ```
     
-alternatively you can pass another builder as operand
+alternatively you can pass another builder as operand.
 
 ```Javascript
 sh
@@ -76,7 +81,8 @@ sh
   .build() // {text: 'SELECT * FROM "users" WHERE "id" in (SELECT "id" FROM "users" ORDER BY "name" LIMIT 10)', values:[]}
 ```
 
-Note: a left operand string is considered as identifier by default whereas the right operand string will be considered as value. So if you want to use an identifier instead, you will need to wrap it with quotes
+Note: a left operand string is considered as identifier by default whereas the right operand string will be considered as value. So if you want to use an identifier instead, you will need to wrap it with quotes.
+
 ```Javascript
 sh
   .select()
@@ -87,11 +93,14 @@ sh
     
 * ##### orderBy
     
- Will add a ** ORDER BY ** clause
+ Will add a **ORDER BY** clause.
 
- Parameters: (property,[direction]). direction can be omitted or either 'desc' or 'asc' 
- Returns: itself
+ Parameters: (property,[direction]). direction can be omitted or either 'desc' or 'asc'.
+  
+ Returns: itself.
+ 
  Example:
+ 
  ```Javascript
  sh
   .select()
@@ -103,11 +112,14 @@ sh
 
 * ##### limit
  
-Will add a ** LIMIT ** clause
+Will add a **LIMIT** clause.
     
-Parameters: (limit, [offset]) offset can be omitted
-Returns: itself
+Parameters: (limit, [offset]) offset can be omitted.
+
+Returns: itself.
+
 Example:
+
 ```Javascript
 sh
   .select()
@@ -118,10 +130,14 @@ sh
 
 * ##### join 
 
-Will add a ** JOIN ** clause
-Parameters: (table name) 
-Returns: itself
+Will add a **JOIN** clause.
+
+Parameters: (table name). 
+
+Returns: itself.
+
 Example:
+
 ```Javascript
 sh
   .select()
@@ -132,7 +148,7 @@ sh
   .build()// { text: 'SELECT * FROM "users" JOIN "products" ON "users"."id" = "products"."userId" AND "price" > 50', values: [] }
 ```
 
-Alternatively, you can pass another builder
+Alternatively, you can pass another builder.
 
 ```Javascript
 sh
@@ -142,24 +158,26 @@ sh
   .on('users.id','"high_price_products"."userId"')
   .build() //{ text: 'SELECT * FROM "users" JOIN (SELECT * FROM "products" WHERE "price" > 50) AS "high_price_products" ON "users"."id" = "high_price_products"."userId"', values: [] }
 ```
-Note: the "noop" method is necessary to revoke the proxy created by the where clause and make sure we actually pass a select builder as argument
+Note: the "noop" method is necessary to revoke the proxy created by the where clause and make sure we actually pass a select builder as argument.
 
 * ##### leftJoin
 
-Same as ** join ** but with left join 
+Same as **join** but with left join. 
 
 * ##### rightJoin
     
-Same as ** join ** but with right join
+Same as **join** but with right join.
  
-* ##### fullJoin
+* ##### fullJoin.
     
-Same as ** join ** but with full join 
+Same as **join** but with full join. 
     
-### Insert query builder
+### Insert query builder.
 
-Parameters: ([object]) a list of key, value pair to insert
-Returns: an insert query builder
+Parameters: ([object]) a list of key, value pair to insert.
+
+Returns: an insert query builder.
+
 Example:
 
 ```Javascript
@@ -174,9 +192,13 @@ sh
 * ##### into
 
 Will add the table name of the insert query. It will be done by default if you use the model service.
-Parameters: (table name)
-Returns: itself
+
+Parameters: (table name).
+
+Returns: itself.
+
 Example:
+
 ```Javascript
 sh
   .insert({name:'Laurent',age:29})
@@ -191,9 +213,12 @@ Users
 
 * ##### value
 
-add a key, value to the insert statement.
-Parameters: (key, [value]) if no value is provided the DEFAULT will be used
+Add a key, value to the insert statement.
+
+Parameters: (key, [value]) if no value is provided the DEFAULT will be used.
+
 Example:
+
 ```Javascript
 sh
   .insert()
@@ -205,9 +230,12 @@ sh
 
 * ##### returning
  
-add a ** RETURNING ** statement to the query.
-Parameters: (property list)
+Add a **RETURNING** statement to the query.
+
+Parameters: (property list).
+
 Example:
+
 ```Javascript
 sh
   .insert({
@@ -218,6 +246,7 @@ sh
   .returning('id', 'name')
   .build() // { text: 'INSERT INTO "users" ( "name", "age" ) VALUES ( \'Laurent\', 29 ) RETURNING "id", "name"', values: [] }
 ```
+
 Note if you use the insert method from the model service, it automatically returns the whole object ('*')
 
 ```Javascript
@@ -228,10 +257,13 @@ Users
   })
   .build() // { text: 'INSERT INTO "users" ( "name", "age" ) VALUES ( \'Laurent\', 29 ) RETURNING *', values: [] }
 ```
+
 ### Update query builder
 
-Parameters: (table name) the table to update. If you use the service model method, the related table will be automatically added
-Returns: an update query builder
+Parameters: (table name) the table to update. If you use the service model method, the related table will be automatically added.
+
+Returns: an update query builder.
+
 Example:
 
 ```Javascript
@@ -245,10 +277,14 @@ sh
 
 * ##### set
 
-Will add a set statement
+Will add a set statement.
+
 Parameters(key, value ) or (map): either a key,value pair, either an object.
-Returns: itself
+
+Returns: itself.
+
 Example:
+
 ```Javascript
 sh
   .update('users')
@@ -269,11 +305,14 @@ sh
 
 * ##### where
 
-Will add a ** WHERE ** clause
+Will add a **WHERE** clause.
 
-Parameters: (leftOperand,[operator],rightOperand) if no operator is provided the default '=' operator is used
-Returns: a [condition query builder]() proxied with the main update builder. You'll be able to chain with conditional builder specific methods but if you use a method of the main update builder, it will fallback to the main update builder and revoke the proxy
+Parameters: (leftOperand,[operator],rightOperand) if no operator is provided the default '=' operator is used.
+
+Returns: a [condition query builder]() proxied with the main update builder. You'll be able to chain with conditional builder specific methods but if you use a method of the main update builder, it will fallback to the main update builder and revoke the proxy.
+
 Example:
+
 ```Javascript
 sh
   .update('users')
@@ -283,7 +322,7 @@ sh
   .build() // { text: 'UPDATE "users" SET "name" = \'what\' WHERE "name" = \'laurent\' AND "age" > 20', values: [] }
 ```
     
-alternatively you can pass another builder as operand
+alternatively you can pass another builder as operand.
 
 ```Javascript
 sh
@@ -297,11 +336,14 @@ Note: a left operand string is considered as identifier by default whereas the r
 
 * ##### from
 
-add a ** FROM ** statement to the query (ideal if you want to add conditions on other tables)
+Add a **FROM** statement to the query (ideal if you want to add conditions on other tables).
 
-Parameters:(table name list)
-Returns: itself
+Parameters:(table name list).
+
+Returns: itself.
+
 Example:
+
 ```Javascript
 sh
   .update('employees')
@@ -314,9 +356,12 @@ sh
 
 * ##### returning
  
-add a ** RETURNING ** statement to the query.
-Parameters: (property list)
+Add a **RETURNING** statement to the query.
+
+Parameters: (property list).
+
 Example:
+
 ```Javascript
 sh
   .update('users')
@@ -327,6 +372,7 @@ sh
   .returning('id', 'name')
   .build() // { text: 'UPDATE "users" SET "name" = \'Laurent\', "age" = 29 RETURNING "id", "name"', values: [] }
 ```
+
 Note if you use the update method from the model service, it automatically returns the whole object ('*')
 
 ```Javascript
@@ -338,11 +384,12 @@ Users
   })
   .build() { text: 'UPDATE "users" SET "name" = \'Laurent\', "age" = 29 RETURNING *', values: [] }
 
-
 ### Delete query builder
 
-Parameters: (table name) the table to update. If you use the service model method, the related table will be automatically added
-Returns: an delete query builder
+Parameters: (table name) the table to update. If you use the service model method, the related table will be automatically added.
+
+Returns: an delete query builder.
+
 Example:
 
 ```Javascript
@@ -361,11 +408,14 @@ Users
 
 * ##### where
 
-Will add a ** WHERE ** clause
+Will add a **WHERE** clause.
 
-Parameters: (leftOperand,[operator],rightOperand) if no operator is provided the default '=' operator is used
-Returns: a [condition query builder]() proxied with the main delete builder. You'll be able to chain with conditional builder specific methods but if you use a method of the main delete builder, it will fallback to the main delete builder and revoke the proxy
+Parameters: (leftOperand,[operator],rightOperand) if no operator is provided the default '=' operator is used.
+
+Returns: a [condition query builder]() proxied with the main delete builder. You'll be able to chain with conditional builder specific methods but if you use a method of the main delete builder, it will fallback to the main delete builder and revoke the proxy.
+
 Example:
+
 ```Javascript
 sh
   .delete('users')
@@ -374,7 +424,7 @@ sh
   .build() // { text: 'DELETE FROM "users" WHERE "name" = \'laurent\' AND "age" > 20', values: [] }
 ```
     
-alternatively you can pass another builder as operand
+alternatively you can pass another builder as operand.
 
 ```Javascript
 sh
@@ -387,10 +437,14 @@ Note: a left operand string is considered as identifier by default whereas the r
 
 * ##### using
 
-will add the ** USING ** clause (ideal if you want to use other tables in your condition)
-Parameters: (table name list)
-Returns: itself
+Will add the **USING** clause (ideal if you want to use other tables in your condition).
+
+Parameters: (table name list).
+
+Returns: itself.
+
 Example:
+
 ```Javascript
 sh
   .delete('films')
@@ -403,24 +457,32 @@ sh
 ### Condition query builder (if)
 
 The condition query builder is most of the time used as a parameter for another builder.
-Parameters:(leftOperand,[operator],rightOperand) if no operator is provided the default '=' operator is used
-Returns: a conditional builder
+
+Parameters:(leftOperand,[operator],rightOperand) if no operator is provided the default '=' operator is used.
+
+Returns: a conditional builder.
+
 Example:
+
 ```Javascript
 sh
   .if('name','Laurent')
   .build() //{ text: '"name" = \'Laurent\'', values: [] }
 ```
-Note: any operand can be replaced by another bulder to combine/nest conditions
+Note: any operand can be replaced by another bulder to combine/nest conditions.
 
 #### Condition query builder API 
 
 * ##### and
 
-Add an ** AND ** part to a condition
-Parameters:(leftOperand,[operator],rightOperand) if no operator is provided the default '=' operator is used
-Returns: itself
+Add an **AND** part to a condition.
+
+Parameters:(leftOperand,[operator],rightOperand) if no operator is provided the default '=' operator is used.
+
+Returns: itself.
+
 Example:
+
 ```Javascript
 sh
   .if('age','>',50)
@@ -430,22 +492,29 @@ sh
 
 * ##### or
 
-Add a ** OR ** part to a condition
-Parameters:(leftOperand,[operator],rightOperand) if no operator is provided the default '=' operator is used
-Returns: itself
+Add a **OR** part to a condition.
+
+Parameters:(leftOperand,[operator],rightOperand) if no operator is provided the default '=' operator is used.
+
+Returns: itself.
+
 Example:
+
 ```Javascript
 sh
   .if('age','>',50)
   .or('name', 'ilike', '%Lau%')
   .build() // { text: '"age" > 50 OR "name" ilike \'%Lau%\'', values: [] }
 ```
+
 ### Query with parameters
 
 > is ship-hold safe from sql injections ?
 
-Of course ** NOT **
+Of course **NOT**.
+
 As any software which deals with SQL database, it can be victim of [SQL injection](). We therefore recommend you to read and review the source code to avoid such attack.
+
 However ship-hold can help you to protect yourself against sql injection by using queries with parameters.
 
 you can pass values as parameters using the syntax '$myValue' and then use an Object to give the value of the different parameters in you "build" method (or "run", "stream" etc)
