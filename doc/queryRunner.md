@@ -44,28 +44,28 @@ and compose around it to [build adapters]() following any paradigm you wish.
  // done in 17ms  
  ```
  
- * #### run
- 
+* #### run
+
  The query runner comes with a convenient built in **Promise** adapter.
- 
+
  Note: the rows are therefore buffered, and the Promise api could be "less efficient" than the streaming api.
- 
+
  Parameters: (parametersObject) parametersObject will be an object whose properties will be used for [query with parameters]().
- 
+
  Returns: a Promise which will resolve the rows as an array (or empty array)
- 
+
  Example:
- 
+
  ```javascript
-  Users
-    .select()
-    .where('age','$age')
-    .run({age:29})
-    .then(function(rows){
-        console.log(rows);
-    });
+ Users
+  .select()
+  .where('age','$age')
+  .run({age:29})
+  .then(function(rows){
+    console.log(rows);
+  });
   // [{ id:1, name:'Laurent', email:'laurent34azerty@gmail.com',age:29 }, { id:2, name:'Blandine', email:'foo@bar.com',age:29 }]  
- ```
+  ```
 
  
  
