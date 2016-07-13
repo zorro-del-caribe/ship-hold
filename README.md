@@ -62,10 +62,10 @@ And start using the query builders.
 ```Javascript
 
 Users
-  .select('name','age')
-  .where('name','Laurent')
-  .run()
-  .then(rows => {console.log(rows)}); // [{name:'Laurent',age:29}]
+    .select('name','age')
+    .where('name','Laurent')
+    .run()
+    .then(rows => {console.log(rows)}); // [{name:'Laurent',age:29}]
 ```
 
 ## Query builders
@@ -87,18 +87,18 @@ Example:
 ```Javascript
 
 sh
-  .select('id','age')
-  .from('users')
-  .build() // { text: 'SELECT "id", "age" FROM "users"', values: [] }
+    .select('id','age')
+    .from('users')
+    .build() // { text: 'SELECT "id", "age" FROM "users"', values: [] }
     
 //equivalent too
 Users
-  .select('id','age')
-  .build();
+    .select('id','age')
+    .build();
   
 ```
 
-#### SELECT QUERY BUILDER API
+#### Select query builder api
     
 * ##### from
 
@@ -113,9 +113,9 @@ Users
  ```Javascript
  
  sh
-   .select('id','age','number')
-   .from('users','phones')
-   .build() // { text: 'SELECT "id", "age", "number" FROM "users", "phones"', values: [] }
+    .select('id','age','number')
+    .from('users','phones')
+    .build() // { text: 'SELECT "id", "age", "number" FROM "users", "phones"', values: [] }
    
  ```
 
@@ -124,9 +124,9 @@ Users
  ```Javascript
  
  sh
-   .select()
-   .from({value:sh.select('id').from('users'),as:'users'}) //sql subquery must have an alias
-   .build() //{ text: 'SELECT * FROM (SELECT "id" FROM "users") AS "users"',values: [] }
+    .select()
+    .from({value:sh.select('id').from('users'),as:'users'}) //sql subquery must have an alias
+    .build() //{ text: 'SELECT * FROM (SELECT "id" FROM "users") AS "users"',values: [] }
  
  ```
 
@@ -143,12 +143,12 @@ Users
  ```Javascript
  
  sh
-   .select()
-   .from('users')
-   .where('name','laurent')
-   .and('age','>',20) // chain with condition builder method
-   .orderBy('name') // proxy back to main select builder
-   .build() // {text:'SELECT * FROM "users" WHERE "name" = \'laurent\' AND "age" > 20 ORDER BY "name"' ORDER BY "name", values:[]} 
+    .select()
+    .from('users')
+    .where('name','laurent')
+    .and('age','>',20) // chain with condition builder method
+    .orderBy('name') // proxy back to main select builder
+    .build() // {text:'SELECT * FROM "users" WHERE "name" = \'laurent\' AND "age" > 20 ORDER BY "name"' ORDER BY "name", values:[]} 
  
  ```
     
@@ -157,10 +157,10 @@ Users
  ```Javascript
  
  sh
-   .select()
-   .from('users')
-   .where('id','in',sh.select('id').from('users').orderBy('name').limit(10))
-   .build() // {text: 'SELECT * FROM "users" WHERE "id" in (SELECT "id" FROM "users" ORDER BY "name" LIMIT 10)', values:[]}
+    .select()
+    .from('users')
+    .where('id','in',sh.select('id').from('users').orderBy('name').limit(10))
+    .build() // {text: 'SELECT * FROM "users" WHERE "id" in (SELECT "id" FROM "users" ORDER BY "name" LIMIT 10)', values:[]}
  
  ```
 
@@ -169,10 +169,10 @@ Users
  ```Javascript
  
  sh
-   .select()
-   .from('users','products')
-   .where('users.id','"products"."userId"')
-   .build() // { text: 'SELECT * FROM "users", "products" WHERE "users"."id" = "products"."userId"', values: [] }
+    .select()
+    .from('users','products')
+    .where('users.id','"products"."userId"')
+    .build() // { text: 'SELECT * FROM "users", "products" WHERE "users"."id" = "products"."userId"', values: [] }
  
  ```
     
@@ -189,11 +189,11 @@ Users
  ```Javascript
  
  sh
-  .select()
-  .from('users')
-  .orderBy('age','desc')
-  .orderBy('email')
-  .build() // { text: 'SELECT * FROM "users" ORDER BY "age" DESC, "email"', values: [] }
+    .select()
+    .from('users')
+    .orderBy('age','desc')
+    .orderBy('email')
+    .build() // { text: 'SELECT * FROM "users" ORDER BY "age" DESC, "email"', values: [] }
  
  ```
 
@@ -210,10 +210,10 @@ Users
  ```Javascript
  
  sh
-   .select()
-   .from('users')
-   .limit(10, 3)
-   .build() // {text: 'SELECT * FROM "users" LIMIT 10 OFFSET 3', values:[]}
+    .select()
+    .from('users')
+    .limit(10, 3)
+    .build() // {text: 'SELECT * FROM "users" LIMIT 10 OFFSET 3', values:[]}
    
  ```
 
@@ -230,12 +230,12 @@ Users
  ```Javascript
  
  sh
-   .select()
-   .from('users')
-   .join('products')
-   .on('users.id','"products"."userId"')
-   .and('price','>',50)// "on" returns a conditional query builder proxied with the main select builder in the same way as where method
-   .build()// { text: 'SELECT * FROM "users" JOIN "products" ON "users"."id" = "products"."userId" AND "price" > 50', values: [] }
+    .select()
+    .from('users')
+    .join('products')
+    .on('users.id','"products"."userId"')
+    .and('price','>',50)// "on" returns a conditional query builder proxied with the main select builder in the same way as where method
+    .build()// { text: 'SELECT * FROM "users" JOIN "products" ON "users"."id" = "products"."userId" AND "price" > 50', values: [] }
  
  ```
 
@@ -244,11 +244,11 @@ Users
  ```Javascript
  
  sh
-   .select()
-   .from('users')
-   .join({value:sh.select().from('products').where('price','>',50).noop(),as:'high_price_products'})
-   .on('users.id','"high_price_products"."userId"')
-   .build() //{ text: 'SELECT * FROM "users" JOIN (SELECT * FROM "products" WHERE "price" > 50) AS "high_price_products" ON "users"."id" = "high_price_products"."userId"', values: [] }
+    .select()
+    .from('users')
+    .join({value:sh.select().from('products').where('price','>',50).noop(),as:'high_price_products'})
+    .on('users.id','"high_price_products"."userId"')
+    .build() //{ text: 'SELECT * FROM "users" JOIN (SELECT * FROM "products" WHERE "price" > 50) AS "high_price_products" ON "users"."id" = "high_price_products"."userId"', values: [] }
  
  ```
  Note: the "noop" method is necessary to revoke the proxy created by the where clause and make sure we actually pass a select builder as argument.
@@ -276,13 +276,13 @@ Example:
 ```Javascript
 
 sh
-  .insert({name:'Laurent',age:29})
-  .into('users')
-  .build() // { text: 'INSERT INTO "users" ( "name", "age" ) VALUES ( \'Laurent\', 29 )', values: [] }
+    .insert({name:'Laurent',age:29})
+    .into('users')
+    .build() // { text: 'INSERT INTO "users" ( "name", "age" ) VALUES ( \'Laurent\', 29 )', values: [] }
 
 ```
 
-#### SELECT QUERY BUILDER API
+#### Insert query builder API
 
 * ##### into
 
@@ -297,9 +297,9 @@ sh
  ```Javascript
 
  sh
-   .insert({name:'Laurent',age:29})
-   .into('users')
-   .build() // { text: 'INSERT INTO "users" ( "name", "age" ) VALUES ( \'Laurent\', 29 )', values: [] }
+    .insert({name:'Laurent',age:29})
+    .into('users')
+    .build() // { text: 'INSERT INTO "users" ( "name", "age" ) VALUES ( \'Laurent\', 29 )', values: [] }
 
  // is equivalent to
  Users
@@ -319,11 +319,11 @@ sh
  ```Javascript
  
  sh
-   .insert()
-   .into('users')
-   .value('name','Laurent')
-   .value('age')
-   .build() //{ text: 'INSERT INTO "users" ( "name", "age" ) VALUES ( \'Laurent\', DEFAULT )', values: [] }
+    .insert()
+    .into('users')
+    .value('name','Laurent')
+    .value('age')
+    .build() //{ text: 'INSERT INTO "users" ( "name", "age" ) VALUES ( \'Laurent\', DEFAULT )', values: [] }
  
  ```
 
@@ -338,13 +338,13 @@ sh
  ```Javascript
  
  sh
-   .insert({
+    .insert({
      name:'Laurent',
      age:29
-   })
-   .into('users')
-   .returning('id', 'name')
-   .build() // { text: 'INSERT INTO "users" ( "name", "age" ) VALUES ( \'Laurent\', 29 ) RETURNING "id", "name"', values: [] }
+    })
+    .into('users')
+    .returning('id', 'name')
+    .build() // { text: 'INSERT INTO "users" ( "name", "age" ) VALUES ( \'Laurent\', 29 ) RETURNING "id", "name"', values: [] }
  
  ```
 
@@ -353,11 +353,11 @@ sh
  ```Javascript
  
  Users
-   .insert({
+    .insert({
      name:'Laurent',
      age:29
    })
-   .build() // { text: 'INSERT INTO "users" ( "name", "age" ) VALUES ( \'Laurent\', 29 ) RETURNING *', values: [] }
+    .build() // { text: 'INSERT INTO "users" ( "name", "age" ) VALUES ( \'Laurent\', 29 ) RETURNING *', values: [] }
  
  ```
 
@@ -372,9 +372,9 @@ Example:
 ```Javascript
 
 sh
-  .update('users')
-  .set('name','Laurent')
-  .build() // { text: 'UPDATE "users" SET "name" = \'Laurent\'', values: [] }
+    .update('users')
+    .set('name','Laurent')
+    .build() // { text: 'UPDATE "users" SET "name" = \'Laurent\'', values: [] }
 
 ```
 
@@ -393,20 +393,20 @@ sh
  ```Javascript
  
  sh
-   .update('users')
-   .set('name','Laurent')
-   .set('age',29)
-   .build() // { text: 'UPDATE "users" SET "name" = \'Laurent\', "age" = 29', values: [] }
+    .update('users')
+    .set('name','Laurent')
+    .set('age',29)
+    .build() // { text: 'UPDATE "users" SET "name" = \'Laurent\', "age" = 29', values: [] }
   
  // is equivalent to 
   
  sh
-   .update('users')
-   .set({
-     name:'Laurent',
-     age:29
-   })
-   .build()
+    .update('users')
+    .set({
+        name:'Laurent',
+        age:29
+    })
+    .build()
  
  ```
 
@@ -423,11 +423,11 @@ sh
  ```Javascript
  
  sh
-   .update('users')
-   .set('name','what')
-   .where('name','laurent')
-   .and('age','>',20) // chain with condition builder method
-   .build() // { text: 'UPDATE "users" SET "name" = \'what\' WHERE "name" = \'laurent\' AND "age" > 20', values: [] }
+    .update('users')
+    .set('name','what')
+    .where('name','laurent')
+    .and('age','>',20) // chain with condition builder method
+    .build() // { text: 'UPDATE "users" SET "name" = \'what\' WHERE "name" = \'laurent\' AND "age" > 20', values: [] }
  
  ```
     
@@ -436,10 +436,10 @@ sh
  ```Javascript
  
  sh
-   .update('users')
-   .set('name','Laurent')
-   .where('id','in',sh.select('id').from('users').orderBy('name').limit(10))
-   .build() // { text: 'UPDATE "users" SET "name" = \'Laurent\' WHERE "id" in (SELECT "id" FROM "users" ORDER BY "name" LIMIT 10)', values: [] }
+    .update('users')
+    .set('name','Laurent')
+    .where('id','in',sh.select('id').from('users').orderBy('name').limit(10))
+    .build() // { text: 'UPDATE "users" SET "name" = \'Laurent\' WHERE "id" in (SELECT "id" FROM "users" ORDER BY "name" LIMIT 10)', values: [] }
  
  ```
 
@@ -458,12 +458,12 @@ sh
  ```Javascript
  
  sh
-   .update('employees')
-   .set('sales_count', 1000)
-   .from('accounts')
-   .where('accounts.name', 'Acme Corporation')
-   .and('employees.id', '"accounts"."sales_person"')
-   .build() // { text: 'UPDATE "employees" SET "sales_count" = 1000 FROM "accounts" WHERE "accounts"."name" = \'Acme Corporation\' AND "employees"."id" = "accounts"."sales_person"', values: [] }
+    .update('employees')
+    .set('sales_count', 1000)
+    .from('accounts')
+    .where('accounts.name', 'Acme Corporation')
+    .and('employees.id', '"accounts"."sales_person"')
+    .build() // { text: 'UPDATE "employees" SET "sales_count" = 1000 FROM "accounts" WHERE "accounts"."name" = \'Acme Corporation\' AND "employees"."id" = "accounts"."sales_person"', values: [] }
  
  ```
 
@@ -478,13 +478,13 @@ sh
  ```Javascript
  
  sh
-   .update('users')
-   .set({
-     name:'Laurent',
-     age:29
-   })
-   .returning('id', 'name')
-   .build() // { text: 'UPDATE "users" SET "name" = \'Laurent\', "age" = 29 RETURNING "id", "name"', values: [] }
+    .update('users')
+    .set({
+        name:'Laurent',
+        age:29
+    })
+    .returning('id', 'name')
+    .build() // { text: 'UPDATE "users" SET "name" = \'Laurent\', "age" = 29 RETURNING "id", "name"', values: [] }
  
  ```
 
@@ -493,12 +493,12 @@ sh
  ```Javascript
  
  Users
-   .update()
-   .set({
-     name:'Laurent',
-     age:29
-   })
-   .build() { text: 'UPDATE "users" SET "name" = \'Laurent\', "age" = 29 RETURNING *', values: [] }
+    .update()
+    .set({
+        name:'Laurent',
+        age:29
+    })
+    .build() { text: 'UPDATE "users" SET "name" = \'Laurent\', "age" = 29 RETURNING *', values: [] }
  
  ```
 
@@ -513,14 +513,14 @@ Example:
 ```Javascript
 
 sh
-  .delete('users')
-  .build() // { text: 'DELETE FROM "users"', values: [] }
+    .delete('users')
+    .build() // { text: 'DELETE FROM "users"', values: [] }
   
 // is equivalent to
 
 Users
-  .delete()
-  .build()
+    .delete()
+    .build()
 
 ```
 
@@ -539,10 +539,10 @@ Users
  ```Javascript
 
  sh
-   .delete('users')
-   .where('name','laurent')
-   .and('age','>',20) // chain with condition builder method
-   .build() // { text: 'DELETE FROM "users" WHERE "name" = \'laurent\' AND "age" > 20', values: [] }
+    .delete('users')
+    .where('name','laurent')
+    .and('age','>',20) // chain with condition builder method
+    .build() // { text: 'DELETE FROM "users" WHERE "name" = \'laurent\' AND "age" > 20', values: [] }
 
  ```
     
@@ -551,9 +551,9 @@ Users
  ```Javascript
 
  sh
-   .delete('users')
-   .where('id','in',sh.select('id').from('users').orderBy('name').limit(10))
-   .build() // { text: 'DELETE FROM "users" WHERE "id" in (SELECT "id" FROM "users" ORDER BY "name" LIMIT 10)', values: [] }
+    .delete('users')
+    .where('id','in',sh.select('id').from('users').orderBy('name').limit(10))
+    .build() // { text: 'DELETE FROM "users" WHERE "id" in (SELECT "id" FROM "users" ORDER BY "name" LIMIT 10)', values: [] }
 
  ```
 
@@ -572,11 +572,11 @@ Users
  ```Javascript
 
  sh
-   .delete('films')
-   .using('producers')
-   .where('producer_id', '"producers"."id"')
-   .and('producers.name', 'foo')
-   .build() // { text: 'DELETE FROM "films" USING "producers" WHERE "producer_id" = "producers"."id" AND "producers"."name" = \'foo\'', values: [] }
+    .delete('films')
+    .using('producers')
+    .where('producer_id', '"producers"."id"')
+    .and('producers.name', 'foo')
+    .build() // { text: 'DELETE FROM "films" USING "producers" WHERE "producer_id" = "producers"."id" AND "producers"."name" = \'foo\'', values: [] }
 
  ``` 
 
@@ -593,8 +593,8 @@ Example:
 ```Javascript
 
 sh
-  .if('name','Laurent')
-  .build() //{ text: '"name" = \'Laurent\'', values: [] }
+    .if('name','Laurent')
+    .build() //{ text: '"name" = \'Laurent\'', values: [] }
 
 ```
 
@@ -615,9 +615,9 @@ Note: any operand can be replaced by another bulder to combine/nest conditions.
  ```Javascript
 
  sh
-   .if('age','>',50)
-   .and('name', 'ilike', '%Lau%')
-   .build() // { text: '"age" > 50 AND "name" ilike \'%Lau%\'', values: [] }
+    .if('age','>',50)
+    .and('name', 'ilike', '%Lau%')
+    .build() // { text: '"age" > 50 AND "name" ilike \'%Lau%\'', values: [] }
 
  ```
 
@@ -634,9 +634,9 @@ Note: any operand can be replaced by another bulder to combine/nest conditions.
  ```Javascript
 
  sh
-   .if('age','>',50)
-   .or('name', 'ilike', '%Lau%')
-   .build() // { text: '"age" > 50 OR "name" ilike \'%Lau%\'', values: [] }
+    .if('age','>',50)
+    .or('name', 'ilike', '%Lau%')
+    .build() // { text: '"age" > 50 OR "name" ilike \'%Lau%\'', values: [] }
 
  ```
 
@@ -693,12 +693,12 @@ and compose around it to [build adapters](extend-query-runner-with-more-adapters
  ```javascript
  
  sh
-   .select()
-   .from('users')
-   .where('age','$age')
-   .stream({age:29}, function * (){
-      const start = Date.now();
-      try {
+    .select()
+    .from('users')
+    .where('age','$age')
+    .stream({age:29}, function * (){
+        const start = Date.now();
+        try {
            while (true) {
              const row = yield;
              console.log(row)
@@ -708,7 +708,7 @@ and compose around it to [build adapters](extend-query-runner-with-more-adapters
          } finally {
            console.log('done in %s',Date.now()-start);
          }
-   });
+    });
  // { id:1, name:'Laurent', email:'laurent34azerty@gmail.com',age:29 }  
  // { id:2, name:'Blandine', email:'foo@bar.com',age:29 }  
  // done in 17ms  
@@ -730,12 +730,12 @@ and compose around it to [build adapters](extend-query-runner-with-more-adapters
  ```javascript
  
  Users
-  .select()
-  .where('age','$age')
-  .run({age:29})
-  .then(function(rows){
-    console.log(rows);
-  });
+    .select()
+    .where('age','$age')
+    .run({age:29})
+    .then(function(rows){
+        console.log(rows);
+    });
   // [{ id:1, name:'Laurent', email:'laurent34azerty@gmail.com',age:29 }, { id:2, name:'Blandine', email:'foo@bar.com',age:29 }]  
  
   ```
@@ -922,12 +922,12 @@ All the model services will have **select**, **insert**, **update**, **delete** 
 ```javascript
 
 Users
-  .select('id','name')
-  .where('id','$id')
-  .run({id:1})
-  .then(rows=>{
-    console.log(rows);
-  });
+    .select('id','name')
+    .where('id','$id')
+    .run({id:1})
+    .then(rows=>{
+        console.log(rows);
+    });
   // [{id:1, name:'Laurent'}]
 
 ```
@@ -997,18 +997,18 @@ the include method will be applied to the new query builder
 ```Javascript
 
 Users
- .select()
- .where('age','>',18)
- .include(Products)
- .build() // somehow "SELECT .. FROM (SELECT * FROM users WHERE users.age > 18) AS users JOIN (SELECT * FROM products) AS products ON users.id = products.userId"  
+    .select()
+    .where('age','>',18)
+    .include(Products)
+    .build() // somehow "SELECT .. FROM (SELECT * FROM users WHERE users.age > 18) AS users JOIN (SELECT * FROM products) AS products ON users.id = products.userId"  
  
  // is different than
  
 Users
-  .select()
-  .include(Products)
-  .where('age','>',18)
-  .build() // somehow "SELECT .. FROM (SELECT * FROM users ) AS users JOIN (SELECT * FROM products) AS products ON users.id = products.userId" WHERE age > 18
+    .select()
+    .include(Products)
+    .where('age','>',18)
+    .build() // somehow "SELECT .. FROM (SELECT * FROM users ) AS users JOIN (SELECT * FROM products) AS products ON users.id = products.userId" WHERE age > 18
 
 ```
 
@@ -1032,21 +1032,21 @@ For example:
 ```Javascript
 
 Users
-  .select('id','name')
-  .orderBy('name')
-  .include(Products.select('id','price','title'))
-  .stream({}, function * (){
-    try{
-        while(true){
-            const row = yield;
-            console.log(row);
+    .select('id','name')
+    .orderBy('name')
+    .include(Products.select('id','price','title'))
+    .stream({}, function * (){
+        try{
+            while(true){
+                const row = yield;
+                console.log(row);
+            }
+        } catch(e){
+            console.log(e);
+        } finally {
+            console.log('done');
         }
-    } catch(e){
-        console.log(e);
-    } finally {
-        console.log('done');
-    }
-  });
+    });
 
 ```
 
@@ -1081,15 +1081,17 @@ And the result of the code above
 
 The diff algorithm uses the primary keys of the different models which means
 1. You must include primary keys in you different select clauses
+
 2. rows must be ordered in a manner that the database send all the rows corresponding to an instance of the main model, then all the rows for a second model instance, etc. In practice
 it will be the default query plan most of the time but in particular cases (with a lot of joins for example) you gonna have to force the order to be sure.
+
 
 ```Javascript
 
 Users
-  .select()
-  .orderBy('name') // (or id,etc) safer to add an order clause.
-  .include(Products,Phones,Accounts.select().include(Banks),..)
+    .select()
+    .orderBy('name') // (or id,etc) safer to add an order clause.
+    .include(Products,Phones,Accounts.select().include(Banks),..)
 
 ```
 
@@ -1346,8 +1348,11 @@ Users
 Here is a list of existing extensions. Please don't hesitate to make a pull request on this documentation to add yours. It is recommended to add the ship-hold key word in the package.json file of your extension.
 
 * [ship-hold-dao](https://github.com/zorro-del-caribe/ship-hold-dao): makes ship-hold return model instances (with behaviour) rather than plain javascript object
- 
- ## Performances
+
+
+
+
+## Performances
 
 As very light and using stream as base component, ship-hold performs quite well. There is a [benchmark repository](https://github.com/zorro-del-caribe/ship-hold-benchmark) you can clone and modify to test with you own use cases and hardware which test ship-hold and other libraries in "realistic" use cases.
 As any benchmark, it has to be taken with a grain of salt and you should do your own testing before making any claim !
@@ -1388,4 +1393,7 @@ Please before you submit an issue or a pull request, make sure you fulfill the f
 4. [ ] update doc if required (not the readme.md but in the doc folder)
 
 Don't forget to have a look at the tests, there are plenty of examples there !
+
+
+Made with love in Cuba!
 

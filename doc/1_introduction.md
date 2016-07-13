@@ -62,9 +62,9 @@ And start using the query builders.
 ```Javascript
 
 Users
-  .select('name','age')
-  .where('name','Laurent')
-  .run()
-  .then(rows => {console.log(rows)}); // [{name:'Laurent',age:29}]
+    .select('name','age')
+    .where('name','Laurent')
+    .run()
+    .then(rows => {console.log(rows)}); // [{name:'Laurent',age:29}]
 ```
 

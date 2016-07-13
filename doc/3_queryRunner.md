@@ -24,12 +24,12 @@ and compose around it to [build adapters](extend-query-runner-with-more-adapters
  ```javascript
  
  sh
-   .select()
-   .from('users')
-   .where('age','$age')
-   .stream({age:29}, function * (){
-      const start = Date.now();
-      try {
+    .select()
+    .from('users')
+    .where('age','$age')
+    .stream({age:29}, function * (){
+        const start = Date.now();
+        try {
            while (true) {
              const row = yield;
              console.log(row)
@@ -39,7 +39,7 @@ and compose around it to [build adapters](extend-query-runner-with-more-adapters
          } finally {
            console.log('done in %s',Date.now()-start);
          }
-   });
+    });
  // { id:1, name:'Laurent', email:'laurent34azerty@gmail.com',age:29 }  
  // { id:2, name:'Blandine', email:'foo@bar.com',age:29 }  
  // done in 17ms  
@@ -61,12 +61,12 @@ and compose around it to [build adapters](extend-query-runner-with-more-adapters
  ```javascript
  
  Users
-  .select()
-  .where('age','$age')
-  .run({age:29})
-  .then(function(rows){
-    console.log(rows);
-  });
+    .select()
+    .where('age','$age')
+    .run({age:29})
+    .then(function(rows){
+        console.log(rows);
+    });
   // [{ id:1, name:'Laurent', email:'laurent34azerty@gmail.com',age:29 }, { id:2, name:'Blandine', email:'foo@bar.com',age:29 }]  
  
   ```

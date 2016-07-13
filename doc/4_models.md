@@ -172,12 +172,12 @@ All the model services will have **select**, **insert**, **update**, **delete** 
 ```javascript
 
 Users
-  .select('id','name')
-  .where('id','$id')
-  .run({id:1})
-  .then(rows=>{
-    console.log(rows);
-  });
+    .select('id','name')
+    .where('id','$id')
+    .run({id:1})
+    .then(rows=>{
+        console.log(rows);
+    });
   // [{id:1, name:'Laurent'}]
 
 ```
@@ -247,18 +247,18 @@ the include method will be applied to the new query builder
 ```Javascript
 
 Users
- .select()
- .where('age','>',18)
- .include(Products)
- .build() // somehow "SELECT .. FROM (SELECT * FROM users WHERE users.age > 18) AS users JOIN (SELECT * FROM products) AS products ON users.id = products.userId"  
+    .select()
+    .where('age','>',18)
+    .include(Products)
+    .build() // somehow "SELECT .. FROM (SELECT * FROM users WHERE users.age > 18) AS users JOIN (SELECT * FROM products) AS products ON users.id = products.userId"  
  
  // is different than
  
 Users
-  .select()
-  .include(Products)
-  .where('age','>',18)
-  .build() // somehow "SELECT .. FROM (SELECT * FROM users ) AS users JOIN (SELECT * FROM products) AS products ON users.id = products.userId" WHERE age > 18
+    .select()
+    .include(Products)
+    .where('age','>',18)
+    .build() // somehow "SELECT .. FROM (SELECT * FROM users ) AS users JOIN (SELECT * FROM products) AS products ON users.id = products.userId" WHERE age > 18
 
 ```
 
@@ -282,21 +282,21 @@ For example:
 ```Javascript
 
 Users
-  .select('id','name')
-  .orderBy('name')
-  .include(Products.select('id','price','title'))
-  .stream({}, function * (){
-    try{
-        while(true){
-            const row = yield;
-            console.log(row);
+    .select('id','name')
+    .orderBy('name')
+    .include(Products.select('id','price','title'))
+    .stream({}, function * (){
+        try{
+            while(true){
+                const row = yield;
+                console.log(row);
+            }
+        } catch(e){
+            console.log(e);
+        } finally {
+            console.log('done');
         }
-    } catch(e){
-        console.log(e);
-    } finally {
-        console.log('done');
-    }
-  });
+    });
 
 ```
 
@@ -331,15 +331,17 @@ And the result of the code above
 
 The diff algorithm uses the primary keys of the different models which means
 1. You must include primary keys in you different select clauses
+
 2. rows must be ordered in a manner that the database send all the rows corresponding to an instance of the main model, then all the rows for a second model instance, etc. In practice
 it will be the default query plan most of the time but in particular cases (with a lot of joins for example) you gonna have to force the order to be sure.
+
 
 ```Javascript
 
 Users
-  .select()
-  .orderBy('name') // (or id,etc) safer to add an order clause.
-  .include(Products,Phones,Accounts.select().include(Banks),..)
+    .select()
+    .orderBy('name') // (or id,etc) safer to add an order clause.
+    .include(Products,Phones,Accounts.select().include(Banks),..)
 
 ```
 

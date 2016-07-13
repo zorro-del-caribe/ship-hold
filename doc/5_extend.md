@@ -251,5 +251,5 @@ Users
 Here is a list of existing extensions. Please don't hesitate to make a pull request on this documentation to add yours. It is recommended to add the ship-hold key word in the package.json file of your extension.
 
 * [ship-hold-dao](https://github.com/zorro-del-caribe/ship-hold-dao): makes ship-hold return model instances (with behaviour) rather than plain javascript object
- 
- 
+
+
