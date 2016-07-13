@@ -1423,7 +1423,6 @@ More details coming soon...
 
 
 
-
 ## contributing
 
 Please before you submit an issue or a pull request, make sure you fulfill the following requirements.
