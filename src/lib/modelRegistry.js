@@ -2,9 +2,8 @@ const debug = require('debug')('ship-hold');
 const relationDefinitions = require('./relationDefinitions');
 const modelFactory = require('./model');
 
-const registry = Object.create(null);
-
 module.exports = function (options = {}) {
+  const registry = Object.create(null);
   const {shiphold} = options;
   return {
     models(){
