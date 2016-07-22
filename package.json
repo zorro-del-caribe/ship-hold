@@ -1,6 +1,6 @@
 {
   "name": "ship-hold",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "data access framework for postgres sql",
   "main": "./src/shiphold.js",
   "scripts": {
@@ -9,9 +9,8 @@
     "test:unit": "node ./test/units/index.js",
     "test:ci": "DB_HOSTNAME=127.0.0.1 npm test",
     "babel": "babel src --out-dir dist -s",
-    "doc":"concat-cli -f ./doc/*.md -o README.md",
-    "build":"npm run babel && npm run doc"
-
+    "doc": "concat-cli -f ./doc/*.md -o README.md",
+    "build": "npm run babel && npm run doc"
   },
   "repository": {
     "type": "git",
