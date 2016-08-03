@@ -308,6 +308,17 @@ sh
 
 ```
 
+Note: when using the service model method, you can directly pass an object map to set.
+
+```Javascript
+
+Users
+    .update({name:'Laurent')
+    .build() // { text: 'UPDATE "users" SET "name" = \'Laurent\'', values: [] }
+
+```
+
+
 #### Update query builder API
 
 * ##### set

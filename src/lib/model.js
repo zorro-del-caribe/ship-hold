@@ -20,10 +20,18 @@ const modelPrototype = {
       .into(this.table)
       .returning('*');
   }),
-  update: namify(function () {
-    return this.shiphold
+  update: namify(function (map = {}) {
+
+    const pairs = Object.keys(map).map(key=>[key, map[key]]);
+    const builder = this.shiphold
       .update(this.table)
       .returning('*');
+
+    for (const [key, value] of pairs) {
+      builder.set(key, value);
+    }
+
+    return builder;
   }),
   delete: namify(function () {
     return this.shiphold

@@ -378,6 +378,17 @@ sh
 
 ```
 
+Note: when using the service model method, you can directly pass an object map to set.
+
+```Javascript
+
+Users
+    .update({name:'Laurent')
+    .build() // { text: 'UPDATE "users" SET "name" = \'Laurent\'', values: [] }
+
+```
+
+
 #### Update query builder API
 
 * ##### set
@@ -1420,6 +1431,7 @@ There will be 100 000 users and 300 000 products
 There is a whole [blog application](https://github.com/zorro-del-caribe/ship-hold-sample) build with ship hold, so you can see an almost real world example.
 
 More details coming soon...
+
 
 
 
