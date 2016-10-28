@@ -251,5 +251,9 @@ Users
 Here is a list of existing extensions. Please don't hesitate to make a pull request on this documentation to add yours. It is recommended to add the ship-hold key word in the package.json file of your extension.
 
 * [ship-hold-dao](https://github.com/zorro-del-caribe/ship-hold-dao): makes ship-hold return model instances (with behaviour) rather than plain javascript object
+* [ship-hold-uuids](https://github.com/zorro-del-caribe/ship-hold-uuids): automatically generate uuid for id fields
+* [ship-hold-migration](https://github.com/zorro-del-caribe/ship-hold-migration): manage and persist database migrations
+* [ship-hold-extension-loader](https://github.com/zorro-del-caribe/ship-hold-extension-loader): automatically load ship-hold extensions based on convention
+* [ship-hold-model-loader](https://github.com/zorro-del-caribe/ship-hold-model-loader): automatically load models based on convention
 
 
