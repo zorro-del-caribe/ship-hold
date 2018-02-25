@@ -9,7 +9,7 @@
     "test:unit": "node ./test/units/index.js",
     "test:ci": "DB_HOSTNAME=127.0.0.1 npm test",
     "babel": "babel src --out-dir dist -s",
-    "doc": "concat-cli -f ./doc/*.md -o README.md",
+    "doc": "cat ./doc/*.md > README.md",
     "build": "npm run babel && npm run doc"
   },
   "repository": {
@@ -31,19 +31,13 @@
   "author": "Laurent RENARD",
   "license": "MIT",
   "dependencies": {
-    "debug": "^2.2.0",
-    "pg": "^4.5.5",
-    "ship-hold-querybuilder": "^1.0.0"
-  },
-  "babel": {
-    "presets": [
-      "es2015"
-    ]
+    "@lorenzofox3/for-await-node": "^0.2.0",
+    "pg": "^7.4.1",
+    "pg-query-stream": "^1.1.1",
+    "smart-table-json-pointer": "^1.0.3"
   },
   "devDependencies": {
-    "babel-cli": "^6.10.1",
-    "babel-preset-es2015": "^6.9.0",
-    "concat-cli": "^4.0.0",
-    "tape": "^4.5.1"
+    "@lorenzofox3/for-await": "^0.1.0",
+    "zora": "^2.0.0"
   }
 }

@@ -1424,21 +1424,9 @@ There will be 100 000 users and 300 000 products
    
 
 
-
- 
- 
- 
- 
- 
 ## sample application
 
 There is a whole [blog application](https://github.com/zorro-del-caribe/ship-hold-sample) build with ship hold, so you can see an almost real world example.
-
-More details coming soon...
-
-
-
-
 ## contributing
 
 Please before you submit an issue or a pull request, make sure you fulfill the following requirements.
@@ -1461,6 +1449,4 @@ Please before you submit an issue or a pull request, make sure you fulfill the f
 
 Don't forget to have a look at the tests, there are plenty of examples there !
 
-
 Made with love in Cuba!
-

@@ -1,21 +1,28 @@
 const shiphold = require('../../src/shiphold');
+const setup = require('./setup');
 const sh = shiphold({
-  hostname: process.env.DB_HOSTNAME || '192.168.99.100',
-  username: process.env.DB_USERNAME || 'docker',
-  password: process.env.DB_PASSWORD || 'docker',
-  database: process.env.DB_NAME || 'ship-hold-test'
+	host: process.env.DB_HOSTNAME || '127.0.0.1',
+	user: process.env.DB_USERNAME || 'docker',
+	password: process.env.DB_PASSWORD || 'docker',
+	database: process.env.DB_NAME || 'ship-hold-test'
 });
-const test = require('./testExtension');
 
-test(sh);
+(async function () {
+	try {
+		await setup(sh);
+		const tests = [
+			// './select_simple',
+			// './insert',
+			// './update',
+			'./select_associations'
+		].map(f => (require(f)(sh)).task);
 
-require('./setup')(sh)
-  .then(function () {
-    require('./select_simple')(sh);
-    require('./select_associations')(sh);
-    require('./insert')(sh);
-    require('./update')(sh);
-  })
-  .catch(function (err) {
-    console.log(err);
-  });
+		// wait for tests to complete
+		for (const t of tests) {
+			await t;
+		}
+	}
+	finally {
+		setTimeout(()=>sh.stop(),100);
+	}
+})();

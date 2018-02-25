@@ -1,33 +1,25 @@
-const test = require('tape');
+const test = require('zora');
 const shiphold = require('../../src/shiphold');
 
-test('bind query to proper table', t=> {
-  const model = shiphold()
-    .model('Users', function (sh) {
-      return {table: 'users', columns: {}, relations: {}};
-    });
-  const query = model
-    .update()
-    .set('foo', 'bar')
-    .build()
-    .text;
+test('bind query to proper table', t => {
+	const query = shiphold()
+		.model('Users', sh => ({table: 'users', columns: {}, relations: {}}))
+		.update()
+		.set('foo', 'bar')
+		.build()
+		.text;
 
-  const expected = 'UPDATE "users" SET "foo" = \'bar\' RETURNING *';
-  t.equal(query, expected);
-  t.end();
+	const expected = 'UPDATE "users" SET "foo" = \'bar\' RETURNING *';
+	t.equal(query, expected);
 });
 
-test('bind query to proper table using object map has parameters', t=> {
-  const model = shiphold()
-    .model('Users', function (sh) {
-      return {table: 'users', columns: {}, relations: {}};
-    });
-  const query = model
-    .update({foo: 'bar'})
-    .build()
-    .text;
+test('bind query to proper table using object map has parameters', t => {
+	const query = shiphold()
+		.model('Users', sh => ({table: 'users', columns: {}, relations: {}}))
+		.update({foo: 'bar'})
+		.build()
+		.text;
 
-  const expected = 'UPDATE "users" SET "foo" = \'bar\' RETURNING *';
-  t.equal(query, expected);
-  t.end();
+	const expected = 'UPDATE "users" SET "foo" = \'bar\' RETURNING *';
+	t.equal(query, expected);
 });

@@ -1,4 +1,4 @@
-const test = require('tape');
+const test = require('zora');
 const shiphold = require('../../src/shiphold');
 const util = require('../../src/lib/util');
 
@@ -38,25 +38,4 @@ test('normalize include specifications', t=> {
   t.equal(relation.pointer, 'user_projects.id');
   t.equal(relation.asCollection, true);
   t.deepEqual(relation.nested, []);
-  t.end();
-});
-
-test('json pointer get', t=> {
-  const pointer = util.jsonPointer('foo.bar');
-  const notFound = pointer.get({});
-  const found = pointer.get({foo: {bar: 'woot'}});
-  t.equal(notFound, undefined);
-  t.equal(found, 'woot');
-  t.end();
-});
-
-test('json pointer set', t=> {
-  const pointer = util.jsonPointer('foo.bar');
-  const ctx = {foo: {bar: 'blah'}};
-  const emptyCtx = {};
-  pointer.set(ctx, 'woot');
-  t.equal(ctx.foo.bar, 'woot');
-  pointer.set(emptyCtx, 'bim');
-  t.equal(emptyCtx.foo.bar, 'bim');
-  t.end();
 });

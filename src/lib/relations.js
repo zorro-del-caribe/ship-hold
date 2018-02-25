@@ -1,132 +1,102 @@
-const selectFieldsBehaviour = {
-  selectFields(){
-    const def = this.definition;
-    return def.attributes.map(attr=> {
-      const value = [def.as, attr].join('.');
-      const as = `"${value}"`;
-      return {
-        value,
-        as
-      };
-    });
-  }
+const select = ({attributes, as}) => () => attributes.map(attr => {
+	const value = [as, attr].join('.');
+	const asLabel = `"${value}"`;
+	return {value, as: asLabel};
+});
+
+const getReverseAssociation = (sourceModel, targetModel) => {
+	const {definition} = targetModel;
+	return Object.entries(definition.relations).find(([name, def]) => def.model === sourceModel.name);
 };
 
-function getReverseAssociation (sourceModel, association, sh) {
-  const targetModel = sh.model(association.model);
-  const targetRelations = targetModel.definition.relations;
-  const reverseRelationName = Object.keys(targetRelations).filter(r=>targetRelations[r].model === sourceModel.name)[0];
-  return targetRelations[reverseRelationName];
-}
+const manyToMany = (sourceModel, targetBuilder, {model}) => builder => {
+	const {relation, model: targetModel} = targetBuilder;
+	const {as, through, referenceKey} = relation;
+	const pivotModel = model(through);
+	const {definition: {table: targetTable, primaryKey: targetPrimaryKey}} = targetModel;
+	const {definition: {table: pivotTable}} = pivotModel;
+	const {definition: {table: sourceTable, primaryKey: sourcePrimaryKey}} = sourceModel;
+	const sourceKeyOnPivot = referenceKey;
+	const [{referenceKey: targetKeyOnPivot}] = getReverseAssociation(sourceModel, targetBuilder.model).reverse();
 
-const manyToMany = Object.assign({}, selectFieldsBehaviour, {
-  join(builder){
-    const {definition, sh}=this;
-    const sourceModelDef = this.model.definition;
+	const pivotSelect = [sourceKeyOnPivot, targetKeyOnPivot].map(key => ({
+		value: [pivotTable, key].join('.'),
+		as: `"${through}.${key}"`
+	}));
 
-    const targetModel = sh.model(definition.model);
-    const pivotModel = sh.model(this.definition.through);
+	const allSelect = pivotSelect.concat(targetTable + '.*');
+	const pivotLeftOperand = [pivotTable, targetKeyOnPivot].join('.');
+	const pivotRightOperand = `"${targetTable}"."${targetPrimaryKey}"`;
 
-    const sourceKeyOnPivot = sourceModelDef.relations[definition.as].referenceKey;
-    const targetKeyOnPivot = getReverseAssociation(this.model, definition, sh).referenceKey;
+	let pivotBuilder = pivotModel.select(...allSelect);
 
-    const pivotSelect = [sourceKeyOnPivot, targetKeyOnPivot].map(key=> {
-      return {
-        value: [pivotModel.table, key].join('.'),
-        as: `"${definition.through}.${key}"`
-      };
-    });
-    const allSelect = pivotSelect.concat(targetModel.table + '.*');
-    const pivotLeftOperand = [pivotModel.table, targetKeyOnPivot].join('.');
-    const pivotRightOperand = `"${targetModel.table}"."${targetModel.primaryKey}"`;
+	pivotBuilder = pivotBuilder
+		.join({value: targetBuilder, as: targetTable})
+		.on(pivotLeftOperand, pivotRightOperand)
+		.noop();
 
-    let pivot = pivotModel
-      .select(...allSelect);
+	const leftOperand = [sourceTable, sourcePrimaryKey].join('.');
+	const rightOperand = `"${as}"."${through}.${sourceKeyOnPivot}"`;
 
-    pivot = pivot
-      .join({value: this.builder, as: targetModel.table})
-      .on(pivotLeftOperand, pivotRightOperand)
-      .noop();
+	return builder
+		.leftJoin({value: pivotBuilder, as})
+		.on(leftOperand, rightOperand)
+		.noop();
+};
 
-    const leftOperand = [sourceModelDef.table, this.model.primaryKey].join('.');
-    const rightOperand = `"${definition.as}"."${definition.through}.${sourceKeyOnPivot}"`;
+const oneToMany = (sourceModel, targetBuilder) => builder => {
+	const {relation} = targetBuilder;
+	const {definition: sourceDef} = sourceModel;
+	const [def] = getReverseAssociation(sourceModel, targetBuilder.model).reverse();
+	const {as} = relation;
 
-    return builder
-      .leftJoin({value: pivot, as: definition.as})
-      .on(leftOperand, rightOperand)
-      .noop();
-  }
-});
+	const leftOperand = [sourceDef.table, sourceDef.primaryKey].join('.');
+	const rightOperand = `"${as}"."${def.foreignKey}"`;
 
-const oneToMany = Object.assign({}, selectFieldsBehaviour, {
-  join(builder){
-    const {definition, model:sourceModel} = this;
+	return builder
+		.leftJoin({value: targetBuilder, as})
+		.on(leftOperand, rightOperand)
+		.noop();
+};
 
-    const foreignKey = getReverseAssociation(sourceModel, definition, this.sh).foreignKey;
-    const leftOperand = [sourceModel.definition.table, sourceModel.primaryKey].join('.');
-    const rightOperand = `"${definition.as}"."${foreignKey}"`;
+const manyToOne = (sourceModel, targetBuilder) => builder => {
+	const {relation} = targetBuilder;
+	const {as, foreignKey} = relation;
+	const leftOperand = [sourceModel.definition.table, foreignKey].join('.');
+	const rightOperand = `"${as}"."${targetBuilder.model.primaryKey}"`;
+	return builder.leftJoin({value: targetBuilder, as})
+		.on(leftOperand, rightOperand)
+		.noop();
+};
 
-    return builder
-      .leftJoin({value: this.builder, as: definition.as})
-      .on(leftOperand, rightOperand)
-      .noop();
-  }
-});
+const oneToOne = (sourceModel, targetBuilder) => builder => {
+	const {relation: {as}} = targetBuilder;
+	const [{foreignKey}] = getReverseAssociation(sourceModel, targetBuilder.model).reverse();
+	const leftOperand = [sourceModel.definition.table, sourceModel.primaryKey].join('.');
+	const rightOperand = `"${as}"."${foreignKey}"`;
+	return builder
+		.leftJoin({value: targetBuilder, as})
+		.on(leftOperand, rightOperand)
+		.noop();
+};
 
-const manyToOne = Object.assign({}, selectFieldsBehaviour, {
-  join(builder){
-    const {definition, model:sourceModel} = this;
-    const targetModel = this.sh.model(definition.model);
-    const leftOperand = [sourceModel.definition.table, definition.foreignKey].join('.');
-    const rightOperand = `"${definition.as}"."${targetModel.primaryKey}"`;
-    return builder
-      .leftJoin({value: this.builder, as: definition.as})
-      .on(leftOperand, rightOperand)
-      .noop();
-  }
-});
+const joinActions = {
+	hasMany: oneToMany,
+	belongsTo: manyToOne,
+	hasOne: oneToOne,
+	belongsToMany: manyToMany
+};
 
-const oneToOne = Object.assign({}, selectFieldsBehaviour, {
-  join(builder){
-    const definition = this.definition;
-    const sourceModel = this.model;
+module.exports = (sourceModel, targetBuilder, sh) => {
+	const {relation:relDef} = targetBuilder;
+	const joinFunc = joinActions[relDef.relation];
 
-    const foreignKey = getReverseAssociation(sourceModel, definition, this.sh).foreignKey;
-    const leftOperand = [sourceModel.definition.table, sourceModel.primaryKey].join('.');
-    const rightOperand = `"${definition.as}"."${foreignKey}"`;
+	if (joinFunc === undefined) {
+		throw new Error(`unknown relation between ${sourceModel.name} and ${targetBuilder.model.name}`);
+	}
 
-    return builder
-      .leftJoin({value: this.builder, as: definition.as})
-      .on(leftOperand, rightOperand)
-      .noop();
-  }
-});
-
-module.exports = function relationFactory (sourceModel, builder) {
-  const shiphold = sourceModel.shiphold;
-  const relationDefinition = builder.relation;
-  const props = {
-    model: {
-      value: sourceModel
-    },
-    sh: {
-      value: shiphold
-    },
-    definition: {
-      value: relationDefinition
-    },
-    builder: {value: builder}
-  };
-  switch (relationDefinition.relation) {
-    case 'belongsToMany':
-      return Object.create(manyToMany, props);
-    case 'hasMany':
-      return Object.create(oneToMany, props);
-    case 'belongsTo':
-      return Object.create(manyToOne, props);
-    case 'hasOne':
-      return Object.create(oneToOne, props);
-    default:
-      throw new Error('unknown relation ' + relationDefinition.relation);
-  }
+	return {
+		selectFields: select(relDef),
+		join: joinFunc(sourceModel, targetBuilder, sh)
+	};
 };

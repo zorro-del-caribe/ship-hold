@@ -1,34 +1,28 @@
-const test = require('tape');
+const test = require('zora');
 const shiphold = require('../../src/shiphold');
 
-test('bind query to proper table', t=> {
-  const model = shiphold()
-    .model('Users', function (sh) {
-      return {table: 'users', columns: {}, relations: {}};
-    });
-  const query = model
-    .select()
-    .build()
-    .text;
+test('bind query to proper table', t => {
+	const query = shiphold()
+		.model('Users', sh => ({table: 'users', columns: {}, relations: {}}))
+		.select()
+		.build()
+		.text;
 
-  const expected = 'SELECT * FROM "users"';
-  t.equal(query, expected);
-  t.end();
+	const expected = 'SELECT * FROM "users"';
+	t.equal(query, expected);
 });
 
-test('bind query to proper table with forwarded arguments', t=> {
-  const model = shiphold()
-    .model('Users', function (sh) {
-      return {table: 'users', columns: {}, relations: {}};
-    });
-  const query = model
-    .select('foo',{value:'bar',as:'blah'})
-    .build()
-    .text;
+test('bind query to proper table with forwarded arguments', t => {
+	const query = shiphold()
+		.model('Users', sh => (
+			{table: 'users', columns: {}, relations: {}}
+		))
+		.select('foo', {value: 'bar', as: 'blah'})
+		.build()
+		.text;
 
-  const expected = 'SELECT "foo", "bar" AS "blah" FROM "users"';
-  t.equal(query, expected);
-  t.end();
+	const expected = 'SELECT "foo", "bar" AS "blah" FROM "users"';
+	t.equal(query, expected);
 });
 
 

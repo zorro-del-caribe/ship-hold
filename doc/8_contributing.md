@@ -20,6 +20,4 @@ Please before you submit an issue or a pull request, make sure you fulfill the f
 
 Don't forget to have a look at the tests, there are plenty of examples there !
 
-
 Made with love in Cuba!
-

@@ -1,5 +1,3 @@
-const adapters = require('./adapterExtensions');
-const debug = require('debug')('ship-hold');
 const util = require('./util');
 
 module.exports = function runnerFactory () {
@@ -19,20 +17,17 @@ module.exports = function runnerFactory () {
             .then(connection => {
               const {client, done}=connection;
               const q = builder.build(params);
-              debug(q);
               const qargs = [q.text];
               if (q.values.length) {
                 qargs.push(q.values);
               }
               const stream = client.query(...qargs);
               stream.on('row', (r)=> {
-                // debug(r);
                 iterator.next(r);
               });
               stream.on('end', ()=> {
                 done();
                 iterator.return();
-                debug('DONE');
               });
               stream.on('error', (err)=> {
                 done();

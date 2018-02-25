@@ -1,19 +1,16 @@
-const pg = require('pg');
+const {Pool} = require('pg');
 
-module.exports = function ({connectionString}) {
-  return {
-    getConnection(){
-      return new Promise(function (resolve, reject) {
-        pg.connect(connectionString, function (err, client, done) {
-          if (err) {
-            return reject(err);
-          }
-          return resolve({client, done});
-        });
-      });
-    },
-    stop(){
-      pg.end();
-    }
-  };
+module.exports = (conf) => {
+	const pool = new Pool(conf);
+	return {
+		query(q) {
+			return pool.query(q);
+		},
+		connect() {
+			return pool.connect();
+		},
+		stop() {
+			return pool.end();
+		}
+	};
 };

@@ -1,31 +1,23 @@
-const test = require('tape');
+const test = require('zora');
 
 module.exports = function (sh) {
 
-  let fixtures = [];
+	let fixtures;
+	const fixtureFactory = items => (filterFunc = x => true) => items.map(i => Object.assign({}, i)).filter(filterFunc);
 
-  function getFixtures () {
-    return fixtures.map(f=>Object.assign({}, f));
-  }
+	const createModels = () => sh.model('Users', h => ({
+		table: 'users_simple_select',
+		columns: {
+			id: 'integer',
+			age: 'integer',
+			name: 'string'
+		}
+	}));
 
-  function createModels () {
-    return sh.model('Users', function () {
-      return {
-        table: 'users_simple_select',
-        columns: {
-          id: 'integer',
-          age: 'integer',
-          name: 'string'
-        }
-      };
-    });
-  }
-
-  test('add fixture', t=> {
-
-    sh.getConnection()
-      .then(function ({client, done}) {
-        const query = `INSERT INTO users_simple_select(name, age) 
+	return test('select_simple', async t => {
+		await t.test('add fixture', async t => {
+			const {query} = sh;
+			const result = await query(`INSERT INTO users_simple_select(name, age) 
       VALUES 
       ('Laurent',29),
       ('Jesus', 2016),
@@ -33,125 +25,131 @@ module.exports = function (sh) {
       ('Blandine',29),
       ('Olivier',31),
       ('Francoise',58)
-      RETURNING *`;
+      RETURNING *`);
 
-        client.query(query, function (err, result) {
-          t.error(err);
-          t.equal(result.rows.length, 6);
-          fixtures = result.rows;
-          done();
-          sh.stop();
-          t.end();
-        });
-      })
-      .catch(e=>console.log(e))
-  });
+			fixtures = fixtureFactory(result.rows);
+			t.equal(result.rows.length, 6);
+		});
 
-  test('select all', t=> {
-    createModels()
-      .select()
-      .orderBy('id')
-      .test({}, t, getFixtures())
-  });
+		t.test('select all', async t => {
+			const users = await createModels()
+				.select()
+				.orderBy('id')
+				.run();
 
-  test('select specified fields', t=> {
-    createModels()
-      .select('name', 'age', 'id')
-      .orderBy('id')
-      .test({}, t, getFixtures().map(r=> {
-        return {id: r.id, name: r.name, age: r.age};
-      }));
-  });
+			t.deepEqual(users, fixtures());
+		});
 
-  test('support simple where clause', t=> {
-    createModels()
-      .select()
-      .where('id', 3)
-      .test({}, t, getFixtures().filter(x=>x.id === 3));
-  });
 
-  test('support parameters in where clause', t=> {
-    createModels()
-      .select()
-      .where('id', '$id')
-      .test({id: 4}, t, getFixtures().filter(x=>x.id === 4))
-  });
+		t.test('select specified fields', async t => {
+			const users = await createModels()
+				.select('name', 'age', 'id')
+				.orderBy('id')
+				.run();
 
-  test('support complex query', t=> {
-    createModels()
-      .select()
-      .where('age', '>', 20)
-      .and('name', 'Laurent')
-      .test({}, t, getFixtures().filter(x=>x.age > 20 && x.name === 'Laurent'));
-  });
+			t.deepEqual(users, fixtures().map(({id, name, age}) => ({id, name, age})));
+		});
 
-  test('support complex query with parameters', t=> {
-    createModels()
-      .select()
-      .where('age', '<', '$age')
-      .and('name', '$name')
-      .test({age: 50, name: 'Blandine'}, t, getFixtures().filter(x=>x.age < 50 && x.name === 'Blandine'));
-  });
+		t.test('support simple where clause', async t => {
+			const users = await createModels()
+				.select()
+				.where('id', 3)
+				.run();
 
-  test('support sub query', t=> {
-    const model = createModels();
-    const subq = model.if('name', '>', 'J').and('age', '>', 30);
+			t.deepEqual(users, fixtures(x => x.id === 3));
+		});
 
-    model
-      .select()
-      .where('name', 'Blandine')
-      .or(subq)
-      .test({}, t, getFixtures().filter(f=>f.name === 'Blandine' || (f.name > 'J' && f.age > 30)));
-  });
+		t.test('support parameters in where clause', async t => {
+			const users = await createModels()
+				.select()
+				.where('id', '$id')
+				.run({id: 4});
 
-  test('support sub query with parameters', t=> {
-    const model = createModels();
-    const subq = model.if('name', '>', '$name').and('age', '>', '$age');
+			t.deepEqual(users, fixtures(x => x.id === 4));
+		});
 
-    model
-      .select()
-      .where('name', '$fixName')
-      .or(subq)
-      .test({
-        fixName: 'Blandine',
-        name: 'J',
-        age: 30
-      }, t, getFixtures().filter(f=>f.name === 'Blandine' || (f.name > 'J' && f.age > 30)));
-  });
+		t.test('support complex query', async t => {
+			const users = await createModels()
+				.select()
+				.where('age', '>', 20)
+				.and('name', 'Laurent')
+				.run();
 
-  test('support order by', t=> {
-    createModels()
-      .select()
-      .orderBy('age')
-      .test({}, t, getFixtures().sort((a, b)=>a.age - b.age));
-  });
+			t.deepEqual(users, fixtures(x => x.age > 20 && x.name === 'Laurent'));
+		});
 
-  test('support order by with direction', t=> {
-    createModels()
-      .select()
-      .orderBy('age', 'desc')
-      .test({}, t, getFixtures().sort((a, b)=>b.age - a.age));
-  });
+		t.test('support complex query with parameters', async t => {
+			const users = await createModels()
+				.select()
+				.where('age', '<', '$age')
+				.and('name', '$name')
+				.run({age: 50, name: 'Blandine'});
 
-  test('support limit', t=> {
-    createModels()
-      .select()
-      .orderBy('id')
-      .limit(2)
-      .test({}, t, getFixtures().splice(0, 2))
-  });
+			t.deepEqual(users, fixtures().filter(x => x.age < 50 && x.name === 'Blandine'));
+		});
 
-  test('support limit with offset', t=> {
-    createModels()
-      .select()
-      .orderBy('id')
-      .limit(2, 1)
-      .test({}, t, getFixtures().splice(1, 2));
-  });
+		t.test('support sub query', async t => {
+			const model = createModels();
+			const subq = model.if('name', '>', 'J').and('age', '>', 30);
+
+			const users = await model
+				.select()
+				.where('name', 'Blandine')
+				.or(subq)
+				.run();
+
+			t.deepEqual(users, fixtures(f => f.name === 'Blandine' || (f.name > 'J' && f.age > 30)));
+		});
+
+		t.test('support sub query with parameters', async t => {
+			const model = createModels();
+			const subq = model.if('name', '>', '$name').and('age', '>', '$age');
+
+			const users = await model
+				.select()
+				.where('name', '$fixName')
+				.or(subq)
+				.run({fixName: 'Blandine', name: 'J', age: 30});
+
+			t.deepEqual(users, fixtures(f => f.name === 'Blandine' || (f.name > 'J' && f.age > 30)));
+		});
+
+		t.test('support order by', async t => {
+			const users = await createModels()
+				.select()
+				.orderBy('age')
+				.run();
+
+			t.deepEqual(users, fixtures().sort((a, b) => a.age - b.age));
+		});
+
+		t.test('support order by with direction', async t => {
+			const users = await createModels()
+				.select()
+				.orderBy('age', 'desc')
+				.run();
+
+			t.deepEqual(users, fixtures().sort((a, b) => b.age - a.age));
+		});
+
+		t.test('support limit', async t => {
+			const users = await createModels()
+				.select()
+				.orderBy('id')
+				.limit(2)
+				.run();
+
+			t.deepEqual(users, fixtures().splice(0, 2));
+		});
+
+		t.test('support limit with offset', async t => {
+			const users = await createModels()
+				.select()
+				.orderBy('id')
+				.limit(2, 1)
+				.run();
+
+			t.deepEqual(users, fixtures().splice(1, 2));
+		});
+	});
 };
-
-
-
-
-
-
