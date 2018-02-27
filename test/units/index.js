@@ -6,4 +6,4 @@ require('./insert');
 require('./relation-definitions');
 require('./model-registry');
 require('./builders');
-// require('./util');
+require('./util');

@@ -1,4 +1,6 @@
+const {nodes} = require('ship-hold-querybuilder');
 exports.jsonPointer = require('smart-table-json-pointer');
+
 
 const normalizeAttributes = (builder) => {
 	const selectAttributes = [...builder.node('select')]
@@ -9,7 +11,6 @@ const normalizeAttributes = (builder) => {
 	return [...new Set(selectAttributes).values()];
 
 	//todo nested include
-
 
 	/*
 	const selectNodesValues = [...builder.selectNodes].map(n => n.value);
@@ -49,17 +50,72 @@ exports.normalizeInclude = ({relations}, {model}, ...includes) => includes.map(i
 	builder = isString ? model(relations[inc].model) : inc;
 
 	// A builder vs a service model (and revoke on going proxies)
-	builder = typeof builder.noop === 'function' ? builder.noop() : builder.select();
+	builder = 'noop' in builder ? builder.noop() : builder.select();
 
 	const [as, relationDef] = Object.entries(relations).find(([name, def]) => def.model === builder.model.name);
 	const attributes = normalizeAttributes(builder); // todo pass relation def so we can pass foreignKey by default
 
+	builder.node('select', nodes.compositeNode({separator: ', '}).add('*'));
+
 	Object.defineProperty(builder, 'relation', {
-		value: Object.assign({as, attributes}, relationDef)
+		value: Object.assign({as, attributes, pointer: builder.model.primaryKey}, relationDef)
 	});
 
 	return builder;
 });
+
+
+const aggregateAsItem = rel => firstRow => {
+	const {as, pointer} = rel;
+	const filtered = firstRow
+		.filter(([key, val]) => key.length > 0 && key[0] === as)
+		.map(([[as, prop], value]) => [prop, value]);
+	const obj = {};
+	for (const [key, value] of filtered) {
+		obj[key] = value;
+	}
+	return obj[pointer] === null ? null : obj;
+};
+
+const aggregateAsCollection = rel => (first, ...rest) => {
+	const {pointer} = rel;
+	const aggrFunc = aggregateAsItem(rel);
+	const firstResult = aggrFunc(first);
+
+	if (firstResult === null) {
+		return [];
+	}
+
+	const map = new Map([[firstResult[pointer], firstResult]]);
+
+	for (const r of rest) {
+		const item = aggrFunc(r);
+		map.set(item[pointer], item);
+	}
+
+	return [...map.values()];
+};
+
+exports.aggregate = rels => rows => {
+
+	const entries = rows.map(r => Object.entries(r)
+		.map(([key, value]) => [key.split('.'), value])
+	);
+
+	const obj = {};
+	for (const [[key], value] of entries[0].filter(([key]) => key.length === 1)) {
+		obj[key] = value;
+	}
+
+	for (const {relation} of rels) {
+		const {asCollection, as} = relation;
+		const aggregateFunc = asCollection === true ? aggregateAsCollection(relation) : aggregateAsItem(relation);
+		obj[as] = aggregateFunc(...entries);
+	}
+
+	return obj;
+};
+
 
 // exports.normalizeRow = function normalizeRow(row, aggDirectives = []) {
 // 	const output = {};

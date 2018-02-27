@@ -9,7 +9,7 @@ module.exports = (definition, sh) => {
 	const withModel = fn => (...args) => {
 		const builder = fn(...args);
 		Object.defineProperty(builder, 'model', {value: service});
-		return builder
+		return builder;
 	};
 
 	const withInclude = selectBuilder => Object.assign(selectBuilder, {
@@ -30,10 +30,7 @@ module.exports = (definition, sh) => {
 
 			// and orderBy before we create the join statements
 			const orderBy = selectBuilder.node('orderBy');
-			newQueryBuilder.node('orderBy', nodes
-				.compositeNode({separator: ', '})
-				.add(...orderBy)
-			);
+			newQueryBuilder.node('orderBy', orderBy);
 
 			newQueryBuilder = relationBuilders.reduce((acc, curr) => {
 				const relation = relationFactory(service, curr, sh);
@@ -43,11 +40,11 @@ module.exports = (definition, sh) => {
 				return relation.join(acc);
 			}, newQueryBuilder);
 
-			return withInclude(newQueryBuilder, {
+			return withInclude(Object.assign(newQueryBuilder, {
 				[Symbol.iterator]() {
 					return relationBuilders[Symbol.iterator]();
 				}
-			});
+			}));
 		})
 	});
 
