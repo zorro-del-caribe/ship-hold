@@ -5,10 +5,13 @@
 version: 2
 jobs:
   build:
+    environment:
+      - POSTGRES_USER=root
+      - POSTGRES_DB=circle_test
+      - POSTGRES_PASSWORD=root
     docker:
-      # specify the version you desire here
       - image: circleci/node:9
-
+      - image: circleci/postgres:10
     steps:
       - checkout
 

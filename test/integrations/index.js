@@ -1,10 +1,10 @@
 const {default: shiphold} = require('../../src/shiphold');
 const setup = require('./setup');
 const sh = shiphold({
-	host: process.env.DB_HOSTNAME || '127.0.0.1',
-	user: process.env.DB_USERNAME || 'docker',
-	password: process.env.DB_PASSWORD || 'docker',
-	database: process.env.DB_NAME || 'ship-hold-test'
+	host: process.env.POSTGRES_HOST || '127.0.0.1',
+	user: process.env.POSTGRES_USER || 'docker',
+	password: process.env.POSTGRES_PASSWORD || 'docker',
+	database: process.env.POSTGRES_DB || 'ship-hold-test'
 });
 
 (async function () {
