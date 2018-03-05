@@ -1,6 +1,6 @@
 {
   "name": "ship-hold",
-  "version": "1.1.0",
+  "version": "2.0.0-0",
   "description": "data access framework for postgres sql",
   "main": "./src/shiphold",
   "scripts": {
