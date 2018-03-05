@@ -31,6 +31,16 @@ module.exports = function (sh) {
 			t.equal(result.rows.length, 6);
 		});
 
+		t.test('select all without model', async t => {
+			const users = await sh
+				.select()
+				.from('users_simple_select')
+				.orderBy('id')
+				.run();
+
+			t.deepEqual(users, fixtures());
+		});
+
 		t.test('select all', async t => {
 			const users = await createModels()
 				.select()

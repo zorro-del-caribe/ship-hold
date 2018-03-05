@@ -1,4 +1,4 @@
-import builders from 'ship-hold-querybuilder';
+import {select, insert, update, condition, delete as del} from 'ship-hold-querybuilder';
 import QueryStream from 'pg-query-stream';
 import {createParser} from './util';
 
@@ -53,7 +53,7 @@ export default pool => {
 	const runner = {
 		stream(params = {}, consumer) {
 			const stream = this._stream(params);
-			const iter = aggregateSink(this, iterator(consumer));
+			const iter = this.relation === undefined ? iterator(consumer)() : aggregateSink(this, iterator(consumer));
 			stream.on('data', row => iter.next(row));
 			stream.on('error', err => iter.throw(err));
 			stream.on('end', () => iter.return());
@@ -89,10 +89,10 @@ export default pool => {
 	};
 	const delegateToBuilder = builder => (...args) => Object.assign(builder(...args), runner);
 	return {
-		select: delegateToBuilder(builders.select),
-		update: delegateToBuilder(builders.update),
-		delete: delegateToBuilder(builders.delete),
-		insert: delegateToBuilder(builders.insert),
-		if: (...args) => builders.condition().if(...args)
+		select: delegateToBuilder(select),
+		update: delegateToBuilder(update),
+		delete: delegateToBuilder(del),
+		insert: delegateToBuilder(insert),
+		if: (...args) => condition().if(...args)
 	};
 };

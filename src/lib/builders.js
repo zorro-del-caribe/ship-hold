@@ -6,8 +6,6 @@ Object.defineProperty(exports, "__esModule", {
 
 var _shipHoldQuerybuilder = require('ship-hold-querybuilder');
 
-var _shipHoldQuerybuilder2 = _interopRequireDefault(_shipHoldQuerybuilder);
-
 var _pgQueryStream = require('pg-query-stream');
 
 var _pgQueryStream2 = _interopRequireDefault(_pgQueryStream);
@@ -67,7 +65,7 @@ exports.default = pool => {
 	const runner = {
 		stream(params = {}, consumer) {
 			const stream = this._stream(params);
-			const iter = aggregateSink(this, iterator(consumer));
+			const iter = this.relation === undefined ? iterator(consumer)() : aggregateSink(this, iterator(consumer));
 			stream.on('data', row => iter.next(row));
 			stream.on('error', err => iter.throw(err));
 			stream.on('end', () => iter.return());
@@ -103,10 +101,10 @@ exports.default = pool => {
 	};
 	const delegateToBuilder = builder => (...args) => Object.assign(builder(...args), runner);
 	return {
-		select: delegateToBuilder(_shipHoldQuerybuilder2.default.select),
-		update: delegateToBuilder(_shipHoldQuerybuilder2.default.update),
-		delete: delegateToBuilder(_shipHoldQuerybuilder2.default.delete),
-		insert: delegateToBuilder(_shipHoldQuerybuilder2.default.insert),
-		if: (...args) => _shipHoldQuerybuilder2.default.condition().if(...args)
+		select: delegateToBuilder(_shipHoldQuerybuilder.select),
+		update: delegateToBuilder(_shipHoldQuerybuilder.update),
+		delete: delegateToBuilder(_shipHoldQuerybuilder.delete),
+		insert: delegateToBuilder(_shipHoldQuerybuilder.insert),
+		if: (...args) => (0, _shipHoldQuerybuilder.condition)().if(...args)
 	};
 };

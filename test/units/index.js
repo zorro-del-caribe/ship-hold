@@ -7,4 +7,4 @@ require('./relation-definitions');
 require('./model-registry');
 require('./builders');
 require('./util');
-require('./jsonPointer');
+require('./json-pointer');

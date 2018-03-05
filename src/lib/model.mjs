@@ -1,4 +1,4 @@
-import shqb from 'ship-hold-querybuilder';
+import {nodes} from 'ship-hold-querybuilder';
 import {normalizeInclude, normalizeAttributes} from './util';
 import relationFactory from './relations';
 
@@ -11,45 +11,44 @@ export default (definition, sh) => {
 		return builder;
 	};
 
-	const withInclude = selectBuilder => Object.assign(selectBuilder, {
-		include: withModel((...args) => {
-			const {nodes} = shqb;
-			const relationBuilders = normalizeInclude(definition, sh, ...args);
-			const selfRelation = {
-				relation: 'self',
-				attributes: normalizeAttributes(selectBuilder),
-				key: selectBuilder.model.primaryKey
-			};
+	const withInclude = selectBuilder => {
+		return Object.assign(selectBuilder, {
+			include: withModel((...args) => {
+				const relationBuilders = normalizeInclude(definition, sh, ...args);
+				const selfRelation = {
+					relation: 'self',
+					attributes: normalizeAttributes(selectBuilder),
+					key: definition.primaryKey
+				};
+				selectBuilder.node('select', nodes.compositeNode().add('*'));
 
-			selectBuilder.node('select', nodes.compositeNode().add('*'));
+				let newQueryBuilder = Object.assign(sh
+					.select(...selfRelation.attributes.map(as => as === '*' ?
+						{value: `"${table}".${as}`} :
+						{value: `"${table}"."${as}"`, as}))
+					.from({value: selectBuilder, as: table}), {
+					relation: selfRelation,
+					[Symbol.iterator]() {
+						return relationBuilders[Symbol.iterator]();
+					}
+				});
 
-			let newQueryBuilder = Object.assign(sh
-				.select(...selfRelation.attributes.map(as => as === '*' ?
-					{value: `"${table}".${as}`} :
-					{value: `"${table}"."${as}"`, as}))
-				.from({value: selectBuilder, as: table}), {
-				relation: selfRelation
-			});
+				// And orderBy before we create the join statements
+				const orderBy = selectBuilder.node('orderBy');
+				newQueryBuilder.node('orderBy', orderBy);
 
-			// And orderBy before we create the join statements
-			const orderBy = selectBuilder.node('orderBy');
-			newQueryBuilder.node('orderBy', orderBy);
+				newQueryBuilder = relationBuilders.reduce((acc, curr) => {
+					const relation = relationFactory(service, curr, sh);
+					// Add select to the main query
+					acc.select(...relation.selectFields);
+					// Overwrite the main query builder based on relation configuration
+					return relation.join(acc);
+				}, newQueryBuilder);
 
-			newQueryBuilder = relationBuilders.reduce((acc, curr) => {
-				const relation = relationFactory(service, curr, sh);
-				// Add select to the main query
-				acc.select(...relation.selectFields);
-				// Overwrite the main query builder based on relation configuration
-				return relation.join(acc);
-			}, newQueryBuilder);
-
-			return withInclude(Object.assign(newQueryBuilder, {
-				[Symbol.iterator]() {
-					return relationBuilders[Symbol.iterator]();
-				}
-			}));
-		})
-	});
+				return withInclude(newQueryBuilder);
+			})
+		});
+	};
 
 	const service = {
 		select: withModel((...args) => withInclude(sh

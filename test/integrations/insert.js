@@ -28,6 +28,16 @@ module.exports = function (sh) {
 
 			t.deepEqual(user, {id: 2, name: 'Blandine', age: 29});
 		});
+
+		await t.test('add user with no model', async t => {
+			const [user] = await sh
+				.insert({age: 666, name: 'devil'})
+				.into('users_insert')
+				.returning('*')
+				.run();
+			t.deepEqual(user, {id: 3, name: 'devil', age: 666});
+		});
+
 	});
 };
 

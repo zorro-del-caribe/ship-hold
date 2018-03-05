@@ -141,7 +141,6 @@ Users
  Example:
 
  ```Javascript
- 
  sh
     .select()
     .from('users')
@@ -609,7 +608,7 @@ sh
 
 ```
 
-Note: any operand can be replaced by another bulder to combine/nest conditions.
+Note: any operand can be replaced by another builder to combine/nest conditions.
 
 #### Condition query builder API 
 
@@ -1424,6 +1423,12 @@ There will be 100 000 users and 300 000 products
    
 
 
+
+ 
+ 
+ 
+ 
+ 
 ## sample application
 
 There is a whole [blog application](https://github.com/zorro-del-caribe/ship-hold-sample) build with ship hold, so you can see an almost real world example.

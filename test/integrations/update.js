@@ -41,7 +41,7 @@ module.exports = function (sh) {
 			t.deepEqual(users, fixtures(i => i.age === 29).map(i => Object.assign({}, i, {age: 30})));
 		});
 
-		t.test('update a bunch of row using object notation', async t => {
+		await t.test('update a bunch of rows using object notation', async t => {
 			const users = await createModels()
 				.update()
 				.set({name: '$name'})
@@ -49,6 +49,17 @@ module.exports = function (sh) {
 				.run({name: 'updated'});
 
 			t.deepEqual(users, fixtures(t => t.name === 'Jesus').map(i => Object.assign({}, i, {name: 'updated'})));
+		});
+
+		await t.test('update a bunch of rows without model', async t => {
+			const users = await sh
+				.update('users_update')
+				.set({name: '$name'})
+				.where('name', 'updated')
+				.returning('*')
+				.run({name: 'not updated anymore'});
+
+			t.deepEqual(users, fixtures(t => t.name === 'Jesus').map(i => Object.assign({}, i, {name: 'not updated anymore'})));
 		});
 	});
 };

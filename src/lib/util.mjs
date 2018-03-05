@@ -1,7 +1,7 @@
 import {nodes} from 'ship-hold-querybuilder';
+import jsonPointer from './json-pointer';
 
 const contextify = context => attr => context === undefined ? attr : context + `.${attr}`;
-const jsonPointer = require('./json-pointer');
 
 // TODO could be inlined code (for perf to check)
 export const createParser = (builder, context) => {
@@ -69,7 +69,7 @@ export const normalizeInclude = ({relations}, {model}, ...includes) => includes.
 	const relation = Object.assign({
 		key: builder.model.primaryKey,
 		as,
-		attributes: normalizeAttributes(builder)
+		attributes: normalizeAttributes(builder, 'select')
 			.map(n => n === '*' ? Object.keys(builder.model.definition.columns) : n)
 			.reduce((acc, curr) => acc.concat(curr), [])
 	}, relationDef);

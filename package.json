@@ -34,7 +34,7 @@
   "dependencies": {
     "pg": "^7.4.1",
     "pg-query-stream": "^1.1.1",
-    "ship-hold-querybuilder": "^2.0.0-0"
+    "ship-hold-querybuilder": "^2.0.0-1"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",

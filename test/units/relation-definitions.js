@@ -1,5 +1,5 @@
 const test = require('zora');
-const rel = require('../../src/lib/relation-definitions');
+const {default:rel} = require('../../src/lib/relation-definitions');
 
 test('belongsTo', t => {
 	const relation = rel.belongsTo('Users', 'userId');

@@ -7,8 +7,13 @@ exports.normalizeInclude = exports.normalizeAttributes = exports.createParser = 
 
 var _shipHoldQuerybuilder = require('ship-hold-querybuilder');
 
+var _jsonPointer = require('./json-pointer');
+
+var _jsonPointer2 = _interopRequireDefault(_jsonPointer);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 const contextify = context => attr => context === undefined ? attr : context + `.${attr}`;
-const jsonPointer = require('./json-pointer');
 
 // TODO could be inlined code (for perf to check)
 const createParser = exports.createParser = (builder, context) => {
@@ -16,7 +21,7 @@ const createParser = exports.createParser = (builder, context) => {
 	const { key, asCollection, attributes } = relation;
 	const expandedAttributes = attributes.map(attr => attr === '*' ? Object.keys(builder.model.definition.columns) : attr).reduce((acc, curr) => acc.concat(curr), []);
 	const attribute = contextify(context);
-	const pointer = jsonPointer(context);
+	const pointer = (0, _jsonPointer2.default)(context);
 	const subParsers = [];
 	if (builder[Symbol.iterator]) {
 		for (const b of builder) {
@@ -72,7 +77,7 @@ const normalizeInclude = exports.normalizeInclude = ({ relations }, { model }, .
 	const relation = Object.assign({
 		key: builder.model.primaryKey,
 		as,
-		attributes: normalizeAttributes(builder).map(n => n === '*' ? Object.keys(builder.model.definition.columns) : n).reduce((acc, curr) => acc.concat(curr), [])
+		attributes: normalizeAttributes(builder, 'select').map(n => n === '*' ? Object.keys(builder.model.definition.columns) : n).reduce((acc, curr) => acc.concat(curr), [])
 	}, relationDef);
 
 	// We can't wildcard for nested include otherwise will bump into ambiguity

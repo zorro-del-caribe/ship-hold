@@ -1,5 +1,5 @@
 const test = require('zora');
-const shiphold = require('../../src/shiphold');
+const {default:shiphold} = require('../../src/shiphold');
 const util = require('../../src/lib/util');
 
 function createDefaultModels(sh) {

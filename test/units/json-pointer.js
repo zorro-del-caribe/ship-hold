@@ -1,5 +1,5 @@
 const test = require('zora');
-const pointer = require('../../src/lib/json-pointer');
+const {default:pointer} = require('../../src/lib/json-pointer');
 
 test('pointer get', t => {
 	const {get: foo} = pointer('foo');
@@ -49,13 +49,3 @@ test('concat arrays when new tree is an array', t=>{
 	const obj = p.set({foo:['woot']},['bar','bim']);
 	t.deepEqual(obj,{foo:['woot','bar','bim']});
 });
-
-// test('pointer should replace array properties', t => {
-// 	const p = pointer('foo');
-// 	const target = {foo:[1]};
-// });
-
-// test('pointer no path', t=>{
-// 	const p = pointer();
-//
-// });

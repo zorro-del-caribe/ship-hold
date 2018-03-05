@@ -6,8 +6,6 @@ Object.defineProperty(exports, "__esModule", {
 
 var _shipHoldQuerybuilder = require('ship-hold-querybuilder');
 
-var _shipHoldQuerybuilder2 = _interopRequireDefault(_shipHoldQuerybuilder);
-
 var _util = require('./util');
 
 var _relations = require('./relations');
@@ -25,41 +23,40 @@ exports.default = (definition, sh) => {
 		return builder;
 	};
 
-	const withInclude = selectBuilder => Object.assign(selectBuilder, {
-		include: withModel((...args) => {
-			const { nodes } = _shipHoldQuerybuilder2.default;
-			const relationBuilders = (0, _util.normalizeInclude)(definition, sh, ...args);
-			const selfRelation = {
-				relation: 'self',
-				attributes: (0, _util.normalizeAttributes)(selectBuilder),
-				key: selectBuilder.model.primaryKey
-			};
+	const withInclude = selectBuilder => {
+		return Object.assign(selectBuilder, {
+			include: withModel((...args) => {
+				const relationBuilders = (0, _util.normalizeInclude)(definition, sh, ...args);
+				const selfRelation = {
+					relation: 'self',
+					attributes: (0, _util.normalizeAttributes)(selectBuilder),
+					key: definition.primaryKey
+				};
+				selectBuilder.node('select', _shipHoldQuerybuilder.nodes.compositeNode().add('*'));
 
-			selectBuilder.node('select', nodes.compositeNode().add('*'));
+				let newQueryBuilder = Object.assign(sh.select(...selfRelation.attributes.map(as => as === '*' ? { value: `"${table}".${as}` } : { value: `"${table}"."${as}"`, as })).from({ value: selectBuilder, as: table }), {
+					relation: selfRelation,
+					[Symbol.iterator]() {
+						return relationBuilders[Symbol.iterator]();
+					}
+				});
 
-			let newQueryBuilder = Object.assign(sh.select(...selfRelation.attributes.map(as => as === '*' ? { value: `"${table}".${as}` } : { value: `"${table}"."${as}"`, as })).from({ value: selectBuilder, as: table }), {
-				relation: selfRelation
-			});
+				// And orderBy before we create the join statements
+				const orderBy = selectBuilder.node('orderBy');
+				newQueryBuilder.node('orderBy', orderBy);
 
-			// And orderBy before we create the join statements
-			const orderBy = selectBuilder.node('orderBy');
-			newQueryBuilder.node('orderBy', orderBy);
+				newQueryBuilder = relationBuilders.reduce((acc, curr) => {
+					const relation = (0, _relations2.default)(service, curr, sh);
+					// Add select to the main query
+					acc.select(...relation.selectFields);
+					// Overwrite the main query builder based on relation configuration
+					return relation.join(acc);
+				}, newQueryBuilder);
 
-			newQueryBuilder = relationBuilders.reduce((acc, curr) => {
-				const relation = (0, _relations2.default)(service, curr, sh);
-				// Add select to the main query
-				acc.select(...relation.selectFields);
-				// Overwrite the main query builder based on relation configuration
-				return relation.join(acc);
-			}, newQueryBuilder);
-
-			return withInclude(Object.assign(newQueryBuilder, {
-				[Symbol.iterator]() {
-					return relationBuilders[Symbol.iterator]();
-				}
-			}));
-		})
-	});
+				return withInclude(newQueryBuilder);
+			})
+		});
+	};
 
 	const service = {
 		select: withModel((...args) => withInclude(sh.select(...args).from(table))),

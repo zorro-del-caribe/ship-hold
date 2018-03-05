@@ -1,4 +1,4 @@
-const shiphold = require('../../src/shiphold');
+const {default:shiphold} = require('../../src/shiphold');
 const test = require('zora');
 
 test('service registry', t => {

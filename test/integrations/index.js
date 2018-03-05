@@ -1,4 +1,4 @@
-const shiphold = require('../../src/shiphold');
+const {default: shiphold} = require('../../src/shiphold');
 const setup = require('./setup');
 const sh = shiphold({
 	host: process.env.DB_HOSTNAME || '127.0.0.1',
@@ -11,10 +11,11 @@ const sh = shiphold({
 	try {
 		await setup(sh);
 		const tests = [
-			// './select_simple',
-			// './insert',
-			// './update',
-			'./select_associations'
+			'./select_simple',
+			'./select_associations',
+			'./insert',
+			'./update',
+			'./delete'
 		].map(f => (require(f)(sh)).task);
 
 		// wait for tests to complete
@@ -23,6 +24,6 @@ const sh = shiphold({
 		}
 	}
 	finally {
-		setTimeout(()=>sh.stop(),100);
+		setTimeout(() => sh.stop(), 100);
 	}
 })();
