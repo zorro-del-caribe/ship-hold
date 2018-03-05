@@ -1,8 +1,3 @@
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-	value: true
-});
 const createEmptyObject = () => ({});
 
 const relation = (relation, asCollection = false, fn = createEmptyObject) => (model, ...args) => Object.assign({}, fn(...args), {
@@ -11,7 +6,7 @@ const relation = (relation, asCollection = false, fn = createEmptyObject) => (mo
 	asCollection
 });
 
-exports.default = {
+export default {
 	belongsTo: relation('belongsTo', false, foreignKey => {
 		if (!foreignKey) {
 			throw new Error('when using the relation "belongsTo", you must specify a foreignKey');
@@ -26,6 +21,6 @@ exports.default = {
 		if (!through) {
 			throw new Error('when using the relation "belongsToMany", you must specify a through model');
 		}
-		return { through, referenceKey };
+		return {through, referenceKey};
 	})
 };

@@ -1,31 +1,45 @@
-const define = require('./relation-definitions');
-const modelFactory = require('./model');
-const {ok} = require('assert');
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
+var _assert = require('assert');
+
+var _relationDefinitions = require('./relation-definitions');
+
+var _relationDefinitions2 = _interopRequireDefault(_relationDefinitions);
+
+var _model = require('./model');
+
+var _model2 = _interopRequireDefault(_model);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 const normalizeColumns = columns => {
 	const columnsDef = {};
 	for (const column of Object.keys(columns)) {
 		const def = columns[column];
-		columnsDef[column] = typeof def === 'string' ? {type: def} : def;
+		columnsDef[column] = typeof def === 'string' ? { type: def } : def;
 	}
-	return columnsDef
+	return columnsDef;
 };
 
 // Create a map of model services
-module.exports = () => {
+
+exports.default = () => {
 	const instance = {};
 	const registry = Object.create(null);
-
-	const getModel = (name) => {
-		ok(registry[name], `could not find the model ${name}`);
+	const getModel = name => {
+		(0, _assert.ok)(registry[name], `could not find the model ${name}`);
 		return registry[name];
 	};
 	const setModel = function (name, defFunc) {
-		const definition = defFunc(define);
+		const definition = Object.assign({ relations: {} }, defFunc(_relationDefinitions2.default));
 		definition.columns = normalizeColumns(definition.columns);
 		definition.primaryKey = definition.primaryKey || 'id';
 		definition.name = name;
-		registry[name] = modelFactory(definition, instance);
+		registry[name] = (0, _model2.default)(definition, instance);
 		return getModel(name);
 	};
 

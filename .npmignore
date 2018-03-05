@@ -1,0 +1,7 @@
+.idea
+.circleci
+.github
+benchmark
+doc
+node_modules
+test

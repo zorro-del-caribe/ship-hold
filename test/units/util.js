@@ -36,8 +36,5 @@ test('normalize include specifications', t => {
 	const relation = normalized[0].relation;
 	t.equal(relation.as, 'user_projects');
 	t.deepEqual(relation.attributes, Object.keys(Projects.definition.columns));
-	t.equal(relation.pointer, 'id');
 	t.equal(relation.asCollection, true);
 });
-
-// todo unit tests on aggregate ?

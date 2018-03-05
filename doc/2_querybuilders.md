@@ -71,7 +71,6 @@ Users
  Example:
 
  ```Javascript
- 
  sh
     .select()
     .from('users')
@@ -539,7 +538,7 @@ sh
 
 ```
 
-Note: any operand can be replaced by another bulder to combine/nest conditions.
+Note: any operand can be replaced by another builder to combine/nest conditions.
 
 #### Condition query builder API 
 

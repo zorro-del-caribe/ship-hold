@@ -2,13 +2,14 @@
   "name": "ship-hold",
   "version": "1.1.0",
   "description": "data access framework for postgres sql",
-  "main": "./src/shiphold.js",
+  "main": "./src/shiphold",
   "scripts": {
+    "xo": "xo ./src/*.js ./src/**/*.js",
     "test": "npm run test:unit && npm run test:int",
-    "test:int": "node ./test/integrations/index.js | tap-diff",
+    "test:int": "node ./test/integrations/index.js",
     "test:unit": "node ./test/units/index.js",
-    "test:ci": "DB_HOSTNAME=127.0.0.1 npm test",
-    "babel": "babel src --out-dir dist -s",
+    "test:ci": "(npm run test:unit | tap-set-exit) && (npm run test:int | tap-set-exit)",
+    "babel": "babel src/*.mjs src/lib/*.mjs --out-dir .",
     "doc": "cat ./doc/*.md > README.md",
     "build": "npm run babel && npm run doc"
   },
@@ -31,14 +32,16 @@
   "author": "Laurent RENARD",
   "license": "MIT",
   "dependencies": {
-    "@lorenzofox3/for-await-node": "^0.2.0",
     "pg": "^7.4.1",
     "pg-query-stream": "^1.1.1",
-    "smart-table-json-pointer": "^1.0.3",
-    "tap-diff": "^0.1.1"
+    "ship-hold-querybuilder": "^2.0.0-0"
   },
   "devDependencies": {
-    "@lorenzofox3/for-await": "^0.1.0",
+    "babel-cli": "^6.26.0",
+    "babel-plugin-dynamic-import-node": "^1.2.0",
+    "babel-plugin-transform-es2015-modules-commonjs": "^6.26.0",
+    "tap-set-exit": "^1.1.1",
+    "xo": "^0.20.3",
     "zora": "^2.0.0"
   }
 }

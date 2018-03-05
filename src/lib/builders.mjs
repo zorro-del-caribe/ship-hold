@@ -1,20 +1,6 @@
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-	value: true
-});
-
-var _shipHoldQuerybuilder = require('ship-hold-querybuilder');
-
-var _shipHoldQuerybuilder2 = _interopRequireDefault(_shipHoldQuerybuilder);
-
-var _pgQueryStream = require('pg-query-stream');
-
-var _pgQueryStream2 = _interopRequireDefault(_pgQueryStream);
-
-var _util = require('./util');
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+import builders from 'ship-hold-querybuilder';
+import QueryStream from 'pg-query-stream';
+import {createParser} from './util';
 
 const iterator = gen => (...args) => {
 	const iter = gen(...args);
@@ -22,9 +8,9 @@ const iterator = gen => (...args) => {
 	return iter;
 };
 
-const aggregateSink = iterator(function* (builder, consumer) {
+const aggregateSink = iterator(function * (builder, consumer) {
 	const sink = consumer();
-	const [parser, ...subParsers] = [...(0, _util.createParser)(builder)];
+	const [parser, ...subParsers] = [...createParser(builder)];
 	const currentKeyValues = new WeakMap(subParsers.map(sb => [sb, []]));
 	let currentItem = null;
 	let newItem = false;
@@ -62,7 +48,7 @@ const aggregateSink = iterator(function* (builder, consumer) {
 	}
 });
 
-exports.default = pool => {
+export default pool => {
 	// Todo add async iterable.
 	const runner = {
 		stream(params = {}, consumer) {
@@ -73,8 +59,8 @@ exports.default = pool => {
 			stream.on('end', () => iter.return());
 		},
 		_stream(params = {}) {
-			const { text, values } = this.build(params);
-			const stream = new _pgQueryStream2.default(text, values);
+			const {text, values} = this.build(params);
+			const stream = new QueryStream(text, values);
 			pool.connect().then(client => {
 				const release = () => client.release();
 				stream.on('end', release);
@@ -86,7 +72,7 @@ exports.default = pool => {
 		run(params = {}) {
 			const rows = [];
 			return new Promise((resolve, reject) => {
-				this.stream(params, function* () {
+				this.stream(params, function * () {
 					try {
 						while (true) {
 							const r = yield;
@@ -103,10 +89,10 @@ exports.default = pool => {
 	};
 	const delegateToBuilder = builder => (...args) => Object.assign(builder(...args), runner);
 	return {
-		select: delegateToBuilder(_shipHoldQuerybuilder2.default.select),
-		update: delegateToBuilder(_shipHoldQuerybuilder2.default.update),
-		delete: delegateToBuilder(_shipHoldQuerybuilder2.default.delete),
-		insert: delegateToBuilder(_shipHoldQuerybuilder2.default.insert),
-		if: (...args) => _shipHoldQuerybuilder2.default.condition().if(...args)
+		select: delegateToBuilder(builders.select),
+		update: delegateToBuilder(builders.update),
+		delete: delegateToBuilder(builders.delete),
+		insert: delegateToBuilder(builders.insert),
+		if: (...args) => builders.condition().if(...args)
 	};
 };
