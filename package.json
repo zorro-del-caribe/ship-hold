@@ -5,6 +5,10 @@
   "main": "./src/shiphold",
   "scripts": {
     "xo": "xo ./src/*.js ./src/**/*.js",
+    "bench:setup": "node ./benchmark/scripts/setup.js",
+    "bench:fixture:users": "node ./benchmark/scripts/fixture_users.js",
+    "bench:fixture:products": "node ./benchmark/scripts/fixture_products.js",
+    "bench:build": "npm run bench:setup && npm run bench:fixture:users && npm run bench:fixture:products",
     "test": "npm run test:unit && npm run test:int",
     "test:int": "node ./test/integrations/index.js",
     "test:unit": "node ./test/units/index.js",
@@ -40,6 +44,10 @@
     "babel-cli": "^6.26.0",
     "babel-plugin-dynamic-import-node": "^1.2.0",
     "babel-plugin-transform-es2015-modules-commonjs": "^6.26.0",
+    "bookshelf": "^0.12.1",
+    "casual": "^1.5.19",
+    "knex": "^0.14.4",
+    "sequelize": "^4.35.2",
     "tap-set-exit": "^1.1.1",
     "xo": "^0.20.3",
     "zora": "^2.0.0"

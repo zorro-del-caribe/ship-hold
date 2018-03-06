@@ -1386,27 +1386,27 @@ There will be 100 000 users and 300 000 products
    
    read repeat [ITERATIONS] times "SELECT * FROM users WHERE age > (random) ORDER BY name LIMIT [PAGESIZE]", wait [BREATH] ms and output response time (average, median, best, worst)
 
-   ###### Sample result (for iterations = 200, pageSize=50, breath = 1000)
+   ###### Sample result (for iterations = 100, pageSize=50, breath = 200)
    
    framework | avg(ms) | worst(ms) | best(ms) | median(ms)
    ----------|---------|-----------|----------|-----------
-   ship-hold|25.41|46|14|26
-   ship-hold(promise)|24.87|50|13|24
-   bookshelf|26.48|75|13|26
-   sequelize|27.62|87|15|27
+   ship-hold|23.48|44|11|23.5
+   ship-hold(promise)|22.01|40|13|22
+   bookshelf|25.2|60|14|25
+   sequelize|22.2|87|13|21
    
 2. ##### fetch page including products
    
    same as test 1 but including products 
     
-   ###### Sample result (for iterations = 100, pageSize=50, breath = 1000)
+   ###### Sample result (for iterations = 100, pageSize=50, breath = 200)
    
    framework | avg(ms) | worst(ms) | best(ms) | median(ms)
    ----------|---------|-----------|----------|-----------
-   ship-hold|47.26|85|44|46
-   ship-hold(promise)|48.57|84|44|47
-   bookshelf|48.01|102|42|46
-   sequelize|56.43|128|50|55
+   ship-hold|63.95|84|54|64
+   ship-hold(promise)|65.08|86|55|65
+   bookshelf|91.86|146|82|91
+   sequelize|67.25|148|54|64
     
 3. ##### get all users
 
@@ -1414,12 +1414,12 @@ There will be 100 000 users and 300 000 products
 
    ###### Sample result
    
-   framework | response time(ms) 
-   ----------|------------------
-   ship-hold|811
-   ship-hold(promise)|1043
-   bookshelf|5756
-   sequelize|3309
+   framework | avg(ms) | worst(ms) | best(ms) | median(ms)
+   ----------|---------|-----------|----------|-----------
+   ship-hold|1254|1634|1109|1222
+   ship-hold(promise)|1522|2110|1272|1470
+   bookshelf|2331.13|3182|1823|2313
+   sequelize|1636|2502|1287|1586.5
    
 
 
