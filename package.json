@@ -1,10 +1,15 @@
 {
   "name": "ship-hold",
-  "version": "2.0.0-0",
+  "version": "2.0.0-1",
   "description": "data access framework for postgres sql",
-  "main": "./src/shiphold",
+  "main": "./dist/bundle/index",
+  "module": "./dist/bundle/module",
+  "types": "./dist/declartions/index.d.ts",
+  "files": [
+    "dist/bundle",
+    "dist/declarations"
+  ],
   "scripts": {
-    "xo": "xo ./src/*.js ./src/**/*.js",
     "bench:setup": "node ./benchmark/scripts/setup.js",
     "bench:fixture:users": "node ./benchmark/scripts/fixture_users.js",
     "bench:fixture:products": "node ./benchmark/scripts/fixture_products.js",
@@ -13,9 +18,11 @@
     "test:int": "node ./test/integrations/index.js",
     "test:unit": "node ./test/units/index.js",
     "test:ci": "(npm run test:unit | tap-set-exit) && (npm run test:int | tap-set-exit)",
-    "babel": "babel src/*.mjs src/lib/*.mjs --out-dir .",
-    "doc": "cat ./doc/*.md > README.md",
-    "build": "npm run babel && npm run doc"
+    "build:doc": "cat ./doc/*.md > README.md",
+    "build:clean": "rm -rf ./dist && mkdir -p ./dist/bundle ./dist/declarations && cp -r ./src ./dist/src",
+    "build:compile": "tsc",
+    "build:bundle": "rollup -c ./rollup/build.js",
+    "build": "npm run build:clean && npm run build:compile && npm run build:bundle && npm run build:doc"
   },
   "repository": {
     "type": "git",
@@ -36,20 +43,23 @@
   "author": "Laurent RENARD",
   "license": "MIT",
   "dependencies": {
-    "pg": "^7.4.1",
-    "pg-query-stream": "^1.1.1",
-    "ship-hold-querybuilder": "^2.0.0-1"
+    "pg": "^7.6.1",
+    "pg-query-stream": "^1.1.2",
+    "ship-hold-querybuilder": "^2.0.0-3"
   },
   "devDependencies": {
-    "babel-cli": "^6.26.0",
-    "babel-plugin-dynamic-import-node": "^1.2.0",
-    "babel-plugin-transform-es2015-modules-commonjs": "^6.26.0",
-    "bookshelf": "^0.12.1",
+    "@types/node": "^10.12.3",
+    "@types/pg": "^7.4.11",
+    "@types/pg-query-stream": "^1.0.2",
+    "bookshelf": "^0.13.3",
     "casual": "^1.5.19",
-    "knex": "^0.14.4",
-    "sequelize": "^4.35.2",
+    "knex": "^0.15.2",
+    "reflect-metadata": "^0.1.12",
+    "rollup": "^0.66.6",
+    "sequelize": "^4.41.1",
     "tap-set-exit": "^1.1.1",
-    "xo": "^0.20.3",
-    "zora": "^2.0.0"
+    "typeorm": "^0.2.9",
+    "typescript": "^3.1.6",
+    "zora": "^2.0.1"
   }
 }

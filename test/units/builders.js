@@ -1,5 +1,5 @@
 const test = require('zora');
-const {default:buildersFactory} = require('../../src/lib/builders');
+const {default:buildersFactory} = require('../../src-old/lib/builders');
 
 test('builder factory should return builders', t => {
 	const builders = buildersFactory({});

@@ -1,5 +1,5 @@
 const test = require('zora');
-const {default:registryFactory} = require('../../src/lib/model-registry');
+const {default:registryFactory} = require('../../src-old/lib/model-registry');
 
 test('should create a model service when a definition argument is passed', t => {
 	const registry = registryFactory({});

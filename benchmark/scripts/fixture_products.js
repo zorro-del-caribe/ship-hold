@@ -1,6 +1,6 @@
 const casual = require('casual');
 const {sh, Products, Users} = require('./ship-hold');
-const {aggregate} = require('ship-hold-querybuilder');
+const {count:aggCount} = require('ship-hold-querybuilder');
 
 const batch = function * (limit = 10000) {
 	let i = 0;
@@ -36,7 +36,7 @@ async function addProduct() {
 (async function () {
 	try {
 		await addProduct();
-		const [{count}] = await Products.select(aggregate.count('*')).run();
+		const [{count}] = await Products.select(aggCount('*')).run();
 		console.log(`successfully inserted ${count} products`);
 	} catch (e) {
 		console.log(e);

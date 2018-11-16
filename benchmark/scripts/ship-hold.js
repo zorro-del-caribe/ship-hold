@@ -1,5 +1,5 @@
 const {hostname: host, username: user, password, database} = require('../config/db');
-const {default:shiphold} = require('../../src/shiphold');
+const {default:shiphold} = require('../../src-old/shiphold');
 
 const sh = shiphold({host, user, password, database});
 const Users = sh.model('users', function (sc) {

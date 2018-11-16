@@ -1,6 +1,6 @@
 const test = require('zora');
-const {default:shiphold} = require('../../src/shiphold');
-const util = require('../../src/lib/util');
+const {default:shiphold} = require('../../src-old/shiphold');
+const util = require('../../src-old/lib/util');
 
 function createDefaultModels(sh) {
 	const Users = sh.model('Users', function (s) {

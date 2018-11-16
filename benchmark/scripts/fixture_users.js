@@ -1,6 +1,6 @@
 const casual = require('casual');
 const {sh, Users} = require('./ship-hold');
-const {aggregate} = require('ship-hold-querybuilder');
+const {count:aggCount} = require('ship-hold-querybuilder');
 
 const batch = function * (limit = 10000) {
 	let i = 0;
@@ -36,7 +36,7 @@ async function addUsers() {
 (async function () {
 	try {
 		await addUsers();
-		const [{count}] =await Users.select(aggregate.count('*')).run();
+		const [{count}] =await Users.select(aggCount('*')).run();
 		console.log(`successfully inserted ${count} users`);
 	} catch (e) {
 		console.log(e);

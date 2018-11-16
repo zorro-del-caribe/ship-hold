@@ -1,44 +1,44 @@
 module.exports = async function (sh) {
-	const {query} = sh;
-	try {
-		await query('SELECT now()'); // Ping
-		await query('DROP TABLE IF EXISTS users_simple_select');
-		await query(`CREATE TABLE users_simple_select
+    const {query} = sh;
+    try {
+        await query('SELECT now()'); // Ping
+        await query('DROP TABLE IF EXISTS users_simple_select');
+        await query(`CREATE TABLE users_simple_select
 					(
 					id serial PRIMARY KEY,
 					age integer,
 					name varchar(100)
 					);`);
-		await query('DROP TABLE IF EXISTS users_update');
-		await query(`CREATE TABLE users_update
+        await query('DROP TABLE IF EXISTS users_update');
+        await query(`CREATE TABLE users_update
 					(
 					id serial PRIMARY KEY,
 					age integer,
 					name varchar(100)
 					);`);
-		await query('DROP TABLE IF EXISTS users_delete');
-		await query(`CREATE TABLE users_delete
+        await query('DROP TABLE IF EXISTS users_delete');
+        await query(`CREATE TABLE users_delete
     (
     id serial PRIMARY KEY,
     age integer,
     name varchar(100)
     );`);
-		await query('DROP TABLE if EXISTS users_insert');
-		await query(`CREATE TABLE users_insert
+        await query('DROP TABLE if EXISTS users_insert');
+        await query(`CREATE TABLE users_insert
     (
     id serial PRIMARY KEY,
     age integer,
     name varchar(100)
     );
     `);
-		await query(`DROP TABLE IF EXISTS
+        await query(`DROP TABLE IF EXISTS
   users_association_select,
   products_association_select,
   phones_association_select,
   accounts_association_select,
   users_accounts_association_select
   ;`);
-		await query(`CREATE TABLE users_association_select
+        await query(`CREATE TABLE users_association_select
     (
     id serial PRIMARY KEY,
     age integer,
@@ -74,9 +74,9 @@ module.exports = async function (sh) {
     account_id integer REFERENCES accounts_association_select
     );
     `);
-	} catch (e) {
-		console.error(e);
-		sh.stop();
-		process.exit(1);
-	}
+    } catch (e) {
+        console.error(e);
+        sh.stop();
+        process.exit(1);
+    }
 };

@@ -1,5 +1,5 @@
 const test = require('zora');
-const {default:shiphold} = require('../../src/shiphold');
+const {default:shiphold} = require('../../src-old/shiphold');
 
 test('bind query to proper table', t => {
 	const query = shiphold()
