@@ -11,8 +11,6 @@
   ],
   "scripts": {
     "bench:setup": "node ./benchmark/scripts/setup.js",
-    "bench:fixture:users": "node ./benchmark/scripts/fixture_users.js",
-    "bench:fixture:products": "node ./benchmark/scripts/fixture_products.js",
     "bench:build": "npm run bench:setup && npm run bench:fixture:users && npm run bench:fixture:products",
     "test": "npm run test:unit && npm run test:int",
     "test:int": "node ./test/integrations/index.js",
@@ -44,19 +42,20 @@
   "license": "MIT",
   "dependencies": {
     "pg": "^7.6.1",
-    "pg-query-stream": "^1.1.2",
-    "ship-hold-querybuilder": "^2.0.0-3"
+    "pg-query-stream": "^1.1.2"
   },
   "devDependencies": {
-    "@types/node": "^10.12.3",
+    "@types/node": "^10.12.9",
     "@types/pg": "^7.4.11",
     "@types/pg-query-stream": "^1.0.2",
     "bookshelf": "^0.13.3",
     "casual": "^1.5.19",
+    "faker": "^4.1.0",
     "knex": "^0.15.2",
     "reflect-metadata": "^0.1.12",
-    "rollup": "^0.66.6",
-    "sequelize": "^4.41.1",
+    "rollup": "^0.67.3",
+    "sequelize": "^4.41.2",
+    "ship-hold-querybuilder": "^2.0.0-4",
     "tap-set-exit": "^1.1.1",
     "typeorm": "^0.2.9",
     "typescript": "^3.1.6",

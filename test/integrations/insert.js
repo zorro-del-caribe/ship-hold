@@ -15,11 +15,10 @@ module.exports = function (sh) {
             t.deepEqual(user, {id: 1, name: 'Laurent', age: 29});
         });
 
-        await t.test('add a user with the values notation', async t => {
+        await t.test('add a user with the field declaration notation', async t => {
             const [user] = await createService()
-                .insert()
-                .value('age', '$age')
-                .value('name', '$name')
+                .insert('age', 'name')
+                .values({age: '$age', name: '$name'})
                 .run({age: 29, name: 'Blandine'});
 
             t.deepEqual(user, {id: 2, name: 'Blandine', age: 29});

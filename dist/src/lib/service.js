@@ -4,18 +4,35 @@ const withService = fn => function (...args) {
     Object.defineProperty(builder, 'service', { value: this });
     return builder;
 };
+// todo typecast
+const normalise = (aliasToService) => (rel) => {
+    // Alias
+    if (typeof rel === 'string') {
+        const service = aliasToService.get(rel);
+        return service.select();
+    }
+    // Builder
+    if ('build' in rel) {
+        return rel;
+    }
+    // Service
+    return rel.select();
+};
 export const service = (definition, sh) => {
     const { table } = definition;
     const serviceToRelation = new WeakMap();
-    const aliasToRelation = new Map();
+    const aliasToService = new Map();
     const withInclude = (builder) => Object.assign(builder, {
         include(...relations) {
-            const newBuilder = relations.reduce(buildRelation, serviceInstance.select(`"${table}".*`)
+            const newBuilder = relations
+                .map(normalise(aliasToService))
+                .map(r => r.noop())
+                .reduce(buildRelation(sh), serviceInstance.select(`"${table}".*`)
                 .with(table, builder));
-            // we need to re apply sort to ensure pagination for complex queries etc.
-            // @ts-ignore //todo
+            // We need to re apply sort to ensure pagination for complex queries etc.
+            // @ts-ignore
             newBuilder.node('orderBy', builder.node('orderBy'));
-            // makes it an entity builder
+            // Makes it an entity builder
             Object.defineProperty(newBuilder, 'service', { value: serviceInstance });
             return newBuilder;
         }
@@ -46,7 +63,7 @@ export const service = (definition, sh) => {
                 alias: label
             };
             serviceToRelation.set(service, relation);
-            aliasToRelation.set(label, relation);
+            aliasToService.set(alias, service);
             return this;
         },
         hasMany(service, alias) {
@@ -56,7 +73,7 @@ export const service = (definition, sh) => {
                 alias: label
             };
             serviceToRelation.set(service, relation);
-            aliasToRelation.set(label, relation);
+            aliasToService.set(alias, service);
             return this;
         },
         belongsTo(service, foreignKey, alias) {
@@ -67,15 +84,31 @@ export const service = (definition, sh) => {
                 foreignKey
             };
             serviceToRelation.set(service, relation);
-            aliasToRelation.set(label, relation);
+            aliasToService.set(alias, service);
+            return this;
+        },
+        belongsToMany(service, pivot, keyInPivot, alias) {
+            const pivotTable = typeof pivot === 'string' ? pivot : pivot.definition.table;
+            const label = alias || service.definition.name.toLowerCase();
+            const relation = {
+                type: "BELONGS_TO_MANY" /* BELONGS_TO_MANY */,
+                alias: label,
+                pivotTable,
+                pivotKey: keyInPivot
+            };
+            serviceToRelation.set(service, relation);
+            aliasToService.set(label, service);
             return this;
         },
         getRelationWith(key) {
-            const rel = typeof key === 'string' ? aliasToRelation.get(key) : serviceToRelation.get(key);
-            if (!rel) {
-                throw new Error(`Could not find a relation between ${this.definition.name} and ${typeof key === 'string' ? key : key.definition.name}`);
+            if (typeof key === 'string') {
+                return this.getRelationWith(aliasToService.get(key));
             }
-            return rel;
+            if (!serviceToRelation.has(key)) {
+                const message = `Could not find a relation between ${this.definition.name} and ${key.definition.name}`;
+                throw new Error(message);
+            }
+            return serviceToRelation.get(key);
         }
     }, {
         definition: { value: Object.freeze(definition) } // Todo should freeze deeply

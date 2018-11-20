@@ -1,9 +1,10 @@
 const casual = require('casual');
-const {sh, Users} = require('./ship-hold');
+const {sh, Posts} = require('./ship-hold');
 const {count: aggCount} = require('ship-hold-querybuilder');
-const {BATCH_SIZE, USERS_NUMBER} = require('../config/users');
+const {USERS_NUMBER} = require('../config/users');
+const {POSTS_NUMBER, BATCH_SIZE} = require('../config/posts');
 
-const BATCH_COUNT = USERS_NUMBER / BATCH_SIZE;
+const BATCH_COUNT = POSTS_NUMBER / BATCH_SIZE;
 
 const batchCount = function* () {
     let batch = 1;
@@ -18,7 +19,7 @@ const wrap = val => `'${val}'`;
 const includeBatchValues = () => {
     const values = [];
     for (let i = 0; i < BATCH_SIZE; i++) {
-        values.push(`(${wrap(casual.email)}, ${wrap(casual.sentences(5))}, ${wrap(casual.first_name)}, ${wrap(casual.last_name)})`);
+        values.push(`(${wrap(casual.title)}, ${wrap(casual.text)}, ${casual.integer(1, USERS_NUMBER)})`);
     }
     return values.join(', ');
 };
@@ -27,9 +28,9 @@ async function addUsers() {
     for (const b of batchCount()) {
         console.log(`Starting batch ${b}`);
         const query = `
-            INSERT INTO users ("email", "biography", "first_name", "last_name")
+            INSERT INTO posts ("title", "content", "user_id")
             VALUES 
-            ${includeBatchValues()}
+            ${includeBatchValues()} 
             ON CONFLICT DO NOTHING;
         `;
         await sh.query(query);
@@ -40,8 +41,8 @@ async function addUsers() {
 (async function () {
     try {
         await addUsers();
-        const [{count}] = await Users.select(aggCount('*')).run();
-        console.log(`successfully inserted ${count} users`);
+        const [{count}] = await Posts.select(aggCount('*')).run();
+        console.log(`successfully inserted ${count} posts`);
     } catch (e) {
         console.log(e);
         process.exit(1);

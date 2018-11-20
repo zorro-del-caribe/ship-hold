@@ -6,7 +6,7 @@
 
 > 1.0.0
 
-3. [ ] my issue is a **bug report** or a **feature request**. Please **NO QUESTION** use stackoverflow or the chat (Preferably stackoverflow so the question can be indexed by search engines: ping me by mail whit your SO question link until I have enough reputation to create a tag)
+3. [ ] my issue is a **bug report** or a **feature request**. Please **NO QUESTION** use stackoverflow or the chat (Preferably stackoverflow so the question can be indexed by search engines)
 
 > Bug
 
@@ -15,7 +15,7 @@
 ```javascript
 
 sh.model('Users',function (h){
-   return { 
+   return {
       table:'users',
       columns:{},
       relations:{}
@@ -29,12 +29,12 @@ Users
 ```
 
 I have
- 
+
 ```sql
 SELECT * FROM "users"
 ```
 
-I expected 
+I expected
 
 ```sql
 SELECT "id" FROM "users"
@@ -42,8 +42,8 @@ SELECT "id" FROM "users"
 
 5. [ ] If it is an issue, provide a small data set and the expected result.
 
-> you can reproduce with the following fixture ... 
+> you can reproduce with the following fixture ...
 
 6. [ ] If it is a feature request: keep in mind that ship-hold favors extension module architecture over monolithic module. So your feature request will likely be refused. Don't hesitate to open it though so it may be open to upvote. However, It is not democracy :) !
 
-> would be great if we had "findById" method on the model services, what do you think ? 
+> would be great if we had "findById" method on the model services, what do you think ?

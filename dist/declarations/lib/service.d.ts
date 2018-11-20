@@ -21,6 +21,7 @@ export interface WithRelations {
     belongsTo(service: EntityService, foreignKey: string, alias?: string): WithRelations;
     hasMany(service: EntityService, alias?: string): WithRelations;
     hasOne(service: EntityService, alias?: string): WithRelations;
+    belongsToMany(service: EntityService, pivot: EntityService | string, keyInPivot: string, alias?: string): WithRelations;
     getRelationWith(rel: EntityService | string): RelationDefinition;
 }
 export interface EntityService extends WithConditionsBuilderFactory, WithRelations {
@@ -31,6 +32,6 @@ export interface EntityService extends WithConditionsBuilderFactory, WithRelatio
     insert: (map?: object) => InsertServiceBuilder;
 }
 export interface WithInclusion {
-    include(...relations: SelectServiceBuilder[]): SelectServiceBuilder;
+    include(...relations: any[]): SelectServiceBuilder;
 }
 export declare const service: <T>(definition: EntityDefinition, sh: ShipHoldBuilders) => EntityService;

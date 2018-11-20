@@ -1,25 +1,26 @@
 const test = require('zora');
-const {default:shiphold} = require('../../src-old/shiphold');
+const {shiphold} = require('../../dist/bundle');
+
+const createService = () => shiphold()
+    .service({name: 'Users', table: 'users', primaryKey: 'id'});
 
 test('bind query to proper table', t => {
-	const query = shiphold()
-		.model('Users', (sh) => ({table: 'users', columns: {}, relations: {}}))
-		.insert()
-		.value('foo', 'bar')
-		.build()
-		.text;
+    const query = createService()
+        .insert('foo')
+        .values({foo: 'bar'})
+        .build()
+        .text;
 
-	const expected = 'INSERT INTO "users" ( "foo" ) VALUES ( \'bar\' ) RETURNING *';
-	t.equal(query, expected);
+    const expected = 'INSERT INTO "users" ( "foo" ) VALUES ( \'bar\' ) RETURNING *';
+    t.equal(query, expected);
 });
 
 test('bind query to proper table with forwarded arguments', t => {
-	const query = shiphold()
-		.model('Users', (sh) => ({table: 'users', columns: {}, relations: {}}))
-		.insert({foo: 'bar', woot: 'what'})
-		.build()
-		.text;
+    const query = createService()
+        .insert({foo: 'bar', woot: 'what'})
+        .build()
+        .text;
 
-	const expected = 'INSERT INTO "users" ( "foo", "woot" ) VALUES ( \'bar\', \'what\' ) RETURNING *';
-	t.equal(query, expected);
+    const expected = 'INSERT INTO "users" ( "foo", "woot" ) VALUES ( \'bar\', \'what\' ) RETURNING *';
+    t.equal(query, expected);
 });

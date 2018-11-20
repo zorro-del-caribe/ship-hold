@@ -44,17 +44,20 @@ Products.belongsTo(Users, 'user_id', 'owner');
 Users.hasOne(Phones, 'phone');
 Phones.belongsTo(Users, 'user_id');
 
+Users.belongsToMany(Accounts, 'users_accounts_association_select', 'user_id', 'money');
+Accounts.belongsToMany(Users, 'users_accounts_association_select', 'account_id', 'owners');
 
 (async function () {
-    const items = await Phones
+    const items = await Users
         .select()
         .orderBy('id')
         .include(
-            Users.select()
-                .include(Products.select())
+            Accounts.select()
         )
         .debug();
     console.table(items);
+
+    // console.dir(await Accounts.select().orderBy('balance').include(Users.select().include(Products.select())).debug());
 })();
 
 /*

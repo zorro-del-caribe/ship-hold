@@ -1,44 +1,27 @@
 const {hostname: host, username: user, password, database} = require('../config/db');
-const {default:shiphold} = require('../../src-old/shiphold');
+const {shiphold} = require('../../dist/bundle');
 
 const sh = shiphold({host, user, password, database});
-const Users = sh.model('users', function (sc) {
-	return {
-		table: 'users',
-		columns: {
-			id: 'integer',
-			age: 'integer',
-			name: 'string',
-			email: 'string',
-			username: 'string',
-			country: 'string',
-			created_at: 'date',
-			updated_at: 'date'
-		},
-		relations: {
-			products: sc.hasMany('products')
-		}
-	}
+
+const Users = sh.service({
+    name: 'users',
+    table: 'users',
+    primaryKey: 'user_id'
 });
-const Products = sh.model('products', function (sc) {
-	return {
-		table: 'products',
-		columns: {
-			id: 'integer',
-			price: 'double',
-			title: 'string',
-			user_id: 'integer',
-			sku: 'string',
-			stock: 'integer',
-			created_at: 'date',
-			updated_at: 'date'
-		},
-		relations: {
-			user: sc.belongsTo('users', 'user_id')
-		}
-	}
+
+const Posts = sh.service({
+    name: 'posts',
+    table: 'posts',
+    primaryKey: 'post_id'
 });
+
+const Comments = sh.service({
+    name: 'comments',
+    table: 'comments',
+    primaryKey: 'comment_id'
+});
+
 
 exports.sh = sh;
 exports.Users = Users;
-exports.Products = Products;
+exports.Posts = Posts;

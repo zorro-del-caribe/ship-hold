@@ -1,6 +1,6 @@
 import {DeleteBuilder, InsertBuilder, NodeParam, SelectBuilder, UpdateBuilder} from 'ship-hold-querybuilder';
 import {ShipHoldBuilders, WithConditionsBuilderFactory, WithQueryRunner} from './builders';
-import {buildRelation, RelationDefinition, RelationType} from './relations';
+import {BelongsToManyRelationDefinition, buildRelation, RelationDefinition, RelationType} from './relations';
 
 export interface EntityDefinition {
     table: string;
@@ -31,6 +31,8 @@ export interface WithRelations {
 
     hasOne(service: EntityService, alias?: string): WithRelations;
 
+    belongsToMany(service: EntityService, pivot: EntityService | string, keyInPivot: string, alias?: string): WithRelations;
+
     getRelationWith(rel: EntityService | string): RelationDefinition;
 }
 
@@ -43,7 +45,7 @@ export interface EntityService extends WithConditionsBuilderFactory, WithRelatio
 }
 
 export interface WithInclusion {
-    include(...relations: SelectServiceBuilder[]): SelectServiceBuilder;
+    include(...relations: any[]): SelectServiceBuilder;
 }
 
 const withService = fn => function (...args) {
@@ -52,29 +54,51 @@ const withService = fn => function (...args) {
     return builder;
 };
 
+type RelationArgument = string | SelectServiceBuilder | EntityService
+
+// todo typecast
+const normalise = (aliasToService: Map<string, EntityService>) => (rel: RelationArgument): SelectServiceBuilder => {
+
+    // Alias
+    if (typeof rel === 'string') {
+        const service = aliasToService.get(rel);
+        return service.select();
+    }
+
+    // Builder
+    if ('build' in rel) {
+        return <SelectServiceBuilder>rel;
+    }
+
+    // Service
+    return rel.select();
+};
+
 export const service = <T>(definition: EntityDefinition, sh: ShipHoldBuilders): EntityService => {
     const {table} = definition;
     const serviceToRelation = new WeakMap<EntityService, RelationDefinition>();
-    const aliasToRelation = new Map<string, RelationDefinition>();
+    const aliasToService = new Map<string, EntityService>();
 
     const withInclude = (builder: SelectServiceBuilder): SelectServiceBuilder & WithInclusion => Object.assign(builder, {
-        include(...relations: SelectServiceBuilder[]): SelectServiceBuilder {
+        include(...relations: any[]): SelectServiceBuilder {
 
-            const newBuilder = relations.reduce(buildRelation,
-                serviceInstance.select(`"${table}".*`)
-                    .with(table, builder)
-            );
+            const newBuilder = relations
+                .map(normalise(aliasToService))
+                .map(r => r.noop())
+                .reduce(buildRelation(sh),
+                    serviceInstance.select(`"${table}".*`)
+                        .with(table, builder)
+                );
 
-            // we need to re apply sort to ensure pagination for complex queries etc.
-            // @ts-ignore //todo
+            // We need to re apply sort to ensure pagination for complex queries etc.
+            // @ts-ignore
             newBuilder.node('orderBy', builder.node('orderBy'));
 
-            // makes it an entity builder
+            // Makes it an entity builder
             Object.defineProperty(newBuilder, 'service', {value: serviceInstance});
 
             return newBuilder;
         }
-
     });
 
     const serviceInstance = Object.create({
@@ -105,7 +129,7 @@ export const service = <T>(definition: EntityDefinition, sh: ShipHoldBuilders): 
                 alias: label
             };
             serviceToRelation.set(service, relation);
-            aliasToRelation.set(label, relation);
+            aliasToService.set(alias, service);
             return this;
         },
         hasMany(service: EntityService, alias) {
@@ -115,7 +139,7 @@ export const service = <T>(definition: EntityDefinition, sh: ShipHoldBuilders): 
                 alias: label
             };
             serviceToRelation.set(service, relation);
-            aliasToRelation.set(label, relation);
+            aliasToService.set(alias, service);
             return this;
         },
         belongsTo(service: EntityService, foreignKey, alias) {
@@ -126,17 +150,34 @@ export const service = <T>(definition: EntityDefinition, sh: ShipHoldBuilders): 
                 foreignKey
             };
             serviceToRelation.set(service, relation);
-            aliasToRelation.set(label, relation);
+            aliasToService.set(alias, service);
+            return this;
+        },
+        belongsToMany(service: EntityService, pivot: EntityService | string, keyInPivot: string, alias?: string) {
+            const pivotTable = typeof pivot === 'string' ? pivot : pivot.definition.table;
+            const label = alias || service.definition.name.toLowerCase();
+            const relation: BelongsToManyRelationDefinition = {
+                type: RelationType.BELONGS_TO_MANY,
+                alias: label,
+                pivotTable,
+                pivotKey: keyInPivot
+            };
+            serviceToRelation.set(service, relation);
+            aliasToService.set(label, service);
             return this;
         },
         getRelationWith(key: EntityService | string) {
-            const rel = typeof key === 'string' ? aliasToRelation.get(key) : serviceToRelation.get(key);
-            if (!rel) {
-                throw new Error(
-                    `Could not find a relation between ${this.definition.name} and ${typeof key === 'string' ? key : key.definition.name}`
-                );
+
+            if (typeof key === 'string') {
+                return this.getRelationWith(aliasToService.get(key));
             }
-            return rel;
+
+            if (!serviceToRelation.has(key)) {
+                const message = `Could not find a relation between ${this.definition.name} and ${key.definition.name}`;
+                throw new Error(message);
+            }
+
+            return serviceToRelation.get(key);
         }
     }, {
         definition: {value: Object.freeze(definition)} // Todo should freeze deeply

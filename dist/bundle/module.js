@@ -1,6 +1,6 @@
 import { Pool } from 'pg';
-import { select, insert, update, condition, delete, jsonAgg, toJson } from 'ship-hold-querybuilder';
 import * as QueryStream from 'pg-query-stream';
+import { select, insert, update, condition, delete, jsonAgg, toJson, coalesce } from 'ship-hold-querybuilder';
 
 const createPoolConnection = (conf) => {
     const pool = new Pool(conf);
@@ -84,23 +84,32 @@ var RelationType;
     RelationType["HAS_MANY"] = "HAS_MANY";
     RelationType["BELONGS_TO_MANY"] = "BELONGS_TO_MANY";
 })(RelationType || (RelationType = {}));
-const buildRelation = (target, relationBuilder) => {
-    const relDef = target.service.getRelationWith(relationBuilder.service);
-    const reverse = relationBuilder.service.getRelationWith(target.service);
-    if (relDef.type === "HAS_MANY" /* HAS_MANY */) {
-        return oneToMany(target, relationBuilder);
+const buildRelation = (sh) => (targetBuilder, relationBuilder) => {
+    const relDef = targetBuilder.service.getRelationWith(relationBuilder.service);
+    const reverse = relationBuilder.service.getRelationWith(targetBuilder.service);
+    let relFunc;
+    switch (relDef.type) {
+        case "HAS_MANY" /* HAS_MANY */: {
+            relFunc = oneToMany;
+            break;
+        }
+        case "HAS_ONE" /* HAS_ONE */: {
+            relFunc = hasOne;
+            break;
+        }
+        case "BELONGS_TO_MANY" /* BELONGS_TO_MANY */: {
+            relFunc = manyToMany;
+            break;
+        }
+        case "BELONGS_TO" /* BELONGS_TO */: {
+            relFunc = reverse.type === "HAS_MANY" /* HAS_MANY */ ? manyToOne : oneBelongsToOne;
+            break;
+        }
     }
-    if (relDef.type === "HAS_ONE" /* HAS_ONE */) {
-        return hasOne(target, relationBuilder);
+    if (!relFunc) {
+        throw new Error('Unknown relation type');
     }
-    if (relDef.type === "BELONGS_TO" /* BELONGS_TO */ && reverse.type === "HAS_MANY" /* HAS_MANY */) {
-        return manyToOne(target, relationBuilder);
-    }
-    if (relDef.type === "BELONGS_TO" /* BELONGS_TO */ && reverse.type === "HAS_ONE" /* HAS_ONE */) {
-        return oneBelongsToOne(target, relationBuilder);
-    }
-    //todo many to many
-    throw new Error('Unknown relation type');
+    return relFunc(targetBuilder, relationBuilder, sh);
 };
 const has = aggregateFunc => (targetBuilder, relationBuilder) => {
     const { alias } = targetBuilder.service.getRelationWith(relationBuilder.service);
@@ -114,15 +123,14 @@ const has = aggregateFunc => (targetBuilder, relationBuilder) => {
     const selectRightOperand = `"${targetTable}"."${primaryKey}"`;
     return targetBuilder
         .select({
-        value: relSelect(aggregateFunc(`"${relationTable}".*`, alias))
+        value: relSelect({ value: aggregateFunc(`"${relationTable}".*`), as: alias })
             .where(leftOperand, selectRightOperand)
             .noop()
     })
-        .with(relationTable, 
-    // @ts-ignore
-    relationBuilder.where(leftOperand, 'IN', withRightOperand).noop());
+        .with(relationTable, relationBuilder.where(leftOperand, 'IN', withRightOperand).noop());
 };
-const oneToMany = has(jsonAgg);
+const coalesceAggregation = (arg) => coalesce([jsonAgg(arg), `'[]'::json`]);
+const oneToMany = has(coalesceAggregation);
 const manyToOne = (targetBuilder, relationBuilder) => {
     const { foreignKey, alias } = targetBuilder.service.getRelationWith(relationBuilder.service);
     const { table: targetTable } = targetBuilder.service.definition;
@@ -134,12 +142,13 @@ const manyToOne = (targetBuilder, relationBuilder) => {
     const selectRightOperand = `"${targetTable}"."${foreignKey}"`;
     return targetBuilder
         .select({
-        value: relSelect(toJson(`"${relTable}".*`, alias)).where(withLeftOperand, selectRightOperand)
+        value: relSelect({
+            value: toJson(`"${relTable}".*`),
+            as: alias
+        }).where(withLeftOperand, selectRightOperand)
             .noop()
     })
-        .with(relTable, 
-    // @ts-ignore
-    relationBuilder.where(withLeftOperand, 'IN', withRightOperand).noop());
+        .with(relTable, relationBuilder.where(withLeftOperand, 'IN', withRightOperand).noop());
 };
 const hasOne = has(toJson);
 const oneBelongsToOne = (targetBuilder, relationBuilder) => {
@@ -153,13 +162,34 @@ const oneBelongsToOne = (targetBuilder, relationBuilder) => {
     const withRightOperand = targetSelect(foreignKey);
     return targetBuilder
         .select({
-        value: relSelect(toJson(`"${relationTable}".*`, alias))
+        value: relSelect({ value: toJson(`"${relationTable}".*`), as: alias })
             .where(leftOperand, rightOperand)
             .noop()
     })
-        .with(relationTable, 
-    // @ts-ignore
-    relationBuilder.where(leftOperand, 'IN', withRightOperand).noop());
+        .with(relationTable, relationBuilder.where(leftOperand, 'IN', withRightOperand).noop());
+};
+const shFn = 'sh_fn';
+const manyToMany = (targetBuilder, relationBuilder, sh) => {
+    const { pivotKey: targetPivotKey, alias, pivotTable } = targetBuilder.service.getRelationWith(relationBuilder.service);
+    const { pivotKey: relationPivotKey } = relationBuilder.service.getRelationWith(targetBuilder.service);
+    const { table: targetTable, primaryKey: targetPrimaryKey } = targetBuilder.service.definition;
+    const { table: relationTable, primaryKey: relationPrimaryKey } = relationBuilder.service.definition;
+    const pivotWith = sh
+        .select(`"${pivotTable}"."${targetPivotKey}"`, { value: `"${relationTable}"`, as: shFn })
+        .from(pivotTable)
+        .join({ value: relationBuilder, as: relationTable })
+        .on(`"${pivotTable}"."${relationPivotKey}"`, `"${relationTable}"."${relationPrimaryKey}"`)
+        .where(`"${pivotTable}"."${targetPivotKey}"`, 'IN', sh.select(targetPrimaryKey).from(targetTable)) // todo check with other relation should be corrected in case we pass other aliases
+        .noop();
+    return targetBuilder
+        .select({
+        value: sh
+            .select({ value: coalesce([jsonAgg(`${shFn}(${relationTable})`), `'[]'::json`]), as: alias }) //todo same than above (should use alias of with instead)
+            .from(relationTable)
+            .where(`"${relationTable}"."${targetPivotKey}"`, `"${targetTable}"."${targetPrimaryKey}"`)
+            .noop()
+    })
+        .with(relationTable, pivotWith);
 };
 
 const withService = fn => function (...args) {
@@ -167,18 +197,35 @@ const withService = fn => function (...args) {
     Object.defineProperty(builder, 'service', { value: this });
     return builder;
 };
+// todo typecast
+const normalise = (aliasToService) => (rel) => {
+    // Alias
+    if (typeof rel === 'string') {
+        const service = aliasToService.get(rel);
+        return service.select();
+    }
+    // Builder
+    if ('build' in rel) {
+        return rel;
+    }
+    // Service
+    return rel.select();
+};
 const service = (definition, sh) => {
     const { table } = definition;
     const serviceToRelation = new WeakMap();
-    const aliasToRelation = new Map();
+    const aliasToService = new Map();
     const withInclude = (builder) => Object.assign(builder, {
         include(...relations) {
-            const newBuilder = relations.reduce(buildRelation, serviceInstance.select(`"${table}".*`)
+            const newBuilder = relations
+                .map(normalise(aliasToService))
+                .map(r => r.noop())
+                .reduce(buildRelation(sh), serviceInstance.select(`"${table}".*`)
                 .with(table, builder));
-            // we need to re apply sort to ensure pagination for complex queries etc.
-            // @ts-ignore //todo
+            // We need to re apply sort to ensure pagination for complex queries etc.
+            // @ts-ignore
             newBuilder.node('orderBy', builder.node('orderBy'));
-            // makes it an entity builder
+            // Makes it an entity builder
             Object.defineProperty(newBuilder, 'service', { value: serviceInstance });
             return newBuilder;
         }
@@ -209,7 +256,7 @@ const service = (definition, sh) => {
                 alias: label
             };
             serviceToRelation.set(service, relation);
-            aliasToRelation.set(label, relation);
+            aliasToService.set(alias, service);
             return this;
         },
         hasMany(service, alias) {
@@ -219,7 +266,7 @@ const service = (definition, sh) => {
                 alias: label
             };
             serviceToRelation.set(service, relation);
-            aliasToRelation.set(label, relation);
+            aliasToService.set(alias, service);
             return this;
         },
         belongsTo(service, foreignKey, alias) {
@@ -230,15 +277,31 @@ const service = (definition, sh) => {
                 foreignKey
             };
             serviceToRelation.set(service, relation);
-            aliasToRelation.set(label, relation);
+            aliasToService.set(alias, service);
+            return this;
+        },
+        belongsToMany(service, pivot, keyInPivot, alias) {
+            const pivotTable = typeof pivot === 'string' ? pivot : pivot.definition.table;
+            const label = alias || service.definition.name.toLowerCase();
+            const relation = {
+                type: "BELONGS_TO_MANY" /* BELONGS_TO_MANY */,
+                alias: label,
+                pivotTable,
+                pivotKey: keyInPivot
+            };
+            serviceToRelation.set(service, relation);
+            aliasToService.set(label, service);
             return this;
         },
         getRelationWith(key) {
-            const rel = typeof key === 'string' ? aliasToRelation.get(key) : serviceToRelation.get(key);
-            if (!rel) {
-                throw new Error(`Could not find a relation between ${this.definition.name} and ${typeof key === 'string' ? key : key.definition.name}`);
+            if (typeof key === 'string') {
+                return this.getRelationWith(aliasToService.get(key));
             }
-            return rel;
+            if (!serviceToRelation.has(key)) {
+                const message = `Could not find a relation between ${this.definition.name} and ${key.definition.name}`;
+                throw new Error(message);
+            }
+            return serviceToRelation.get(key);
         }
     }, {
         definition: { value: Object.freeze(definition) } // Todo should freeze deeply

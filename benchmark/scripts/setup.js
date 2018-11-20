@@ -1,38 +1,31 @@
 const {sh} = require('./ship-hold');
 
-(async () => {
-	const {query} = sh;
-	try {
-		await query(`DROP TABLE IF EXISTS users, products;`);
-		await query(`CREATE TABLE users
-        (
-        id serial PRIMARY KEY,
-        age integer,
-        name varchar(100),
-        email varchar(100),
-        username varchar(100),
-        country varchar(3),
-        created_at timestamp,
-        updated_at timestamp
-        );`);
+const setupSQL = `
+DROP TABLE IF EXISTS posts, users, comments, tags, posts_tags CASCADE;
+CREATE TABLE users (
+    user_id serial PRIMARY KEY,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    biography TEXT,
+    first_name VARCHAR(100) NOT NULL, 
+    last_name VARCHAR(100) NOT NULL 
+);
 
-		await query(`CREATE TABLE products
-          (
-          id serial PRIMARY KEY,
-          sku character varying(255),
-          title character varying(255),
-          stock integer,
-          price double precision,
-          created_at timestamp,
-          updated_at timestamp,
-          user_id integer REFERENCES users
-          )`);
+CREATE TABLE posts(
+    post_id serial PRIMARY KEY,
+    title VARCHAR NOT NULL,
+    content TEXT,
+    user_id integer REFERENCES users (user_id)
+);
+`;
 
-	} catch (e) {
-		console.log(e);
-		process.exit(1);
-	} finally {
-		console.log(`set up done`);
-		sh.stop();
-	}
-})();
+sh.query(setupSQL)
+    .then(() => {
+        console.log('successfully set up the database');
+    })
+    .catch(e => {
+        console.log('Problem while setting up the database');
+        console.log(e);
+    })
+    .finally(() => {
+        sh.stop();
+    });

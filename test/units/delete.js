@@ -1,15 +1,13 @@
 const test = require('zora');
-const {default:shiphold} = require('../../src-old/shiphold');
+const {shiphold} = require('../../dist/bundle');
 
 test('bind query to proper table', t => {
-	const query = shiphold()
-		.model('Users', (sh) => ({
-			table: 'users', columns: {}, relations: {}
-		}))
-		.delete()
-		.build()
-		.text;
+    const query = shiphold()
+        .service({name: 'Users', table: 'users', primaryKey: 'id'})
+        .delete()
+        .build()
+        .text;
 
-	const expected = 'DELETE FROM "users"';
-	t.equal(query, expected);
+    const expected = 'DELETE FROM "users"';
+    t.equal(query, expected);
 });
