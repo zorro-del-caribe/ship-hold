@@ -4,33 +4,39 @@ const withService = fn => function (...args) {
     Object.defineProperty(builder, 'service', { value: this });
     return builder;
 };
-// todo typecast
-const normalise = (aliasToService) => (rel) => {
+const isNormalized = (val) => {
+    return typeof val === 'object' && 'as' in val;
+};
+const normaliseInclude = (aliasToService, targetBuilder) => (rel) => {
+    if (isNormalized(rel)) {
+        return rel;
+    }
     // Alias
     if (typeof rel === 'string') {
         const service = aliasToService.get(rel);
-        return service.select();
+        return { builder: service.select(), as: rel };
     }
-    // Builder
-    if ('build' in rel) {
-        return rel;
-    }
-    // Service
-    return rel.select();
+    const builder = ('build' in rel ? rel : rel.select()).noop();
+    const as = targetBuilder.service.getRelationWith(builder.service).alias;
+    return {
+        builder: builder,
+        as
+    };
 };
 export const service = (definition, sh) => {
-    const { table } = definition;
+    const { table, name } = definition;
     const serviceToRelation = new WeakMap();
     const aliasToService = new Map();
+    const setAsServiceBuilder = (builder) => Object.defineProperty(builder, 'service', { value: serviceInstance });
     const withInclude = (builder) => Object.assign(builder, {
         include(...relations) {
+            const targetBuilder = setAsServiceBuilder(sh.select(`"${name}".*`)
+                .from(name)
+                .with(name, builder));
             const newBuilder = relations
-                .map(normalise(aliasToService))
-                .map(r => r.noop())
-                .reduce(buildRelation(sh), serviceInstance.select(`"${table}".*`)
-                .with(table, builder));
+                .map(normaliseInclude(aliasToService, builder))
+                .reduce(buildRelation(sh), targetBuilder);
             // We need to re apply sort to ensure pagination for complex queries etc.
-            // @ts-ignore
             newBuilder.node('orderBy', builder.node('orderBy'));
             // Makes it an entity builder
             Object.defineProperty(newBuilder, 'service', { value: serviceInstance });

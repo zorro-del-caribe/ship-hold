@@ -1,0 +1,2 @@
+exports.COMMENTS_NUMBER = 120000;
+exports.BATCH_SIZE = 5000;

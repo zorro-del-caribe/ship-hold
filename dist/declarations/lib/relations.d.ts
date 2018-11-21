@@ -1,5 +1,4 @@
 import { SelectServiceBuilder } from './service';
-import { Buildable } from 'ship-hold-querybuilder';
 import { ShipHoldBuilders } from './builders';
 export declare const enum RelationType {
     BELONGS_TO = "BELONGS_TO",
@@ -18,8 +17,8 @@ export interface BelongsToManyRelationDefinition extends RelationDefinition {
     pivotTable: string;
     pivotKey: string;
 }
-export interface InclusionParameter {
-    builder: Buildable;
+export interface InclusionInput {
+    builder: SelectServiceBuilder;
     as: string;
 }
-export declare const buildRelation: (sh: ShipHoldBuilders) => (targetBuilder: SelectServiceBuilder, relationBuilder: SelectServiceBuilder) => any;
+export declare const buildRelation: (sh: ShipHoldBuilders) => (targetBuilder: SelectServiceBuilder, relation: InclusionInput) => any;

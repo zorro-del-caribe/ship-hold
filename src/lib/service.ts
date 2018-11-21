@@ -1,6 +1,12 @@
-import {DeleteBuilder, InsertBuilder, NodeParam, SelectBuilder, UpdateBuilder} from 'ship-hold-querybuilder';
+import {Builder, DeleteBuilder, InsertBuilder, NodeParam, SelectBuilder, UpdateBuilder} from 'ship-hold-querybuilder';
 import {ShipHoldBuilders, WithConditionsBuilderFactory, WithQueryRunner} from './builders';
-import {BelongsToManyRelationDefinition, buildRelation, RelationDefinition, RelationType} from './relations';
+import {
+    BelongsToManyRelationDefinition,
+    buildRelation,
+    RelationDefinition,
+    RelationType,
+    InclusionInput
+} from './relations';
 
 export interface EntityDefinition {
     table: string;
@@ -54,44 +60,55 @@ const withService = fn => function (...args) {
     return builder;
 };
 
-type RelationArgument = string | SelectServiceBuilder | EntityService
+type RelationArgument = InclusionInput | string | SelectServiceBuilder | EntityService;
 
-// todo typecast
-const normalise = (aliasToService: Map<string, EntityService>) => (rel: RelationArgument): SelectServiceBuilder => {
-
-    // Alias
-    if (typeof rel === 'string') {
-        const service = aliasToService.get(rel);
-        return service.select();
-    }
-
-    // Builder
-    if ('build' in rel) {
-        return <SelectServiceBuilder>rel;
-    }
-
-    // Service
-    return rel.select();
+const isNormalized = (val: RelationArgument): val is InclusionInput => {
+    return typeof val === 'object' && 'as' in val;
 };
 
+const normaliseInclude = (aliasToService: Map<string, EntityService>, targetBuilder: SelectServiceBuilder) =>
+    (rel: RelationArgument): InclusionInput => {
+
+        if (isNormalized(rel)) {
+            return rel;
+        }
+
+        // Alias
+        if (typeof rel === 'string') {
+            const service = aliasToService.get(rel);
+            return {builder: service.select(), as: rel};
+        }
+
+        const builder = <SelectServiceBuilder>('build' in rel ? rel : rel.select()).noop();
+        const as = targetBuilder.service.getRelationWith(builder.service).alias;
+
+        return {
+            builder: builder,
+            as
+        };
+    };
+
 export const service = <T>(definition: EntityDefinition, sh: ShipHoldBuilders): EntityService => {
-    const {table} = definition;
+    const {table, name} = definition;
     const serviceToRelation = new WeakMap<EntityService, RelationDefinition>();
     const aliasToService = new Map<string, EntityService>();
 
+    const setAsServiceBuilder = (builder: Builder) => Object.defineProperty(builder, 'service', {value: serviceInstance});
+
     const withInclude = (builder: SelectServiceBuilder): SelectServiceBuilder & WithInclusion => Object.assign(builder, {
-        include(...relations: any[]): SelectServiceBuilder {
+        include(...relations: RelationArgument[]): SelectServiceBuilder {
+
+            const targetBuilder = setAsServiceBuilder(sh.select(`"${name}".*`)
+                .from(name)
+                .with(name, builder));
 
             const newBuilder = relations
-                .map(normalise(aliasToService))
-                .map(r => r.noop())
+                .map(normaliseInclude(aliasToService, builder))
                 .reduce(buildRelation(sh),
-                    serviceInstance.select(`"${table}".*`)
-                        .with(table, builder)
+                    targetBuilder
                 );
 
             // We need to re apply sort to ensure pagination for complex queries etc.
-            // @ts-ignore
             newBuilder.node('orderBy', builder.node('orderBy'));
 
             // Makes it an entity builder
