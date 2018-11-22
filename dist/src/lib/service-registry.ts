@@ -1,9 +1,5 @@
-import {service, EntityDefinition, EntityService} from './service';
-import {ShipHoldBuilders} from './builders';
-
-export interface ServiceRegistry extends Iterable<[string, EntityService]> {
-    service(def: EntityDefinition | string): EntityService;
-}
+import {service} from './service';
+import {EntityDefinition, EntityService, ServiceRegistry, ShipHoldBuilders} from '../interfaces';
 
 // Create a registry of services bound to a specific table
 export const serviceRegistry = (builders: ShipHoldBuilders): ServiceRegistry => {

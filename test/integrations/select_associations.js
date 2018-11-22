@@ -115,6 +115,7 @@ module.exports = function (sh) {
 
         // ONE HAS ONE
 
+        /*
         t.test('one has one: load all users with their phone number (service notation)', async t => {
             const {Users, Phones} = createServices();
             const expected = usersFixture()
@@ -195,51 +196,47 @@ module.exports = function (sh) {
             t.deepEqual(users, expected);
         });
 
-        // ONE BELONGS TO ONE
+// ONE BELONGS TO ONE
 
         t.test('one belongs to one: load all the phones with their owner (service notation)', async t => {
             const {Users, Phones} = createServices();
-            const expected = usersFixture()
-                .map(u => Object.assign(u, {
-                    phone: phonesFixture(p => p.user_id === u.id)
-                        .map(({id, number, user_id}) => ({id, number, user_id}))[0] || null
+            const expected = phonesFixture()
+                .map(p => Object.assign(p, {
+                    human: (usersFixture(u => p.user_id === u.id)[0]) || null
                 }));
-            const builder = Users
+            const builder = Phones
                 .select()
                 .orderBy('id')
-                .include(Phones);
+                .include(Users);
 
-            const users = await builder.run();
-            t.deepEqual(users, expected);
+            const phones = await builder.run();
+            t.deepEqual(phones, expected);
         });
 
         t.test('one belongs to one: load all the phones with their owner (builder notations)', async t => {
             const {Users, Phones} = createServices();
-            const expected = usersFixture()
-                .map(u => Object.assign(u, {phone: phonesFixture(p => p.user_id === u.id)[0] || null}));
-            const builder = Users
+            const expected = phonesFixture()
+                .map(p => Object.assign(p, {human: usersFixture(u => p.user_id === u.id)[0] || null}));
+            const builder = Phones
                 .select()
                 .orderBy('id')
-                .include(Phones.select());
+                .include(Users.select());
 
-            const users = await builder.run();
-            t.deepEqual(users, expected);
+            const phones = await builder.run();
+            t.deepEqual(phones, expected);
         });
 
         t.test('one belongs to one: load all the phones with their owner (builder notations), using select fields ', async t => {
             const {Users, Phones} = createServices();
-            const expected = usersFixture()
-                .map(({id, name}) => Object.assign({
-                    id,
-                    name
-                }, {
-                    phone: phonesFixture(p => p.user_id === id)
-                        .map(({id, user_id}) => ({id, user_id}))[0] || null
+            const expected = phonesFixture()
+                .map(p => Object.assign(p, {
+                    human: usersFixture(u => p.user_id === u.id)
+                        .map(({id, name}) => ({id, name}))[0] || null
                 }));
-            const builder = Users
-                .select('id', 'name')
+            const builder = Phones
+                .select('id', 'number', 'user_id')
                 .orderBy('id')
-                .include(Phones.select('id', 'user_id'));
+                .include(Users.select('id', 'name'));
 
             const users = await builder.run();
             t.deepEqual(users, expected);
@@ -247,37 +244,34 @@ module.exports = function (sh) {
 
         t.test('one belongs to one: load all the phones with their owner with custom alias', async t => {
             const {Users, Phones} = createServices();
-            const expected = usersFixture()
-                .map(({id, name}) => Object.assign({
-                    id,
-                    name
-                }, {
-                    p: phonesFixture(p => p.user_id === id)
-                        .map(({id, user_id}) => ({id, user_id}))[0] || null
+            const expected = phonesFixture()
+                .map(p => Object.assign(p, {
+                    holder: usersFixture(u => p.user_id === u.id)
+                        .map(({id, name}) => ({id, name}))[0] || null
                 }));
-            const builder = Users
-                .select('id', 'name')
+            const builder = Phones
+                .select('id', 'number', 'user_id')
                 .orderBy('id')
-                .include({builder: Phones.select('id', 'user_id'), as: 'p'});
+                .include({builder: Users.select('id', 'name'), as: 'holder'});
 
             const users = await builder.run();
             t.deepEqual(users, expected);
         });
 
         t.test('one belongs to one: load all the phones with their owner (string notation)', async t => {
-            const {Users} = createServices();
-            const expected = usersFixture()
-                .map(u => Object.assign(u, {phone: phonesFixture(p => p.user_id === u.id)[0] || null}));
-            const builder = Users
+            const {Phones} = createServices();
+            const expected = phonesFixture()
+                .map(p => Object.assign(p, {human: usersFixture(u => p.user_id === u.id)[0] || null}));
+            const builder = Phones
                 .select()
                 .orderBy('id')
-                .include('phone');
+                .include('human');
 
             const users = await builder.run();
             t.deepEqual(users, expected);
         });
 
-        // ONE BELONGS TO MANY
+// ONE HAS MANY
 
         t.test('one to Many: load all users with their products (service notation)', async t => {
             const {Users, Products} = createServices();
@@ -318,7 +312,8 @@ module.exports = function (sh) {
             const builder = Users
                 .select('id', 'name')
                 .orderBy('id')
-                .include(Products.select('id', 'sku', 'user_id').orderBy('id'));
+                .limit(4)
+                .include(Products.select('id', 'sku', 'user_id').orderBy('id').limit(1));
 
             const users = await builder.run();
 
@@ -497,7 +492,7 @@ module.exports = function (sh) {
             t.deepEqual(users, expected);
         });
 
-        // MANY HAS ONE
+// MANY HAS ONE
 
         t.test('many to one: specify fields (string notation)', async t => {
             const {Products} = createServices();
@@ -593,7 +588,7 @@ module.exports = function (sh) {
             t.deepEqual(products, expected);
         });
 
-        // MANY BELONGS TO MANY
+// MANY BELONGS TO MANY
 
         t.test('many to many', async t => {
             const {Users, Accounts} = createServices();
@@ -680,6 +675,48 @@ module.exports = function (sh) {
             const users = await builder.run();
             t.deepEqual(users, expected);
         });
+
+        t.test('many to many: load multiple times the service with custom aliases', async t => {
+            const {Users, Accounts} = createServices();
+            const expected = [{
+                'id': 1,
+                'name': 'Laurent',
+                'positive': [{'id': 1, 'balance': 200.42}],
+                'negative': [{'id': 2, 'balance': -20.56}]
+            }, {
+                'id': 2,
+                'name': 'Jesus',
+                'positive': [{'id': 1, 'balance': 200.42}, {'id': 3, 'balance': 42.42}, {'id': 4, 'balance': 51.2}],
+                'negative': []
+            }, {'id': 3, 'name': 'Raymond', 'positive': [], 'negative': []}, {
+                'id': 4,
+                'name': 'Blandine',
+                'positive': [],
+                'negative': []
+            }, {'id': 5, 'name': 'Olivier', 'positive': [], 'negative': []}, {
+                'id': 6,
+                'name': 'Francoise',
+                'positive': [],
+                'negative': []
+            }];
+            const builder = Users
+                .select('id', 'name')
+                .orderBy('id')
+                .include(
+                    {
+                        builder: Accounts.select().where('balance', '>', 0).orderBy('id'),
+                        as: 'positive'
+                    }, {
+                        builder: Accounts.select().where('balance', '<', 0).orderBy('id'),
+                        as: 'negative'
+                    });
+
+            const actual = await builder.run();
+
+            t.deepEqual(actual, expected);
+        });
+
+// MIX
 
         t.test('combo', async t => {
             const {Users, Products, Phones, Accounts} = createServices();
@@ -793,10 +830,50 @@ module.exports = function (sh) {
             const builder = Products
                 .select()
                 .where('id', '$id')
-                .include(Users.select().include('phone', Accounts.select().orderBy('id')));
+                .include(
+                    Users
+                        .select()
+                        .include(
+                            'phone',
+                            Accounts
+                                .select()
+                                .orderBy('id')));
 
             const products = await builder.run({id: 2});
             t.deepEqual(products, expected);
+        });
+
+        */
+
+        t.test('pagination on nested include', async t => {
+            const {Users, Products} = createServices();
+
+            const expected = [
+                {id: 1, name: 'Laurent', products: [{id: 2, sku: 'kbd', user_id: 1, owner: {id: 1, name: 'Laurent'}}]},
+                {id: 2, name: 'Jesus', products: [{id: 1, sku: 'sgl', user_id: 2, owner: {id: 2, name: 'Jesus'}}]},
+                {id: 3, name: 'Raymond', products: []},
+                {
+                    id: 4,
+                    name: 'Blandine',
+                    products: [{id: 5, sku: 'wdr', user_id: 4, owner: {id: 4, name: 'Blandine'}}]
+                },
+            ];
+
+            const builder = Users
+                .select('id', 'name')
+                .orderBy('id')
+                .limit(4)
+                .include(
+                    Products
+                        .select('id', 'user_id', 'sku')
+                        .orderBy('id')
+                        .limit(1)
+                        .include(Users.select('id', 'name'))
+                );
+
+            const actual = await builder.run();
+
+            t.deepEqual(actual, expected);
         });
     });
 };

@@ -1,123 +1,56 @@
-import { buildRelation } from './relations';
-const withService = fn => function (...args) {
-    const builder = fn(...args);
-    Object.defineProperty(builder, 'service', { value: this });
-    return builder;
-};
-const isNormalized = (val) => {
-    return typeof val === 'object' && 'as' in val;
-};
-const normaliseInclude = (aliasToService, targetBuilder) => (rel) => {
-    if (isNormalized(rel)) {
-        return rel;
-    }
-    // Alias
-    if (typeof rel === 'string') {
-        const service = aliasToService.get(rel);
-        return { builder: service.select(), as: rel };
-    }
-    const builder = ('build' in rel ? rel : rel.select()).noop();
-    const as = targetBuilder.service.getRelationWith(builder.service).alias;
-    return {
-        builder: builder,
-        as
-    };
-};
+import { compositeNode } from 'ship-hold-querybuilder';
+import { buildRelation, } from './relations';
+import { withRelation } from './with-relations';
+import { normaliseInclude, setAsServiceBuilder } from './utils';
 export const service = (definition, sh) => {
     const { table, name } = definition;
     const serviceToRelation = new WeakMap();
     const aliasToService = new Map();
-    const setAsServiceBuilder = (builder) => Object.defineProperty(builder, 'service', { value: serviceInstance });
+    let setAsServiceB;
     const withInclude = (builder) => Object.assign(builder, {
         include(...relations) {
-            const targetBuilder = setAsServiceBuilder(sh.select(`"${name}".*`)
+            // todo we may need to (unset) pagination on "builder" in case we are in a nested include (ie if we have a parent)
+            // todo therefore we also need to restrict the with query (for efficiency) depending on the relation with the parent
+            const orderBy = builder.node('orderBy');
+            const limit = builder.node('limit');
+            builder.node('orderBy', compositeNode());
+            builder.node('limit', compositeNode());
+            const targetBuilder = setAsServiceB(sh.select(`"${name}".*`)
                 .from(name)
-                .with(name, builder));
+                .with(name, builder), name);
             const newBuilder = relations
                 .map(normaliseInclude(aliasToService, builder))
                 .reduce(buildRelation(sh), targetBuilder);
-            // We need to re apply sort to ensure pagination for complex queries etc.
-            newBuilder.node('orderBy', builder.node('orderBy'));
-            // Makes it an entity builder
-            Object.defineProperty(newBuilder, 'service', { value: serviceInstance });
+            // We need to re apply pagination settings to ensure pagination work for complex queries etc.
+            newBuilder.node('orderBy', orderBy);
+            newBuilder.node('limit', limit);
+            console.log(newBuilder.build());
             return newBuilder;
         }
     });
-    const serviceInstance = Object.create({
-        select: withService((...args) => withInclude(sh
+    const ServicePrototype = Object.assign({
+        select: (...args) => setAsServiceB(withInclude(sh
             .select(...args)
             .from(table))),
-        insert: withService((...args) => sh
+        insert: (...args) => setAsServiceB(sh
             .insert(...args)
             .into(table)
             .returning('*')),
-        update: withService((map = {}) => {
+        update: (map = {}) => {
             const builder = sh
                 .update(table)
                 .returning('*');
             for (const [key, value] of Object.entries(map)) {
                 builder.set(key, value);
             }
-            return builder;
-        }),
-        delete: withService(() => sh.delete(table)),
-        if: (leftOperand, ...rest) => sh.if(leftOperand, ...rest),
-        hasOne(service, alias) {
-            const label = alias || service.definition.name.toLowerCase();
-            const relation = {
-                type: "HAS_ONE" /* HAS_ONE */,
-                alias: label
-            };
-            serviceToRelation.set(service, relation);
-            aliasToService.set(alias, service);
-            return this;
+            return setAsServiceB(builder);
         },
-        hasMany(service, alias) {
-            const label = alias || service.definition.name.toLowerCase();
-            const relation = {
-                type: "HAS_MANY" /* HAS_MANY */,
-                alias: label
-            };
-            serviceToRelation.set(service, relation);
-            aliasToService.set(alias, service);
-            return this;
-        },
-        belongsTo(service, foreignKey, alias) {
-            const label = alias || service.definition.name.toLowerCase();
-            const relation = {
-                type: "BELONGS_TO" /* BELONGS_TO */,
-                alias: label,
-                foreignKey
-            };
-            serviceToRelation.set(service, relation);
-            aliasToService.set(alias, service);
-            return this;
-        },
-        belongsToMany(service, pivot, keyInPivot, alias) {
-            const pivotTable = typeof pivot === 'string' ? pivot : pivot.definition.table;
-            const label = alias || service.definition.name.toLowerCase();
-            const relation = {
-                type: "BELONGS_TO_MANY" /* BELONGS_TO_MANY */,
-                alias: label,
-                pivotTable,
-                pivotKey: keyInPivot
-            };
-            serviceToRelation.set(service, relation);
-            aliasToService.set(label, service);
-            return this;
-        },
-        getRelationWith(key) {
-            if (typeof key === 'string') {
-                return this.getRelationWith(aliasToService.get(key));
-            }
-            if (!serviceToRelation.has(key)) {
-                const message = `Could not find a relation between ${this.definition.name} and ${key.definition.name}`;
-                throw new Error(message);
-            }
-            return serviceToRelation.get(key);
-        }
-    }, {
+        delete: () => setAsServiceB(sh.delete(table)),
+        if: (leftOperand, ...rest) => sh.if(leftOperand, ...rest)
+    }, withRelation(serviceToRelation, aliasToService));
+    const serviceInstance = Object.create(ServicePrototype, {
         definition: { value: Object.freeze(definition) } // Todo should freeze deeply
     });
+    setAsServiceB = setAsServiceBuilder(serviceInstance);
     return serviceInstance;
 };

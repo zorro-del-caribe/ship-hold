@@ -22,7 +22,7 @@ const iterator = (gen) => (...args) => {
     iter.next();
     return iter;
 };
-const buildersFactory = (pool) => {
+const withQueryRunner = (pool) => {
     const runner = {
         stream(consumer, params = {}, offset = 1) {
             const stream = this._stream(params);
@@ -67,23 +67,22 @@ const buildersFactory = (pool) => {
             });
         }
     };
-    const delegateToBuilder = (builderFactory) => (...args) => Object.assign(builderFactory(...args), runner);
+    return (builder) => {
+        return Object.assign(builder, runner);
+    };
+};
+
+const buildersFactory = (pool) => {
+    const runnable = withQueryRunner(pool);
     return {
-        select: delegateToBuilder(select),
-        update: delegateToBuilder(update),
-        delete: delegateToBuilder(delete),
-        insert: delegateToBuilder(insert),
+        select: (...args) => runnable(select(...args)),
+        update: (...args) => runnable(update(...args)),
+        delete: (...args) => runnable(delete(...args)),
+        insert: (...args) => runnable(insert(...args)),
         if: (...args) => condition().if(...args)
     };
 };
 
-var RelationType;
-(function (RelationType) {
-    RelationType["BELONGS_TO"] = "BELONGS_TO";
-    RelationType["HAS_ONE"] = "HAS_ONE";
-    RelationType["HAS_MANY"] = "HAS_MANY";
-    RelationType["BELONGS_TO_MANY"] = "BELONGS_TO_MANY";
-})(RelationType || (RelationType = {}));
 const buildRelation = (sh) => (targetBuilder, relation) => {
     const { builder: relationBuilder } = relation;
     const relDef = targetBuilder.service.getRelationWith(relationBuilder.service);
@@ -112,33 +111,33 @@ const buildRelation = (sh) => (targetBuilder, relation) => {
     }
     return relFunc(targetBuilder, relation, sh);
 };
-//todo alias
-const oneBelongsToOne = (targetBuilder, relation) => {
+const oneBelongsToOne = (targetBuilder, relation, sh) => {
     const { builder: relationBuilder, as: alias } = relation;
     const { foreignKey } = targetBuilder.service.getRelationWith(relationBuilder.service);
-    const { table: targetTable } = targetBuilder.service.definition;
-    const { table: relationTable, primaryKey } = relationBuilder.service.definition;
-    const relSelect = relationBuilder.service.select;
-    const targetSelect = targetBuilder.service.select;
-    const leftOperand = `"${relationTable}"."${primaryKey}"`;
-    const rightOperand = `"${targetTable}"."${foreignKey}"`;
-    const withRightOperand = targetSelect(foreignKey);
+    const { cte: targetName } = targetBuilder;
+    const { primaryKey, cte: relationTable } = relationBuilder;
+    const selectLeftOperand = `"${alias}"."${primaryKey}"`;
+    const selectRightOperand = `"${targetName}"."${foreignKey}"`;
+    const withLeftOperand = `"${relationTable}"."${primaryKey}"`;
+    const withRightOperand = sh.select(foreignKey).from(targetName);
+    const selectValue = {
+        value: toJson(`"${alias}".*`),
+        as: alias
+    };
     return targetBuilder
         .select({
-        value: relSelect({
-            value: toJson(`"${relationTable}".*`),
-            as: alias
-        })
-            .where(leftOperand, rightOperand)
+        value: sh.select(selectValue)
+            .from(alias)
+            .where(selectLeftOperand, selectRightOperand)
             .noop()
     })
-        .with(relationTable, relationBuilder.where(leftOperand, "IN" /* IN */, withRightOperand).noop());
+        .with(alias, relationBuilder.where(withLeftOperand, "IN" /* IN */, withRightOperand).noop());
 };
 const manyToOne = (targetBuilder, relation, sh) => {
     const { as: alias, builder: relationBuilder } = relation;
     const { foreignKey } = targetBuilder.service.getRelationWith(relationBuilder.service);
-    const { name: targetName } = targetBuilder.service.definition;
-    const { primaryKey, table: relTable } = relationBuilder.service.definition;
+    const { cte: targetName } = targetBuilder;
+    const { primaryKey, cte: relTable } = relationBuilder;
     const selectLeftOperand = `"${alias}"."${primaryKey}"`;
     const selectRightOperand = `"${targetName}"."${foreignKey}"`;
     const withLeftOperand = `"${relTable}"."${primaryKey}"`;
@@ -158,8 +157,8 @@ const manyToOne = (targetBuilder, relation, sh) => {
 const hasOne = (targetBuilder, relation, sh) => {
     const { builder: relationBuilder, as: alias } = relation;
     const { foreignKey } = relationBuilder.service.getRelationWith(targetBuilder.service);
-    const { name: targetName, primaryKey } = targetBuilder.service.definition;
-    const { table: relationTable } = relationBuilder.service.definition;
+    const { cte: targetName, primaryKey } = targetBuilder;
+    const { cte: relationTable } = relationBuilder;
     const withLeftOperand = `"${relationTable}"."${foreignKey}"`;
     const withRightOperand = sh.select(primaryKey).from(targetName);
     const selectLeftOperand = `"${alias}"."${foreignKey}"`;
@@ -171,58 +170,57 @@ const hasOne = (targetBuilder, relation, sh) => {
             .where(selectLeftOperand, selectRightOperand)
             .noop()
     })
-        .with(alias, relationBuilder.where(withLeftOperand, 'IN', withRightOperand).noop());
+        .with(alias, relationBuilder.where(withLeftOperand, "IN" /* IN */, withRightOperand).noop());
 };
 const coalesceAggregation = (arg) => coalesce([jsonAgg(arg), `'[]'::json`]);
 const oneToMany = (targetBuilder, relation, sh) => {
-    const { builder: relationBuilder, as: alias } = relation;
+    const { builder: relationBuilder, as } = relation;
     const { foreignKey } = relationBuilder.service.getRelationWith(targetBuilder.service);
-    const { name: targetName, primaryKey } = targetBuilder.service.definition;
-    const { table: relationTable } = relationBuilder.service.definition;
-    const selectLeftOperand = `"${alias}"."${foreignKey}"`;
-    const selectRightOperand = `"${targetName}"."${primaryKey}"`;
-    const withLeftOperand = `"${relationTable}"."${foreignKey}"`;
-    const withRightOperand = sh.select(primaryKey).from(targetName);
+    const { cte: targetCTE, primaryKey } = targetBuilder;
+    const { cte: relationCTE } = relationBuilder;
+    const selectLeftOperand = `"${as}"."${foreignKey}"`;
+    const selectRightOperand = `"${targetCTE}"."${primaryKey}"`;
+    const withLeftOperand = `"${relationCTE}"."${foreignKey}"`;
+    const withRightOperand = sh.select(primaryKey).from(targetCTE);
     let relationBuilderInMainQuery;
     const orderByNode = relationBuilder.node('orderBy');
     const limitNode = relationBuilder.node('limit');
+    const createRelationBuilder = (selectArgument = '*') => sh.select(selectArgument)
+        .from(as)
+        .where(selectLeftOperand, selectRightOperand)
+        .noop();
     // We need to paginate the subquery
     if (orderByNode.length || limitNode.length) {
         relationBuilder.node('orderBy', compositeNode());
         relationBuilder.node('limit', compositeNode());
-        const value = sh.select()
-            .from(alias)
-            .where(selectLeftOperand, selectRightOperand)
-            .noop();
+        const value = createRelationBuilder();
         value.node('orderBy', orderByNode);
         value.node('limit', limitNode);
         relationBuilderInMainQuery = sh.select({
-            value: coalesceAggregation(`"${alias}".*`), as: alias
+            value: coalesceAggregation(`"${as}".*`), as
         })
             .from({
             value: value,
-            as: alias
+            as
         });
     }
     else {
-        relationBuilderInMainQuery = sh.select({ value: coalesceAggregation(`"${alias}".*`), as: alias })
-            .from(alias)
-            .where(selectLeftOperand, selectRightOperand)
-            .noop();
+        relationBuilderInMainQuery = createRelationBuilder({ value: coalesceAggregation(`"${as}".*`), as });
     }
     return targetBuilder
         .select({
         value: relationBuilderInMainQuery
     })
-        .with(alias, relationBuilder.where(withLeftOperand, "IN" /* IN */, withRightOperand).noop());
+        .with(as, relationBuilder.where(withLeftOperand, "IN" /* IN */, withRightOperand).noop());
 };
 const shFn = 'sh_temp';
+//todo investigate how nested pagination on nested include would work here would work here
 const manyToMany = (targetBuilder, relation, sh) => {
     const { builder: relationBuilder, as: alias } = relation;
     const { pivotKey: targetPivotKey, pivotTable } = targetBuilder.service.getRelationWith(relationBuilder.service);
     const { pivotKey: relationPivotKey } = relationBuilder.service.getRelationWith(targetBuilder.service);
-    const { name: targetName, primaryKey: targetPrimaryKey } = targetBuilder.service.definition;
-    const { primaryKey: relationPrimaryKey } = relationBuilder.service.definition;
+    const { cte: targetName, primaryKey: targetPrimaryKey } = targetBuilder;
+    const { primaryKey: relationPrimaryKey } = relationBuilder;
     const pivotWith = sh
         .select(`"${pivotTable}"."${targetPivotKey}"`, { value: `"${alias}"`, as: shFn })
         .from(pivotTable)
@@ -233,14 +231,15 @@ const manyToMany = (targetBuilder, relation, sh) => {
     let relationBuilderInMainQuery;
     const orderByNode = relationBuilder.node('orderBy');
     const limitNode = relationBuilder.node('limit');
+    const createRelationBuilder = (selectArgument = '*') => sh
+        .select(selectArgument)
+        .from(alias)
+        .where(`"${alias}"."${targetPivotKey}"`, `"${targetName}"."${targetPrimaryKey}"`)
+        .noop();
     if (orderByNode.length || limitNode.length) {
         relationBuilder.node('orderBy', compositeNode());
         relationBuilder.node('limit', compositeNode());
-        const value = sh
-            .select()
-            .from(alias)
-            .where(`"${alias}"."${targetPivotKey}"`, `"${targetName}"."${targetPrimaryKey}"`)
-            .noop();
+        const value = createRelationBuilder();
         for (const orderMember of [...orderByNode]) {
             // @ts-ignore
             const [prop, direction] = [...orderMember].map(({ value }) => value);
@@ -256,11 +255,10 @@ const manyToMany = (targetBuilder, relation, sh) => {
         });
     }
     else {
-        relationBuilderInMainQuery = sh
-            .select({ value: coalesceAggregation(`${shFn}(${alias})`), as: alias })
-            .from(alias)
-            .where(`"${alias}"."${targetPivotKey}"`, `"${targetName}"."${targetPrimaryKey}"`)
-            .noop();
+        relationBuilderInMainQuery = createRelationBuilder({
+            value: coalesceAggregation(`${shFn}(${alias})`),
+            as: alias
+        });
     }
     return targetBuilder
         .select({
@@ -269,69 +267,8 @@ const manyToMany = (targetBuilder, relation, sh) => {
         .with(alias, pivotWith);
 };
 
-const withService = fn => function (...args) {
-    const builder = fn(...args);
-    Object.defineProperty(builder, 'service', { value: this });
-    return builder;
-};
-const isNormalized = (val) => {
-    return typeof val === 'object' && 'as' in val;
-};
-const normaliseInclude = (aliasToService, targetBuilder) => (rel) => {
-    if (isNormalized(rel)) {
-        return rel;
-    }
-    // Alias
-    if (typeof rel === 'string') {
-        const service = aliasToService.get(rel);
-        return { builder: service.select(), as: rel };
-    }
-    const builder = ('build' in rel ? rel : rel.select()).noop();
-    const as = targetBuilder.service.getRelationWith(builder.service).alias;
+const withRelation = (serviceToRelation, aliasToService) => {
     return {
-        builder: builder,
-        as
-    };
-};
-const service = (definition, sh) => {
-    const { table, name } = definition;
-    const serviceToRelation = new WeakMap();
-    const aliasToService = new Map();
-    const setAsServiceBuilder = (builder) => Object.defineProperty(builder, 'service', { value: serviceInstance });
-    const withInclude = (builder) => Object.assign(builder, {
-        include(...relations) {
-            const targetBuilder = setAsServiceBuilder(sh.select(`"${name}".*`)
-                .from(name)
-                .with(name, builder));
-            const newBuilder = relations
-                .map(normaliseInclude(aliasToService, builder))
-                .reduce(buildRelation(sh), targetBuilder);
-            // We need to re apply sort to ensure pagination for complex queries etc.
-            newBuilder.node('orderBy', builder.node('orderBy'));
-            // Makes it an entity builder
-            Object.defineProperty(newBuilder, 'service', { value: serviceInstance });
-            return newBuilder;
-        }
-    });
-    const serviceInstance = Object.create({
-        select: withService((...args) => withInclude(sh
-            .select(...args)
-            .from(table))),
-        insert: withService((...args) => sh
-            .insert(...args)
-            .into(table)
-            .returning('*')),
-        update: withService((map = {}) => {
-            const builder = sh
-                .update(table)
-                .returning('*');
-            for (const [key, value] of Object.entries(map)) {
-                builder.set(key, value);
-            }
-            return builder;
-        }),
-        delete: withService(() => sh.delete(table)),
-        if: (leftOperand, ...rest) => sh.if(leftOperand, ...rest),
         hasOne(service, alias) {
             const label = alias || service.definition.name.toLowerCase();
             const relation = {
@@ -386,9 +323,87 @@ const service = (definition, sh) => {
             }
             return serviceToRelation.get(key);
         }
-    }, {
+    };
+};
+
+const isNormalized = (val) => {
+    return typeof val === 'object' && 'as' in val;
+};
+const normaliseInclude = (aliasToService, targetBuilder) => (rel) => {
+    if (isNormalized(rel)) {
+        return rel;
+    }
+    // Alias
+    if (typeof rel === 'string') {
+        const service = aliasToService.get(rel);
+        return { builder: service.select(), as: rel };
+    }
+    const builder = ('build' in rel ? rel : rel.select()).noop();
+    const as = targetBuilder.service.getRelationWith(builder.service).alias;
+    return {
+        builder: builder,
+        as
+    };
+};
+const setAsServiceBuilder = (service) => {
+    const { table, primaryKey } = service.definition;
+    return (builder, tableName = table) => Object.defineProperties(builder, {
+        service: { value: service },
+        cte: { value: tableName },
+        primaryKey: { value: primaryKey }
+    });
+};
+
+const service = (definition, sh) => {
+    const { table, name } = definition;
+    const serviceToRelation = new WeakMap();
+    const aliasToService = new Map();
+    let setAsServiceB;
+    const withInclude = (builder) => Object.assign(builder, {
+        include(...relations) {
+            // todo we may need to (unset) pagination on "builder" in case we are in a nested include (ie if we have a parent)
+            // todo therefore we also need to restrict the with query (for efficiency) depending on the relation with the parent
+            const orderBy = builder.node('orderBy');
+            const limit = builder.node('limit');
+            builder.node('orderBy', compositeNode());
+            builder.node('limit', compositeNode());
+            const targetBuilder = setAsServiceB(sh.select(`"${name}".*`)
+                .from(name)
+                .with(name, builder), name);
+            const newBuilder = relations
+                .map(normaliseInclude(aliasToService, builder))
+                .reduce(buildRelation(sh), targetBuilder);
+            // We need to re apply pagination settings to ensure pagination work for complex queries etc.
+            newBuilder.node('orderBy', orderBy);
+            newBuilder.node('limit', limit);
+            console.log(newBuilder.build());
+            return newBuilder;
+        }
+    });
+    const ServicePrototype = Object.assign({
+        select: (...args) => setAsServiceB(withInclude(sh
+            .select(...args)
+            .from(table))),
+        insert: (...args) => setAsServiceB(sh
+            .insert(...args)
+            .into(table)
+            .returning('*')),
+        update: (map = {}) => {
+            const builder = sh
+                .update(table)
+                .returning('*');
+            for (const [key, value] of Object.entries(map)) {
+                builder.set(key, value);
+            }
+            return setAsServiceB(builder);
+        },
+        delete: () => setAsServiceB(sh.delete(table)),
+        if: (leftOperand, ...rest) => sh.if(leftOperand, ...rest)
+    }, withRelation(serviceToRelation, aliasToService));
+    const serviceInstance = Object.create(ServicePrototype, {
         definition: { value: Object.freeze(definition) } // Todo should freeze deeply
     });
+    setAsServiceB = setAsServiceBuilder(serviceInstance);
     return serviceInstance;
 };
 
