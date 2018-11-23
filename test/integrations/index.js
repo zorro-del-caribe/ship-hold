@@ -11,11 +11,11 @@ const sh = shiphold({
     try {
         await setup(sh);
         const tests = [
-            // './select_simple',
+            './select_simple',
             './select_associations',
-            // './insert',
-            // './update',
-            // './delete'
+            './insert',
+            './update',
+            './delete'
         ].map(f => (require(f)(sh)).task);
 
         // wait for tests to complete (//todo could be run in parallel ? )

@@ -1,6 +1,10 @@
 import { jsonAgg, toJson, coalesce, compositeNode } from 'ship-hold-querybuilder';
-export const buildRelation = (sh) => (targetBuilder, relation) => {
+import { setAsServiceBuilder } from './with-service-builder-mixin';
+export const changeFromRelation = (sh) => (targetBuilder, relation) => {
     const { builder: relationBuilder } = relation;
+    if (targetBuilder === relationBuilder) {
+        return self(targetBuilder, sh);
+    }
     const relDef = targetBuilder.service.getRelationWith(relationBuilder.service);
     const reverse = relationBuilder.service.getRelationWith(targetBuilder.service);
     let relFunc;
@@ -181,4 +185,17 @@ const manyToMany = (targetBuilder, relation, sh) => {
         value: relationBuilderInMainQuery
     })
         .with(alias, pivotWith);
+};
+const self = (builder, sh) => {
+    const name = builder.service.definition.name;
+    const orderBy = builder.node('orderBy');
+    const limit = builder.node('limit');
+    const setAsServiceB = setAsServiceBuilder(builder.service);
+    const targetBuilder = setAsServiceB(sh.select(`"${name}".*`)
+        .from(name)
+        .with(name, builder), name);
+    // We need to re apply pagination settings to ensure pagination work for complex queries etc.
+    targetBuilder.node('orderBy', orderBy);
+    targetBuilder.node('limit', limit);
+    return targetBuilder;
 };

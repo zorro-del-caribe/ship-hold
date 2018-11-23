@@ -103,19 +103,19 @@ module.exports = function (sh) {
     (1,2),
     (2,1),
     (2,3),
-    (2,4)
+    (2,4),
+    (5,1)
       RETURNING *
     `;
 
             const {rows} = await query(queryText);
             t.equal(rows.length, 4, 'should have inserted 4 accounts');
             const {rows: pivotRows} = await query(pivotq);
-            t.equal(pivotRows.length, 5, 'should have inserted 5 relations');
+            t.equal(pivotRows.length, 6, 'should have inserted 6 relations');
         });
 
         // ONE HAS ONE
 
-        /*
         t.test('one has one: load all users with their phone number (service notation)', async t => {
             const {Users, Phones} = createServices();
             const expected = usersFixture()
@@ -196,7 +196,7 @@ module.exports = function (sh) {
             t.deepEqual(users, expected);
         });
 
-// ONE BELONGS TO ONE
+        // ONE BELONGS TO ONE
 
         t.test('one belongs to one: load all the phones with their owner (service notation)', async t => {
             const {Users, Phones} = createServices();
@@ -271,7 +271,7 @@ module.exports = function (sh) {
             t.deepEqual(users, expected);
         });
 
-// ONE HAS MANY
+        // ONE HAS MANY
 
         t.test('one to Many: load all users with their products (service notation)', async t => {
             const {Users, Products} = createServices();
@@ -312,8 +312,7 @@ module.exports = function (sh) {
             const builder = Users
                 .select('id', 'name')
                 .orderBy('id')
-                .limit(4)
-                .include(Products.select('id', 'sku', 'user_id').orderBy('id').limit(1));
+                .include(Products.select('id', 'sku', 'user_id').orderBy('id'));
 
             const users = await builder.run();
 
@@ -492,7 +491,7 @@ module.exports = function (sh) {
             t.deepEqual(users, expected);
         });
 
-// MANY HAS ONE
+        // MANY HAS ONE
 
         t.test('many to one: specify fields (string notation)', async t => {
             const {Products} = createServices();
@@ -588,7 +587,7 @@ module.exports = function (sh) {
             t.deepEqual(products, expected);
         });
 
-// MANY BELONGS TO MANY
+        // MANY BELONGS TO MANY
 
         t.test('many to many', async t => {
             const {Users, Accounts} = createServices();
@@ -601,7 +600,7 @@ module.exports = function (sh) {
                 },
                 {id: 3, name: 'Raymond', accounts: []},
                 {id: 4, name: 'Blandine', accounts: []},
-                {id: 5, name: 'Olivier', accounts: []},
+                {id: 5, name: 'Olivier', accounts: [{id: 1, balance: 200.42}]},
                 {id: 6, name: 'Francoise', accounts: []},
             ];
             const builder = Users
@@ -640,7 +639,7 @@ module.exports = function (sh) {
                 },
                 {id: 3, name: 'Raymond', accounts: []},
                 {id: 4, name: 'Blandine', accounts: []},
-                {id: 5, name: 'Olivier', accounts: []},
+                {id: 5, name: 'Olivier', accounts: [{id: 1, balance: 200.42}]},
                 {id: 6, name: 'Francoise', accounts: []}
             ];
             const builder = Users
@@ -664,7 +663,7 @@ module.exports = function (sh) {
                 },
                 {id: 3, name: 'Raymond', accounts: []},
                 {id: 4, name: 'Blandine', accounts: []},
-                {id: 5, name: 'Olivier', accounts: []},
+                {id: 5, name: 'Olivier', accounts: [{id: 1, balance: 200.42}]},
                 {id: 6, name: 'Francoise', accounts: []},
             ];
             const builder = Users
@@ -693,7 +692,7 @@ module.exports = function (sh) {
                 'name': 'Blandine',
                 'positive': [],
                 'negative': []
-            }, {'id': 5, 'name': 'Olivier', 'positive': [], 'negative': []}, {
+            }, {'id': 5, 'name': 'Olivier', 'positive': [{id: 1, balance: 200.42}], 'negative': []}, {
                 'id': 6,
                 'name': 'Francoise',
                 'positive': [],
@@ -843,10 +842,8 @@ module.exports = function (sh) {
             t.deepEqual(products, expected);
         });
 
-        */
-
-        t.test('pagination on nested include', async t => {
-            const {Users, Products} = createServices();
+        t.test('pagination on nested include: one to many', async t => {
+            const {Users, Products, Accounts} = createServices();
 
             const expected = [
                 {id: 1, name: 'Laurent', products: [{id: 2, sku: 'kbd', user_id: 1, owner: {id: 1, name: 'Laurent'}}]},
@@ -875,5 +872,56 @@ module.exports = function (sh) {
 
             t.deepEqual(actual, expected);
         });
+
+        t.test('pagination on nested include: many to many', async t => {
+            const {Users, Accounts} = createServices();
+
+            const expected = [
+                {
+                    id: 1, name: 'Laurent', accounts: [
+                        {
+                            id: 2, balance: -20.56, owners: [
+                                {id: 1, name: 'Laurent'}
+                            ]
+                        }, {
+                            id: 1, balance: 200.42, owners: [
+                                {id: 1, name: 'Laurent'},
+                                {id: 2, name: 'Jesus'},
+                                {id: 5, name: 'Olivier'}
+                            ]
+                        }
+                    ]
+                },
+                {
+                    id: 2, name: 'Jesus', accounts: [{
+                        id: 3, balance: 42.42, owners: [
+                            {id: 2, name: 'Jesus'}
+                        ]
+                    }, {
+                        id: 4, balance: 51.2, owners: [
+                            {id: 2, name: 'Jesus'}
+                        ]
+                    }]
+                },
+                {id: 3, name: 'Raymond', accounts: []},
+            ];
+
+            const builder = Users
+                .select('id', 'name')
+                .orderBy('id')
+                .limit(3)
+                .include(
+                    Accounts
+                        .select()
+                        .orderBy('balance')
+                        .limit(2)
+                        .include(Users.select('id', 'name'))
+                );
+
+            const actual = await builder.run();
+
+            t.deepEqual(actual, expected);
+        });
+
     });
 };

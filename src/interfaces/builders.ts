@@ -4,10 +4,10 @@ import {
     ConditionsBuilder, DeleteBuilder, InsertBuilder,
     NodeParam,
     SelectBuilder,
-    SQLComparisonOperator,
+    SQLComparisonOperator, SQLQuery,
     UpdateBuilder
 } from 'ship-hold-querybuilder';
-import {WithRelations} from './relations';
+import {InclusionInput, WithRelations} from './relations';
 
 export interface WithQueryRunner {
     stream: (sink: GeneratorFunction, params?: object, offset?: number) => void;
@@ -59,8 +59,14 @@ export interface EntityService extends WithConditionsBuilderFactory, WithRelatio
     insert: (map ?: object) => InsertServiceBuilder;
 }
 
-export interface WithInclusion {
-    include(...relations: any[]): SelectServiceBuilder;
+export interface WithInclusion<T> {
+    readonly inclusions: InclusionInput[];
+
+    include(...relations: any[]): WithInclusion<T> & T;
+
+    clone(): WithInclusion<T> & T;
+
+    toBuilder(): WithInclusion<T> & T;
 }
 
 export interface ShipHoldBuilders extends WithConditionsBuilderFactory {

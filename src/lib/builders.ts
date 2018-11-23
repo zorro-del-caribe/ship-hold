@@ -9,7 +9,7 @@ import {
     DeleteBuilder, InsertBuilder
 } from 'ship-hold-querybuilder';
 import {DBConnectionsPool, ShipHoldBuilders} from '../interfaces';
-import {withQueryRunner} from './with-query-runner';
+import {withQueryRunner} from './with-query-runner-builder-mixin';
 
 export const buildersFactory = (pool: DBConnectionsPool): ShipHoldBuilders => {
 

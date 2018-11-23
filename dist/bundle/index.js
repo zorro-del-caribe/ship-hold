@@ -26,6 +26,12 @@ const iterator = (gen) => (...args) => {
     iter.next();
     return iter;
 };
+/**
+ * Create a functional mixin to be applied to a builder to be able to run the query against an actual database connection
+ * Note: the mixin is "stateless" (or at least the connection pool can and should be shared across builders) and therefore can be copied as is when cloning a builder
+ * @param {DBConnectionsPool} pool
+ * @returns {WithQueryRunnerMixin}
+ */
 const withQueryRunner = (pool) => {
     const runner = {
         stream(consumer, params = {}, offset = 1) {
@@ -87,8 +93,112 @@ const buildersFactory = (pool) => {
     };
 };
 
-const buildRelation = (sh) => (targetBuilder, relation) => {
+/**
+ * Mixin to be applied to an Entity Service
+ * @param {WeakMap<EntityService, RelationDefinition>} serviceToRelation
+ * @param {Map<string, EntityService>} aliasToService
+ * @returns {WithRelations<EntityService>}
+ */
+const withRelation = (serviceToRelation, aliasToService) => {
+    return {
+        hasOne(service, alias) {
+            const label = alias || service.definition.name.toLowerCase();
+            const relation = {
+                type: "HAS_ONE" /* HAS_ONE */,
+                alias: label
+            };
+            serviceToRelation.set(service, relation);
+            aliasToService.set(alias, service);
+            return this;
+        },
+        hasMany(service, alias) {
+            const label = alias || service.definition.name.toLowerCase();
+            const relation = {
+                type: "HAS_MANY" /* HAS_MANY */,
+                alias: label
+            };
+            serviceToRelation.set(service, relation);
+            aliasToService.set(alias, service);
+            return this;
+        },
+        belongsTo(service, foreignKey, alias) {
+            const label = alias || service.definition.name.toLowerCase();
+            const relation = {
+                type: "BELONGS_TO" /* BELONGS_TO */,
+                alias: label,
+                foreignKey
+            };
+            serviceToRelation.set(service, relation);
+            aliasToService.set(alias, service);
+            return this;
+        },
+        belongsToMany(service, pivot, keyInPivot, alias) {
+            const pivotTable = typeof pivot === 'string' ? pivot : pivot.definition.table;
+            const label = alias || service.definition.name.toLowerCase();
+            const relation = {
+                type: "BELONGS_TO_MANY" /* BELONGS_TO_MANY */,
+                alias: label,
+                pivotTable,
+                pivotKey: keyInPivot
+            };
+            serviceToRelation.set(service, relation);
+            aliasToService.set(label, service);
+            return this;
+        },
+        getRelationWith(key) {
+            if (typeof key === 'string') {
+                return this.getRelationWith(aliasToService.get(key));
+            }
+            if (!serviceToRelation.has(key)) {
+                const message = `Could not find a relation between ${this.definition.name} and ${key.definition.name}`;
+                throw new Error(message);
+            }
+            return serviceToRelation.get(key);
+        }
+    };
+};
+
+const isNormalized = (val) => {
+    return typeof val === 'object' && 'as' in val;
+};
+const normaliseInclude = (aliasToService, targetBuilder) => (rel) => {
+    if (isNormalized(rel)) {
+        return rel;
+    }
+    // Alias
+    if (typeof rel === 'string') {
+        const service = aliasToService.get(rel);
+        return { builder: service.select(), as: rel };
+    }
+    const builder = ('build' in rel ? rel : rel.select()).noop();
+    const as = targetBuilder.service.getRelationWith(builder.service).alias;
+    return {
+        builder: builder,
+        as
+    };
+};
+
+/**
+ * Create a functional mixin to be applied to a builder to pass metadata related to the service and context the builder was generated with
+ * Note: the metadata are part of the "identity" of the builder and therefore are be copied when cloning a builder
+ * @param {EntityService} service
+ * @returns {WithServiceBuilderMixin}
+ */
+const setAsServiceBuilder = (service) => {
+    const { table, primaryKey } = service.definition;
+    return (builder, tableName = table) => Object.defineProperties(builder, {
+        service: { value: service, enumerable: true },
+        cte: { value: tableName, enumerable: true, writable: true },
+        primaryKey: { value: primaryKey, enumerable: true },
+        parentBuilder: { value: null, enumerable: true, writable: true },
+    });
+};
+
+const changeFromRelation = (sh) => (targetBuilder, relation) => {
     const { builder: relationBuilder } = relation;
+    if (targetBuilder === relationBuilder) {
+        return self(targetBuilder, sh);
+    }
     const relDef = targetBuilder.service.getRelationWith(relationBuilder.service);
     const reverse = relationBuilder.service.getRelationWith(targetBuilder.service);
     let relFunc;
@@ -270,124 +380,78 @@ const manyToMany = (targetBuilder, relation, sh) => {
     })
         .with(alias, pivotWith);
 };
-
-const withRelation = (serviceToRelation, aliasToService) => {
-    return {
-        hasOne(service, alias) {
-            const label = alias || service.definition.name.toLowerCase();
-            const relation = {
-                type: "HAS_ONE" /* HAS_ONE */,
-                alias: label
-            };
-            serviceToRelation.set(service, relation);
-            aliasToService.set(alias, service);
-            return this;
-        },
-        hasMany(service, alias) {
-            const label = alias || service.definition.name.toLowerCase();
-            const relation = {
-                type: "HAS_MANY" /* HAS_MANY */,
-                alias: label
-            };
-            serviceToRelation.set(service, relation);
-            aliasToService.set(alias, service);
-            return this;
-        },
-        belongsTo(service, foreignKey, alias) {
-            const label = alias || service.definition.name.toLowerCase();
-            const relation = {
-                type: "BELONGS_TO" /* BELONGS_TO */,
-                alias: label,
-                foreignKey
-            };
-            serviceToRelation.set(service, relation);
-            aliasToService.set(alias, service);
-            return this;
-        },
-        belongsToMany(service, pivot, keyInPivot, alias) {
-            const pivotTable = typeof pivot === 'string' ? pivot : pivot.definition.table;
-            const label = alias || service.definition.name.toLowerCase();
-            const relation = {
-                type: "BELONGS_TO_MANY" /* BELONGS_TO_MANY */,
-                alias: label,
-                pivotTable,
-                pivotKey: keyInPivot
-            };
-            serviceToRelation.set(service, relation);
-            aliasToService.set(label, service);
-            return this;
-        },
-        getRelationWith(key) {
-            if (typeof key === 'string') {
-                return this.getRelationWith(aliasToService.get(key));
-            }
-            if (!serviceToRelation.has(key)) {
-                const message = `Could not find a relation between ${this.definition.name} and ${key.definition.name}`;
-                throw new Error(message);
-            }
-            return serviceToRelation.get(key);
-        }
-    };
+const self = (builder, sh) => {
+    const name = builder.service.definition.name;
+    const orderBy = builder.node('orderBy');
+    const limit = builder.node('limit');
+    const setAsServiceB = setAsServiceBuilder(builder.service);
+    const targetBuilder = setAsServiceB(sh.select(`"${name}".*`)
+        .from(name)
+        .with(name, builder), name);
+    // We need to re apply pagination settings to ensure pagination work for complex queries etc.
+    targetBuilder.node('orderBy', orderBy);
+    targetBuilder.node('limit', limit);
+    return targetBuilder;
 };
 
-const isNormalized = (val) => {
-    return typeof val === 'object' && 'as' in val;
-};
-const normaliseInclude = (aliasToService, targetBuilder) => (rel) => {
-    if (isNormalized(rel)) {
-        return rel;
-    }
-    // Alias
-    if (typeof rel === 'string') {
-        const service = aliasToService.get(rel);
-        return { builder: service.select(), as: rel };
-    }
-    const builder = ('build' in rel ? rel : rel.select()).noop();
-    const as = targetBuilder.service.getRelationWith(builder.service).alias;
-    return {
-        builder: builder,
-        as
+const withInclude = (aliasToService, sh) => {
+    return (target) => {
+        const inclusions = [];
+        const include = withInclude(aliasToService, sh);
+        const originalBuild = Object.getPrototypeOf(target).build.bind(target);
+        const originalClone = Object.getPrototypeOf(target).clone.bind(target);
+        return Object.assign(target, {
+            inclusions,
+            include(...relations) {
+                inclusions.push(...relations
+                    .map(normaliseInclude(aliasToService, target)));
+                return this;
+            },
+            clone() {
+                const clone = include(originalClone());
+                if (inclusions.length) {
+                    clone.include(...inclusions.map(({ as, builder }) => {
+                        const relationClone = builder.clone();
+                        relationClone.parentBuilder = clone;
+                        return {
+                            as,
+                            builder: relationClone
+                        };
+                    }));
+                }
+                return clone;
+            },
+            toBuilder() {
+                const clone = this.clone();
+                const fullRelationsList = [{
+                        as: target.cte,
+                        builder: clone
+                    }, ...clone.inclusions];
+                clone.inclusions.splice(0); // empty list
+                return include(fullRelationsList.reduce(changeFromRelation(sh), clone));
+            },
+            build(params, offset) {
+                if (inclusions.length === 0) {
+                    return originalBuild(params, offset);
+                }
+                return this.toBuilder().build(params, offset);
+            }
+        });
     };
-};
-const setAsServiceBuilder = (service) => {
-    const { table, primaryKey } = service.definition;
-    return (builder, tableName = table) => Object.defineProperties(builder, {
-        service: { value: service },
-        cte: { value: tableName },
-        primaryKey: { value: primaryKey }
-    });
 };
 
 const service = (definition, sh) => {
-    const { table, name } = definition;
+    const { table } = definition;
     const serviceToRelation = new WeakMap();
     const aliasToService = new Map();
+    const include = withInclude(aliasToService, sh);
     let setAsServiceB;
-    const withInclude = (builder) => Object.assign(builder, {
-        include(...relations) {
-            // todo we may need to (unset) pagination on "builder" in case we are in a nested include (ie if we have a parent)
-            // todo therefore we also need to restrict the with query (for efficiency) depending on the relation with the parent
-            const orderBy = builder.node('orderBy');
-            const limit = builder.node('limit');
-            builder.node('orderBy', shipHoldQuerybuilder.compositeNode());
-            builder.node('limit', shipHoldQuerybuilder.compositeNode());
-            const targetBuilder = setAsServiceB(sh.select(`"${name}".*`)
-                .from(name)
-                .with(name, builder), name);
-            const newBuilder = relations
-                .map(normaliseInclude(aliasToService, builder))
-                .reduce(buildRelation(sh), targetBuilder);
-            // We need to re apply pagination settings to ensure pagination work for complex queries etc.
-            newBuilder.node('orderBy', orderBy);
-            newBuilder.node('limit', limit);
-            console.log(newBuilder.build());
-            return newBuilder;
-        }
-    });
     const ServicePrototype = Object.assign({
-        select: (...args) => setAsServiceB(withInclude(sh
-            .select(...args)
-            .from(table))),
+        select: (...args) => {
+            return setAsServiceB(include(sh
+                .select(...args)
+                .from(table)));
+        },
         insert: (...args) => setAsServiceB(sh
             .insert(...args)
             .into(table)

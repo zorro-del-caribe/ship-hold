@@ -1,5 +1,5 @@
 import { select, insert, update, condition, delete as del } from 'ship-hold-querybuilder';
-import { withQueryRunner } from './with-query-runner';
+import { withQueryRunner } from './with-query-runner-builder-mixin';
 export const buildersFactory = (pool) => {
     const runnable = withQueryRunner(pool);
     return {

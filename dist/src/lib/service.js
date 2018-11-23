@@ -1,37 +1,18 @@
-import { compositeNode } from 'ship-hold-querybuilder';
-import { buildRelation, } from './relations';
-import { withRelation } from './with-relations';
-import { normaliseInclude, setAsServiceBuilder } from './utils';
+import { withRelation } from './with-relations-service-mixin';
+import { withInclude } from './with-include-builder-mixin';
+import { setAsServiceBuilder } from './with-service-builder-mixin';
 export const service = (definition, sh) => {
-    const { table, name } = definition;
+    const { table } = definition;
     const serviceToRelation = new WeakMap();
     const aliasToService = new Map();
+    const include = withInclude(aliasToService, sh);
     let setAsServiceB;
-    const withInclude = (builder) => Object.assign(builder, {
-        include(...relations) {
-            // todo we may need to (unset) pagination on "builder" in case we are in a nested include (ie if we have a parent)
-            // todo therefore we also need to restrict the with query (for efficiency) depending on the relation with the parent
-            const orderBy = builder.node('orderBy');
-            const limit = builder.node('limit');
-            builder.node('orderBy', compositeNode());
-            builder.node('limit', compositeNode());
-            const targetBuilder = setAsServiceB(sh.select(`"${name}".*`)
-                .from(name)
-                .with(name, builder), name);
-            const newBuilder = relations
-                .map(normaliseInclude(aliasToService, builder))
-                .reduce(buildRelation(sh), targetBuilder);
-            // We need to re apply pagination settings to ensure pagination work for complex queries etc.
-            newBuilder.node('orderBy', orderBy);
-            newBuilder.node('limit', limit);
-            console.log(newBuilder.build());
-            return newBuilder;
-        }
-    });
     const ServicePrototype = Object.assign({
-        select: (...args) => setAsServiceB(withInclude(sh
-            .select(...args)
-            .from(table))),
+        select: (...args) => {
+            return setAsServiceB(include(sh
+                .select(...args)
+                .from(table)));
+        },
         insert: (...args) => setAsServiceB(sh
             .insert(...args)
             .into(table)

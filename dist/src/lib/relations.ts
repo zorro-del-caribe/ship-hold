@@ -14,9 +14,15 @@ import {
     SelectServiceBuilder,
     ShipHoldBuilders
 } from '../interfaces';
+import {setAsServiceBuilder} from './with-service-builder-mixin';
 
-export const buildRelation = (sh: ShipHoldBuilders) => (targetBuilder: SelectServiceBuilder, relation: InclusionInput) => {
+export const changeFromRelation = (sh: ShipHoldBuilders) => (targetBuilder: SelectServiceBuilder, relation: InclusionInput) => {
     const {builder: relationBuilder} = relation;
+
+    if (targetBuilder === relationBuilder) {
+        return self(targetBuilder, sh);
+    }
+
     const relDef = targetBuilder.service.getRelationWith(relationBuilder.service);
     const reverse = relationBuilder.service.getRelationWith(targetBuilder.service);
 
@@ -237,4 +243,23 @@ const manyToMany = (targetBuilder: SelectServiceBuilder, relation: InclusionInpu
             value: relationBuilderInMainQuery
         })
         .with(alias, pivotWith);
+};
+
+const self = (builder: SelectServiceBuilder, sh) => {
+    const name = builder.service.definition.name;
+    const orderBy = builder.node('orderBy');
+    const limit = builder.node('limit');
+
+    const setAsServiceB = setAsServiceBuilder(builder.service);
+
+    const targetBuilder = setAsServiceB(sh.select(`"${name}".*`)
+        .from(name)
+        .with(name, builder), name);
+
+    // We need to re apply pagination settings to ensure pagination work for complex queries etc.
+    targetBuilder.node('orderBy', orderBy);
+    targetBuilder.node('limit', limit);
+
+    return targetBuilder;
+
 };

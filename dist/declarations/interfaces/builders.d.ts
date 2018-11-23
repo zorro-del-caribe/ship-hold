@@ -1,6 +1,6 @@
 import * as QueryStream from 'pg-query-stream';
 import { Builder, ConditionsBuilder, DeleteBuilder, InsertBuilder, NodeParam, SelectBuilder, SQLComparisonOperator, UpdateBuilder } from 'ship-hold-querybuilder';
-import { WithRelations } from './relations';
+import { InclusionInput, WithRelations } from './relations';
 export interface WithQueryRunner {
     stream: (sink: GeneratorFunction, params?: object, offset?: number) => void;
     _stream: (params?: object, offset?: number) => QueryStream;
@@ -39,8 +39,11 @@ export interface EntityService extends WithConditionsBuilderFactory, WithRelatio
     delete: () => DeleteServiceBuilder;
     insert: (map?: object) => InsertServiceBuilder;
 }
-export interface WithInclusion {
-    include(...relations: any[]): SelectServiceBuilder;
+export interface WithInclusion<T> {
+    readonly inclusions: InclusionInput[];
+    include(...relations: any[]): WithInclusion<T> & T;
+    clone(): WithInclusion<T> & T;
+    toBuilder(): WithInclusion<T> & T;
 }
 export interface ShipHoldBuilders extends WithConditionsBuilderFactory {
     select: (...args: NodeParam<any>[]) => SelectBuilder & WithQueryRunner;

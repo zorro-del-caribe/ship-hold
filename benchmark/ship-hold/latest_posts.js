@@ -20,7 +20,7 @@ const wait = () => new Promise(resolve => {
                 Comments
                     .select()
                     .orderBy('published_at')
-                    .limit(10)
+                    .limit(2)
                     .include(Users)
             )
             .debug();

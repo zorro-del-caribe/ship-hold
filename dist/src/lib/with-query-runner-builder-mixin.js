@@ -4,6 +4,12 @@ const iterator = (gen) => (...args) => {
     iter.next();
     return iter;
 };
+/**
+ * Create a functional mixin to be applied to a builder to be able to run the query against an actual database connection
+ * Note: the mixin is "stateless" (or at least the connection pool can and should be shared across builders) and therefore can be copied as is when cloning a builder
+ * @param {DBConnectionsPool} pool
+ * @returns {WithQueryRunnerMixin}
+ */
 export const withQueryRunner = (pool) => {
     const runner = {
         stream(consumer, params = {}, offset = 1) {

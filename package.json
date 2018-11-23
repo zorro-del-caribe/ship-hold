@@ -55,7 +55,7 @@
     "reflect-metadata": "^0.1.12",
     "rollup": "^0.67.3",
     "sequelize": "^4.41.2",
-    "ship-hold-querybuilder": "^2.0.0-4",
+    "ship-hold-querybuilder": "^2.0.0-5",
     "tap-set-exit": "^1.1.1",
     "typeorm": "^0.2.9",
     "typescript": "^3.1.6",

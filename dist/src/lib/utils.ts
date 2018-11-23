@@ -1,5 +1,4 @@
 import {EntityService, InclusionInput, RelationArgument, SelectServiceBuilder} from '../interfaces';
-import {Builder} from 'ship-hold-querybuilder';
 
 const isNormalized = (val: RelationArgument): val is InclusionInput => {
     return typeof val === 'object' && 'as' in val;
@@ -26,14 +25,3 @@ export const normaliseInclude = (aliasToService: Map<string, EntityService>, tar
             as
         };
     };
-
-export const setAsServiceBuilder = (service: EntityService) => {
-
-    const {table, primaryKey} = service.definition;
-
-    return (builder: Builder, tableName = table) => Object.defineProperties(builder, {
-        service: {value: service},
-        cte: {value: tableName},
-        primaryKey: {value: primaryKey}
-    });
-};

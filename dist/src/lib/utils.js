@@ -17,11 +17,3 @@ export const normaliseInclude = (aliasToService, targetBuilder) => (rel) => {
         as
     };
 };
-export const setAsServiceBuilder = (service) => {
-    const { table, primaryKey } = service.definition;
-    return (builder, tableName = table) => Object.defineProperties(builder, {
-        service: { value: service },
-        cte: { value: tableName },
-        primaryKey: { value: primaryKey }
-    });
-};
