@@ -69,9 +69,9 @@ module.exports = async function (sh) {
 
     CREATE TABLE users_accounts_association_select
     (
-    id serial PRIMARY KEY,
     user_id integer REFERENCES users_association_select,
-    account_id integer REFERENCES accounts_association_select
+    account_id integer REFERENCES accounts_association_select,
+    PRIMARY KEY (user_id, account_id)
     );
     `);
     } catch (e) {

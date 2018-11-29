@@ -59,6 +59,15 @@ export const withRelation = (serviceToRelation, aliasToService) => {
                 throw new Error(message);
             }
             return serviceToRelation.get(key);
+        },
+        remove(service) {
+            serviceToRelation.delete(service);
+            const toRemove = [...aliasToService.entries()]
+                .filter(([key, value]) => value === service)
+                .map(([key]) => key);
+            for (const k of toRemove) {
+                aliasToService.delete(k);
+            }
         }
     };
 };

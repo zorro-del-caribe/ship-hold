@@ -19,6 +19,11 @@ export const service = <T>(definition: EntityDefinition, sh: ShipHoldBuilders): 
     let setAsServiceB;
 
     const ServicePrototype = Object.assign({
+            rawSelect: (...args) => {
+                return setAsServiceB(include(<SelectServiceBuilder>sh
+                    .select(...args)));
+            },
+
             select: (...args) => {
                 return setAsServiceB(include(<SelectServiceBuilder>sh
                     .select(...args)
@@ -50,7 +55,7 @@ export const service = <T>(definition: EntityDefinition, sh: ShipHoldBuilders): 
     );
 
     const serviceInstance = Object.create(ServicePrototype, {
-        definition: {value: Object.freeze(definition)} // Todo should freeze deeply
+        definition: {value: Object.freeze(definition)}
     });
 
     setAsServiceB = setAsServiceBuilder(serviceInstance);

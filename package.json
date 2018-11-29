@@ -11,7 +11,8 @@
   ],
   "scripts": {
     "bench:setup": "node ./benchmark/scripts/setup.js",
-    "bench:build": "npm run bench:setup && npm run bench:fixture:users && npm run bench:fixture:products",
+    "bench:fixture": "node ./benchmark/scripts/fixture_users.js && node ./benchmark/scripts/fixture_posts.js && node ./benchmark/scripts/fixture_comments.js && node ./benchmark/scripts/fixture_tags.js",
+    "bench:build": "npm run bench:setup && npm run bench:fixture",
     "test": "npm run test:unit && npm run test:int",
     "test:int": "node ./test/integrations/index.js",
     "test:unit": "node ./test/units/index.js",
@@ -27,6 +28,8 @@
     "url": "https://github.com/zorro-del-caribe/ship-hold.git"
   },
   "keywords": [
+    "data",
+    "relational",
     "postgresql",
     "postgres",
     "orm",
@@ -52,6 +55,8 @@
     "casual": "^1.5.19",
     "faker": "^4.1.0",
     "knex": "^0.15.2",
+    "objection": "^1.4.0",
+    "pug": "^2.0.3",
     "reflect-metadata": "^0.1.12",
     "rollup": "^0.67.3",
     "sequelize": "^4.41.2",

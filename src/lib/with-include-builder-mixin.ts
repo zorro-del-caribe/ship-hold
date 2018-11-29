@@ -1,6 +1,5 @@
 import {
     EntityService,
-    InclusionInput,
     RelationArgument,
     SelectServiceBuilder,
     ShipHoldBuilders,
@@ -15,25 +14,23 @@ export const withInclude = (aliasToService: Map<string, EntityService>, sh: Ship
 
     return (target: SelectServiceBuilder): BuilderWithInclude => {
 
-        const inclusions: InclusionInput[] = [];
         const include = withInclude(aliasToService, sh);
 
         const originalBuild = Object.getPrototypeOf(target).build.bind(target);
         const originalClone = Object.getPrototypeOf(target).clone.bind(target);
 
         return Object.assign(target, {
-            inclusions,
+            inclusions: [],
             include(this: BuilderWithInclude, ...relations: RelationArgument[]) {
-                inclusions.push(...relations
+                this.inclusions.push(...relations
                     .map(normaliseInclude(aliasToService, target)));
                 return this;
             },
-            clone() {
+            clone(deep = true) {
                 const clone = include(<SelectServiceBuilder>originalClone());
-                if (inclusions.length) {
-                    clone.include(...inclusions.map(({as, builder}) => {
+                if (deep === true && this.inclusions.length) {
+                    clone.include(...this.inclusions.map(({as, builder}) => {
                         const relationClone = <SelectServiceBuilder>builder.clone();
-                        relationClone.parentBuilder = clone;
                         return {
                             as,
                             builder: relationClone
@@ -52,7 +49,7 @@ export const withInclude = (aliasToService: Map<string, EntityService>, sh: Ship
                 return include(fullRelationsList.reduce(changeFromRelation(sh), clone));
             },
             build(params, offset) {
-                if (inclusions.length === 0) {
+                if (this.inclusions.length === 0) {
                     return originalBuild(params, offset);
                 }
 

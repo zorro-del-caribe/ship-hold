@@ -471,19 +471,20 @@ module.exports = function (sh) {
         t.test('one to many: order and limit on include service', async t => {
             const {Users, Products} = createServices();
             const expected = [
-                {id: 1, name: 'Laurent', products: [{id: 2, sku: 'kbd', user_id: 1}]},
-                {id: 2, name: 'Jesus', products: [{id: 1, sku: 'sgl', user_id: 2}]},
-                {id: 3, name: 'Raymond', products: []},
                 {id: 4, name: 'Blandine', products: [{id: 5, user_id: 4, sku: 'wdr'}]},
-                {id: 5, name: 'Olivier', products: []},
                 {id: 6, name: 'Francoise', products: []},
+                {id: 2, name: 'Jesus', products: [{id: 1, sku: 'sgl', user_id: 2}]},
+                {id: 1, name: 'Laurent', products: [{id: 7, sku: 'twl', user_id: 1}]},
+                {id: 5, name: 'Olivier', products: []},
+                {id: 3, name: 'Raymond', products: []},
             ];
+
             const builder = Users
                 .select('id', 'name')
-                .orderBy('id')
+                .orderBy('name')
                 .include(Products
                     .select('id', 'user_id', 'sku')
-                    .orderBy('id')
+                    .orderBy('id', 'desc')
                     .limit(1));
 
             const users = await builder.run();
@@ -922,6 +923,5 @@ module.exports = function (sh) {
 
             t.deepEqual(actual, expected);
         });
-
     });
 };

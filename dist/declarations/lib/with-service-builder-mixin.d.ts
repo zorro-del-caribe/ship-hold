@@ -5,7 +5,7 @@ interface WithServiceBuilderMixin {
 }
 /**
  * Create a functional mixin to be applied to a builder to pass metadata related to the service and context the builder was generated with
- * Note: the metadata are part of the "identity" of the builder and therefore are be copied when cloning a builder
+ * Note: the metadata are part of the "identity" of the builder and therefore are copied when cloning a builder
  * @param {EntityService} service
  * @returns {WithServiceBuilderMixin}
  */

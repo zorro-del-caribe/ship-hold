@@ -12,32 +12,31 @@ const wait = () => new Promise(resolve => {
         const collector = collectorFactory();
         // while (iter <= iterations) {
         const start = Date.now();
-        const posts = await Posts
+        const [user] = await Users
             .select()
-            .orderBy('published_at', 'desc')
-            .limit(pageSize)
+            .where('user_id', 38778)
             .include(
                 Comments
                     .select()
                     .orderBy('published_at', 'desc')
-                    .limit(3)
-                    .include(Users),
-                Tags.select('tag'),
-                Users.select()
+                    .limit(5)
+                    .include(
+                        Posts
+                            .select('post_id', 'user_id', 'title')
+                            .include(
+                                Users.select('user_id', 'first_name', 'last_name'))
+                    ),
+                Posts
+                    .select('title', 'post_id', 'user_id', 'published_at')
+                    .orderBy('published_at', 'desc')
+                    .limit(5)
             )
-            .debug();
+            .run();
 
         const executionTime = Date.now() - start;
         // collector.collect(executionTime);
         console.log(`executed in ${executionTime}ms`);
-        console.log(JSON.stringify(posts));
-        // console.table(posts.map(({post_id, user_id, tags, published_at, comments}) => ({
-        //     post_id, user_id, comments: JSON.stringify(comments.map(c => ({
-        //         comment_id: c.comment_id,
-        //         user_id: c.author.user_id
-        //     }))),
-        //     tags: JSON.stringify(tags.map(t => t.tag))
-        // })));
+        console.log(JSON.stringify(user));
         await wait();
         iter++;
         // }

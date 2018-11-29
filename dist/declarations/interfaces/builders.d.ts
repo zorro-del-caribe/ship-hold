@@ -22,9 +22,8 @@ export interface EntityBuilder {
     readonly service: EntityService;
     readonly cte: string;
     readonly primaryKey?: string;
-    parentBuilder?: EntityBuilder;
 }
-export interface SelectServiceBuilder extends SelectBuilder, WithQueryRunner, EntityBuilder {
+export interface SelectServiceBuilder extends WithInclusion<SelectServiceBuilder>, WithQueryRunner, EntityBuilder {
 }
 export interface UpdateServiceBuilder extends UpdateBuilder, WithQueryRunner, EntityBuilder {
 }
@@ -34,15 +33,16 @@ export interface InsertServiceBuilder extends InsertBuilder, WithQueryRunner, En
 }
 export interface EntityService extends WithConditionsBuilderFactory, WithRelations<EntityService> {
     readonly definition: EntityDefinition;
+    rawSelect: (...args: NodeParam<any>[]) => SelectServiceBuilder;
     select: (...args: NodeParam<any>[]) => SelectServiceBuilder;
     update: (map?: object) => UpdateServiceBuilder;
     delete: () => DeleteServiceBuilder;
     insert: (map?: object) => InsertServiceBuilder;
 }
-export interface WithInclusion<T> {
+export interface WithInclusion<T> extends SelectBuilder {
     readonly inclusions: InclusionInput[];
     include(...relations: any[]): WithInclusion<T> & T;
-    clone(): WithInclusion<T> & T;
+    clone(deep?: boolean): WithInclusion<T> & T;
     toBuilder(): WithInclusion<T> & T;
 }
 export interface ShipHoldBuilders extends WithConditionsBuilderFactory {

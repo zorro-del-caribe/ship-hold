@@ -1,5 +1,6 @@
 const {iterations, pageSize, breath} = require('../config/bench');
-const {Users, Posts, Tags, Comments, sh} = require('../scripts/ship-hold');
+const {Users, Posts, Tags, PostsTags, Comments, sh} = require('../scripts/ship-hold');
+const {sum} = require('ship-hold-querybuilder');
 const collectorFactory = require('../collector');
 
 const wait = () => new Promise(resolve => {
@@ -12,32 +13,23 @@ const wait = () => new Promise(resolve => {
         const collector = collectorFactory();
         // while (iter <= iterations) {
         const start = Date.now();
-        const posts = await Posts
+
+        const [tag] = await Tags
             .select()
-            .orderBy('published_at', 'desc')
-            .limit(pageSize)
+            .where('tag', 'nisi')
             .include(
-                Comments
+                Posts
                     .select()
                     .orderBy('published_at', 'desc')
-                    .limit(3)
-                    .include(Users),
-                Tags.select('tag'),
-                Users.select()
+                    .limit(5)
+                .include(Users)
             )
             .debug();
 
         const executionTime = Date.now() - start;
         // collector.collect(executionTime);
         console.log(`executed in ${executionTime}ms`);
-        console.log(JSON.stringify(posts));
-        // console.table(posts.map(({post_id, user_id, tags, published_at, comments}) => ({
-        //     post_id, user_id, comments: JSON.stringify(comments.map(c => ({
-        //         comment_id: c.comment_id,
-        //         user_id: c.author.user_id
-        //     }))),
-        //     tags: JSON.stringify(tags.map(t => t.tag))
-        // })));
+        console.log(JSON.stringify(tag));
         await wait();
         iter++;
         // }

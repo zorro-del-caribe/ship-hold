@@ -8,6 +8,10 @@ export const service = (definition, sh) => {
     const include = withInclude(aliasToService, sh);
     let setAsServiceB;
     const ServicePrototype = Object.assign({
+        rawSelect: (...args) => {
+            return setAsServiceB(include(sh
+                .select(...args)));
+        },
         select: (...args) => {
             return setAsServiceB(include(sh
                 .select(...args)
@@ -30,7 +34,7 @@ export const service = (definition, sh) => {
         if: (leftOperand, ...rest) => sh.if(leftOperand, ...rest)
     }, withRelation(serviceToRelation, aliasToService));
     const serviceInstance = Object.create(ServicePrototype, {
-        definition: { value: Object.freeze(definition) } // Todo should freeze deeply
+        definition: { value: Object.freeze(definition) }
     });
     setAsServiceB = setAsServiceBuilder(serviceInstance);
     return serviceInstance;

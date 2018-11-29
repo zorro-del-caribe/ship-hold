@@ -92,6 +92,14 @@ const hasOne = (targetBuilder, relation, sh) => {
     })
         .with(alias, relationBuilder.where(withLeftOperand, "IN" /* IN */, withRightOperand).noop());
 };
+const movePaginationNode = (from, to) => {
+    const orderBy = from.node('orderBy');
+    const limit = from.node('limit');
+    from.node('orderBy', compositeNode());
+    from.node('limit', compositeNode());
+    to.node('orderBy', orderBy);
+    to.node('limit', limit);
+};
 const coalesceAggregation = (arg) => coalesce([jsonAgg(arg), `'[]'::json`]);
 const oneToMany = (targetBuilder, relation, sh) => {
     const { builder: relationBuilder, as } = relation;
@@ -102,100 +110,83 @@ const oneToMany = (targetBuilder, relation, sh) => {
     const selectRightOperand = `"${targetCTE}"."${primaryKey}"`;
     const withLeftOperand = `"${relationCTE}"."${foreignKey}"`;
     const withRightOperand = sh.select(primaryKey).from(targetCTE);
-    let relationBuilderInMainQuery;
-    const orderByNode = relationBuilder.node('orderBy');
-    const limitNode = relationBuilder.node('limit');
-    const createRelationBuilder = (selectArgument = '*') => sh.select(selectArgument)
+    const value = sh.select()
         .from(as)
         .where(selectLeftOperand, selectRightOperand)
         .noop();
     // We need to paginate the subquery
-    if (orderByNode.length || limitNode.length) {
-        relationBuilder.node('orderBy', compositeNode());
-        relationBuilder.node('limit', compositeNode());
-        const value = createRelationBuilder();
-        value.node('orderBy', orderByNode);
-        value.node('limit', limitNode);
-        relationBuilderInMainQuery = sh.select({
-            value: coalesceAggregation(`"${as}".*`), as
-        })
-            .from({
-            value: value,
-            as
-        });
-    }
-    else {
-        relationBuilderInMainQuery = createRelationBuilder({ value: coalesceAggregation(`"${as}".*`), as });
-    }
+    movePaginationNode(relationBuilder, value);
+    const relationBuilderInMainQuery = sh.select({
+        value: coalesceAggregation(`"${as}".*`), as
+    })
+        .from({
+        value,
+        as
+    });
     return targetBuilder
         .select({
         value: relationBuilderInMainQuery
     })
         .with(as, relationBuilder.where(withLeftOperand, "IN" /* IN */, withRightOperand).noop());
 };
-const shFn = 'sh_temp';
-//todo investigate how nested pagination on nested include would work here would work here
+const createRelationBuilder = (pivotAlias, relationBuilder) => {
+    const { service } = relationBuilder;
+    const builder = service.rawSelect().from(pivotAlias);
+    // pass the inclusions along
+    builder.include(...relationBuilder.inclusions);
+    return builder;
+};
 const manyToMany = (targetBuilder, relation, sh) => {
     const { builder: relationBuilder, as: alias } = relation;
     const { pivotKey: targetPivotKey, pivotTable } = targetBuilder.service.getRelationWith(relationBuilder.service);
     const { pivotKey: relationPivotKey } = relationBuilder.service.getRelationWith(targetBuilder.service);
     const { cte: targetName, primaryKey: targetPrimaryKey } = targetBuilder;
     const { primaryKey: relationPrimaryKey } = relationBuilder;
-    const pivotWith = sh
-        .select(`"${pivotTable}"."${targetPivotKey}"`, { value: `"${alias}"`, as: shFn })
-        .from(pivotTable)
-        .join({ value: relationBuilder, as: alias })
-        .on(`"${pivotTable}"."${relationPivotKey}"`, `"${alias}"."${relationPrimaryKey}"`)
-        .where(`"${pivotTable}"."${targetPivotKey}"`, "IN" /* IN */, sh.select(targetPrimaryKey).from(targetName))
-        .noop();
-    let relationBuilderInMainQuery;
+    const pivotAlias = ['_sh', targetName, alias, 'pivot'].join('_');
     const orderByNode = relationBuilder.node('orderBy');
-    const limitNode = relationBuilder.node('limit');
-    const createRelationBuilder = (selectArgument = '*') => sh
-        .select(selectArgument)
+    const value = sh
+        .select()
         .from(alias)
         .where(`"${alias}"."${targetPivotKey}"`, `"${targetName}"."${targetPrimaryKey}"`)
         .noop();
-    if (orderByNode.length || limitNode.length) {
-        relationBuilder.node('orderBy', compositeNode());
-        relationBuilder.node('limit', compositeNode());
-        const value = createRelationBuilder();
-        for (const orderMember of [...orderByNode]) {
-            // @ts-ignore
-            const [prop, direction] = [...orderMember].map(({ value }) => value);
-            value.orderBy(`("${alias}"."${shFn}").${prop}`, direction);
-        }
-        value.node('limit', limitNode);
-        relationBuilderInMainQuery = sh.select({
-            value: coalesceAggregation(`${shFn}(${alias})`), as: alias
-        })
-            .from({
-            value: value,
-            as: alias
-        });
+    // re map orderBy nodes to alias
+    for (const orderMember of [...orderByNode]) {
+        // @ts-ignore
+        const [prop, direction] = [...orderMember].map(({ value }) => value);
+        value.orderBy(`"${alias}"."${prop}"`, direction);
     }
-    else {
-        relationBuilderInMainQuery = createRelationBuilder({
-            value: coalesceAggregation(`${shFn}(${alias})`),
-            as: alias
-        });
-    }
+    movePaginationNode(relationBuilder, value);
+    const relationInJoin = relationBuilder.clone(false);
+    const pivotWith = sh
+        .select(`"${pivotTable}".*`, `"${alias}".*`, { value: `"${alias}"`, as: alias })
+        .from(pivotTable)
+        .join({ value: relationInJoin, as: alias })
+        .on(`"${pivotTable}"."${relationPivotKey}"`, `"${alias}"."${relationPrimaryKey}"`)
+        .where(`"${pivotTable}"."${targetPivotKey}"`, "IN" /* IN */, sh.select(targetPrimaryKey).from(targetName))
+        .noop();
+    // we create a temporary service for the pivot
+    const relationWith = createRelationBuilder(pivotAlias, relationBuilder);
+    const relationBuilderInMainQuery = sh.select({
+        value: coalesceAggregation(`"${alias}"`), as: alias
+    })
+        .from({
+        value: value,
+        as: alias
+    });
     return targetBuilder
         .select({
         value: relationBuilderInMainQuery
     })
-        .with(alias, pivotWith);
+        .with(pivotAlias, pivotWith)
+        .with(alias, relationWith);
 };
 const self = (builder, sh) => {
     const name = builder.service.definition.name;
-    const orderBy = builder.node('orderBy');
-    const limit = builder.node('limit');
     const setAsServiceB = setAsServiceBuilder(builder.service);
     const targetBuilder = setAsServiceB(sh.select(`"${name}".*`)
         .from(name)
         .with(name, builder), name);
-    // We need to re apply pagination settings to ensure pagination work for complex queries etc.
-    targetBuilder.node('orderBy', orderBy);
-    targetBuilder.node('limit', limit);
+    // We need to re apply pagination settings to ensure pagination works for complex queries etc.
+    targetBuilder.node('orderBy', builder.node('orderBy'));
     return targetBuilder;
 };

@@ -2,23 +2,21 @@ import { normaliseInclude } from './utils';
 import { changeFromRelation } from './relations';
 export const withInclude = (aliasToService, sh) => {
     return (target) => {
-        const inclusions = [];
         const include = withInclude(aliasToService, sh);
         const originalBuild = Object.getPrototypeOf(target).build.bind(target);
         const originalClone = Object.getPrototypeOf(target).clone.bind(target);
         return Object.assign(target, {
-            inclusions,
+            inclusions: [],
             include(...relations) {
-                inclusions.push(...relations
+                this.inclusions.push(...relations
                     .map(normaliseInclude(aliasToService, target)));
                 return this;
             },
-            clone() {
+            clone(deep = true) {
                 const clone = include(originalClone());
-                if (inclusions.length) {
-                    clone.include(...inclusions.map(({ as, builder }) => {
+                if (deep === true && this.inclusions.length) {
+                    clone.include(...this.inclusions.map(({ as, builder }) => {
                         const relationClone = builder.clone();
-                        relationClone.parentBuilder = clone;
                         return {
                             as,
                             builder: relationClone
@@ -37,7 +35,7 @@ export const withInclude = (aliasToService, sh) => {
                 return include(fullRelationsList.reduce(changeFromRelation(sh), clone));
             },
             build(params, offset) {
-                if (inclusions.length === 0) {
+                if (this.inclusions.length === 0) {
                     return originalBuild(params, offset);
                 }
                 return this.toBuilder().build(params, offset);

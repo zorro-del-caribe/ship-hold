@@ -26,6 +26,17 @@ CREATE TABLE comments(
     post_id integer REFERENCES posts (post_id)
 );
 
+CREATE TABLE tags(
+    tag VARCHAR PRIMARY KEY,
+    description TEXT
+);
+
+CREATE TABLE posts_tags(
+    post_id INTEGER REFERENCES posts,
+    tag VARCHAR REFERENCES tags,
+    PRIMARY KEY (post_id, tag)
+);
+
 
 `;
 
