@@ -609,7 +609,7 @@ module.exports = function (sh) {
                 .orderBy('id')
                 .include(Accounts.select('id', 'balance'));
 
-            const users = await builder.run();
+            const users = await builder.debug();
             t.deepEqual(users, expected);
 
         });

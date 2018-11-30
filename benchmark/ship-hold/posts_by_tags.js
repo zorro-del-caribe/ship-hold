@@ -22,7 +22,14 @@ const wait = () => new Promise(resolve => {
                     .select()
                     .orderBy('published_at', 'desc')
                     .limit(5)
-                .include(Users)
+                    .include(
+                        Users
+                        // Comments
+                        //     .select()
+                        //     .orderBy('published_at', 'desc')
+                        //     .limit(3)
+                        //     .include(Users)
+                    )
             )
             .debug();
 

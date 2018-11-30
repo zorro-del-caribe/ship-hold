@@ -129,9 +129,9 @@ const oneToMany = (targetBuilder, relation, sh) => {
     })
         .with(as, relationBuilder.where(withLeftOperand, "IN" /* IN */, withRightOperand).noop());
 };
-const createRelationBuilder = (pivotAlias, relationBuilder) => {
+const createRelationBuilder = (pivotAlias, alias, targetPivotKey, relationBuilder) => {
     const { service } = relationBuilder;
-    const builder = service.rawSelect().from(pivotAlias);
+    const builder = service.rawSelect(`("${pivotAlias}"."${alias}").*`, `"${pivotAlias}"."${targetPivotKey}"`).from(pivotAlias);
     // pass the inclusions along
     builder.include(...relationBuilder.inclusions);
     return builder;
@@ -145,7 +145,7 @@ const manyToMany = (targetBuilder, relation, sh) => {
     const pivotAlias = ['_sh', targetName, alias, 'pivot'].join('_');
     const orderByNode = relationBuilder.node('orderBy');
     const value = sh
-        .select()
+        .select(`"${alias}"`)
         .from(alias)
         .where(`"${alias}"."${targetPivotKey}"`, `"${targetName}"."${targetPrimaryKey}"`)
         .noop();
@@ -158,14 +158,17 @@ const manyToMany = (targetBuilder, relation, sh) => {
     movePaginationNode(relationBuilder, value);
     const relationInJoin = relationBuilder.clone(false);
     const pivotWith = sh
-        .select(`"${pivotTable}".*`, `"${alias}".*`, { value: `"${alias}"`, as: alias })
+        .select(`"${pivotTable}"."${targetPivotKey}"`, `"${pivotTable}"."${relationPivotKey}"`, {
+        value: `"${alias}"`,
+        as: alias
+    })
         .from(pivotTable)
+        .where(`"${pivotTable}"."${targetPivotKey}"`, "IN" /* IN */, sh.select(targetPrimaryKey).from(targetName))
         .join({ value: relationInJoin, as: alias })
         .on(`"${pivotTable}"."${relationPivotKey}"`, `"${alias}"."${relationPrimaryKey}"`)
-        .where(`"${pivotTable}"."${targetPivotKey}"`, "IN" /* IN */, sh.select(targetPrimaryKey).from(targetName))
         .noop();
     // we create a temporary service for the pivot
-    const relationWith = createRelationBuilder(pivotAlias, relationBuilder);
+    const relationWith = createRelationBuilder(pivotAlias, alias, targetPivotKey, relationBuilder);
     const relationBuilderInMainQuery = sh.select({
         value: coalesceAggregation(`"${alias}"`), as: alias
     })

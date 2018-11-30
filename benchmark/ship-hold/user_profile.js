@@ -30,6 +30,7 @@ const wait = () => new Promise(resolve => {
                     .select('title', 'post_id', 'user_id', 'published_at')
                     .orderBy('published_at', 'desc')
                     .limit(5)
+                    .include(Tags)
             )
             .run();
 

@@ -35,6 +35,7 @@ const wait = () => new Promise(resolve => {
                         attributes: ['title', 'post_id', 'user_id', 'published_at'],
                         order: [['published_at', 'desc']],
                         limit: 5,
+                        include:Tags
                     }]
             });
         console.log(`executed in ${Date.now() - start}ms`);
