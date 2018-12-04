@@ -17,11 +17,11 @@
     "test:int": "node ./test/integrations/index.js",
     "test:unit": "node ./test/units/index.js",
     "test:ci": "(npm run test:unit | tap-set-exit) && (npm run test:int | tap-set-exit)",
-    "build:doc": "cat ./doc/*.md > README.md",
+    "doc:build": "node ./doc/scripts/compile.js",
     "build:clean": "rm -rf ./dist && mkdir -p ./dist/bundle ./dist/declarations && cp -r ./src ./dist/src",
     "build:compile": "tsc",
     "build:bundle": "rollup -c ./rollup/build.js",
-    "build": "npm run build:clean && npm run build:compile && npm run build:bundle && npm run build:doc"
+    "build": "npm run build:clean && npm run build:compile && npm run build:bundle && npm run doc:build"
   },
   "repository": {
     "type": "git",
@@ -44,26 +44,23 @@
   "author": "Laurent RENARD",
   "license": "MIT",
   "dependencies": {
-    "pg": "^7.6.1",
+    "pg": "^7.7.1",
     "pg-query-stream": "^1.1.2"
   },
   "devDependencies": {
-    "@types/node": "^10.12.9",
+    "@types/node": "^10.12.11",
     "@types/pg": "^7.4.11",
     "@types/pg-query-stream": "^1.0.2",
-    "bookshelf": "^0.13.3",
     "casual": "^1.5.19",
-    "faker": "^4.1.0",
+    "jstransformer-highlight": "^2.0.0",
     "knex": "^0.15.2",
     "objection": "^1.4.0",
     "pug": "^2.0.3",
-    "reflect-metadata": "^0.1.12",
     "rollup": "^0.67.3",
     "sequelize": "^4.41.2",
-    "ship-hold-querybuilder": "^2.0.0-5",
+    "ship-hold-querybuilder": "^2.0.0-6",
     "tap-set-exit": "^1.1.1",
-    "typeorm": "^0.2.9",
-    "typescript": "^3.1.6",
+    "typescript": "^3.2.1",
     "zora": "^2.0.1"
   }
 }

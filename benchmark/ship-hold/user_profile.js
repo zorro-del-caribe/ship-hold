@@ -1,16 +1,7 @@
-const {iterations, pageSize, breath} = require('../config/bench');
 const {Users, Posts, Tags, Comments, sh} = require('../scripts/ship-hold');
-const collectorFactory = require('../collector');
-
-const wait = () => new Promise(resolve => {
-    setTimeout(() => resolve(), breath);
-});
 
 (async function () {
     try {
-        let iter = 1;
-        const collector = collectorFactory();
-        // while (iter <= iterations) {
         const start = Date.now();
         const [user] = await Users
             .select()
@@ -35,13 +26,8 @@ const wait = () => new Promise(resolve => {
             .run();
 
         const executionTime = Date.now() - start;
-        // collector.collect(executionTime);
         console.log(`executed in ${executionTime}ms`);
         console.log(JSON.stringify(user));
-        await wait();
-        iter++;
-        // }
-        // collector.print();
     } catch (e) {
         console.log(e);
     } finally {

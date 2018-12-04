@@ -1,4 +1,5 @@
 import { service } from './service';
+import { toCamelCase } from './utils';
 // Create a registry of services bound to a specific table
 export const serviceRegistry = (builders) => {
     const registry = new Map();
@@ -9,7 +10,7 @@ export const serviceRegistry = (builders) => {
         return registry.get(name);
     };
     const setService = function (def) {
-        const definition = Object.assign({}, def);
+        const definition = Object.assign({ primaryKey: 'id', name: toCamelCase(def.table) }, def);
         const { name } = definition;
         registry.set(name, service(definition, builders));
         return getService(name);

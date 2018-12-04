@@ -4,7 +4,7 @@ const {shiphold} = require('../../dist/bundle');
 test('should create a service when a definition argument is passed', t => {
     const registry = shiphold({});
 
-    const service = registry.service({name: 'users'});
+    const service = registry.service({table: 'users'});
 
     t.equal(typeof service.select, 'function', 'select method should be defined');
     t.equal(typeof service.insert, 'function', 'insert method should be defined');

@@ -182,6 +182,17 @@ const normaliseInclude = (aliasToService, targetBuilder) => (rel) => {
         as
     };
 };
+const uppercaseTheFirstLetter = (word) => {
+    const copy = word;
+    copy[0].toUpperCase();
+    return copy;
+};
+const toCamelCase = (input) => {
+    return input
+        .split('_')
+        .map(uppercaseTheFirstLetter)
+        .join();
+};
 
 /**
  * Create a functional mixin to be applied to a builder to pass metadata related to the service and context the builder was generated with
@@ -334,6 +345,7 @@ const createRelationBuilder = (pivotAlias, alias, targetPivotKey, relationBuilde
     builder.include(...relationBuilder.inclusions);
     return builder;
 };
+const aggregateAndClean = (arg, toRemove) => coalesce([jsonAgg(`to_jsonb(${arg}) - '${toRemove}'`), `'[]'::json`]);
 const manyToMany = (targetBuilder, relation, sh) => {
     const { builder: relationBuilder, as: alias } = relation;
     const { pivotKey: targetPivotKey, pivotTable } = targetBuilder.service.getRelationWith(relationBuilder.service);
@@ -368,7 +380,7 @@ const manyToMany = (targetBuilder, relation, sh) => {
     // we create a temporary service for the pivot
     const relationWith = createRelationBuilder(pivotAlias, alias, targetPivotKey, relationBuilder);
     const relationBuilderInMainQuery = sh.select({
-        value: coalesceAggregation(`"${alias}"`), as: alias
+        value: aggregateAndClean(`"${alias}"`, targetPivotKey), as: alias
     })
         .from({
         value: value,
@@ -485,7 +497,7 @@ const serviceRegistry = (builders) => {
         return registry.get(name);
     };
     const setService = function (def) {
-        const definition = Object.assign({}, def);
+        const definition = Object.assign({ primaryKey: 'id', name: toCamelCase(def.table) }, def);
         const { name } = definition;
         registry.set(name, service(definition, builders));
         return getService(name);

@@ -1,20 +1,11 @@
-const {iterations, pageSize, breath} = require('../config/bench');
 const {User, knex, Post} = require('./models');
-const collectorFactory = require('../collector');
-
-const wait = () => new Promise(resolve => {
-    setTimeout(() => resolve(), breath);
-});
 
 (async function () {
     try {
-        let iter = 1;
-        const collector = collectorFactory();
-        // while (iter <= iterations) {
         const start = Date.now();
         const [user] = await User
             .query()
-            .where('user_id', 58597)
+            .where('user_id', 38778)
             .eager('[comments.post.author, posts]')
             .modifyEager('comments', builder => {
                 builder.orderBy('published_at', 'desc');
@@ -28,15 +19,9 @@ const wait = () => new Promise(resolve => {
         const limitedPosts = user.posts.slice(0, 5);
         user.comments = limitedComments;
         user.posts = limitedPosts;
-
         const executionTime = Date.now() - start;
-        // collector.collect(executionTime);
         console.log(`executed in ${executionTime}ms`);
         console.log(JSON.stringify(user));
-        await wait();
-        iter++;
-        // }
-        // collector.print();
     } catch (e) {
         console.log(e);
     } finally {

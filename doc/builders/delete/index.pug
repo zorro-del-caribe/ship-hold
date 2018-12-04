@@ -1,0 +1,47 @@
+extends ../../common/main
+
+include ../../common/mixins
+
+block content
+    h1#delete-builder Delete Builder
+
+    p.
+        The delete builder allows you to create #[+link('https://devdocs.io/postgresql~10/sql-delete','DELETE queries')], to delete a set of rows
+        from your database.
+    article
+        h2.method#delete .delete(tableName: pointer)
+
+        p.
+            The delete builder takes as argument the name of the table items will be deleted from, eventually with an alias.
+        +codeblock
+            include:highlight(lang='javascript') snippets/delete.js
+
+    article
+        h2.method#using .using(...pointers[])
+
+        p.
+            The #[em using] method allows you to use others table columns in the #[+link('builders/delete#where','where')] clause of your delete query.
+
+        +codeblock
+            include:highlight(lang='javascript') snippets/delete-using.js
+
+    article
+        h2.mtehod#where .where(leftOperand, ?operator, ?rightOperand)
+
+        p.
+            This method returns a proxy of a conditions builder which will be revoked whenever you call a method which does not belong to that conditions builder.
+            See #[+link('builders/conditions','conditions builder')] for more details. You use it to create where clause in your delete query
+
+        +codeblock
+            include:highlight(lang='javascript') snippets/delete-where.js
+
+    article
+        h2.method#returning .returning(...properties: pointers[])
+        p.
+            Specify a returning close to your delete query. It is useful if you want to get back the freshly deleted rows (to archive in other table for example)
+
+        +codeblock
+            include:highlight(lang='javascript') snippets/delete-returning.js
+
+        p.tip.
+            You can use the #[code '*'] character if you wish to return all the columns the deleted rows.

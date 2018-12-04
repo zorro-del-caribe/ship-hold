@@ -1,34 +1,29 @@
-const {iterations, pageSize, breath} = require('../config/bench');
 const {User, knex, Tag, Post} = require('./models');
-const collectorFactory = require('../collector');
-
-const wait = () => new Promise(resolve => {
-    setTimeout(() => resolve(), breath);
-});
 
 (async function () {
     try {
-        let iter = 1;
-        const collector = collectorFactory();
-        // while (iter <= iterations) {
         const start = Date.now();
-        const posts = await Tag
+        const [tag] = await Tag
             .query()
-            .orderBy('tag')
-            .limit(5)
-            .eager('[posts]');
-
+            .where('tag', 'nisi')
+            .eager('posts.[author, comments]')
+            .modifyEager('posts', builder => {
+                builder
+                    .orderBy('published_at', 'desc');
+            })
+            .modifyEager('posts.comments', builder => {
+                builder
+                    .orderBy('published_at', 'desc');
+            });
 
         // Not possible to have it right: https://github.com/Vincit/objection.js/issues/848
-
+        tag.posts = tag.posts.slice(0, 5).map(p => {
+            p.comments = p.comments.slice(0, 3);
+            return p;
+        });
         const executionTime = Date.now() - start;
-        // collector.collect(executionTime);
         console.log(`executed in ${executionTime}ms`);
-        console.log(JSON.stringify(posts));
-        await wait();
-        iter++;
-        // }
-        // collector.print();
+        console.log(JSON.stringify(tag));
     } catch (e) {
         console.log(e);
     } finally {

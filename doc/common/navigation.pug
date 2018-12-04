@@ -1,0 +1,106 @@
+mixin navigationLink(path, label)
+    a(href=path)
+        span !{label}
+
+div#main-navigation-container
+    nav
+        ul
+            li.top
+                +navigationLink('introduction','Introduction')
+                ul
+                    li
+                        +navigationLink('introduction#getting-started','Getting started')
+                        ul
+                            li.leaf
+                                +navigationLink('introduction#installation','Installation')
+                            li.leaf
+                                +navigationLink('introduction#initialisation','Initialisation')
+                    li
+                        +navigationLink('introduction#how-to-read','How to read this documentation')
+            li.top
+                +navigationLink('builders','Builders')
+                ul
+                    li
+                        +navigationLink('builders#build','.build()')
+                        ul
+                            li.leaf
+                                +navigationLink('builders#parameterized-query', 'Parameterized queries')
+                    li
+                        +navigationLink('builders#clone','.clone()')
+                    li
+                        +navigationLink('builders#with','.with(as, build)')
+                    li
+                        +navigationLink('builders#common-types','Common types')
+                        ul
+                            li.leaf
+                                +navigationLink('builders#pointers', 'Pointers')
+                            li.leaf
+                                +navigationLink('builders#values', 'Values')
+            li.top
+                +navigationLink('builders/insert','INSERT builder')
+                ul
+                    li
+                        +navigationLink('builders/insert#insert','.insert(map,...othersProps)')
+                    li
+                        +navigationLink('builders/insert#into','.into(tableName)')
+                    li
+                        +navigationLink('builders/insert#values','.values(rows)')
+                    li
+                        +navigationLink('builders/insert#returning','.returning(...properties)')
+            li.top
+                +navigationLink('builders/update','UPDATE builder')
+                ul
+                    li
+                        +navigationLink('builders/update#update','.update(tableName)')
+                    li
+                        +navigationLink('builders/update#set','.set(mapOrString, ?value)')
+                    li
+                        +navigationLink('builders/update#from','.from(...pointers)')
+                    li
+                        +navigationLink('builders/update#where','.where(leftOperand, operator, rightOperand)')
+                    li
+                        +navigationLink('builders/update#returning','.returning(...properties)')       li
+            li.top
+                +navigationLink('builders/delete','DELETE builder')
+                ul
+                    li
+                        +navigationLink('builders/delete#delete','.delete(tableName)')
+                    li
+                        +navigationLink('builders/delete#using','.using(...pointers)')
+                    li
+                        +navigationLink('builders/delete#where','.where(leftOperand, operator, rightOperand)')
+                    li
+                        +navigationLink('builders/delete#returning','.returning(...properties)')
+            li.top
+                +navigationLink('builders/select','SELECT builder')
+                ul
+                    li
+                        +navigationLink('builders/select#select','.select(...pointers)')
+                    li
+                        +navigationLink('builders/select#from','.from(...pointers)')
+                    li
+                        +navigationLink('builders/select#joins','Joins')
+                        ul
+                            li.leaf
+                                +navigationLink('builders/select#join', '.join(table, leftOp, rightOp)')
+                            li.leaf
+                                +navigationLink('builders/select#left-join', '.leftJoin(table, leftOp, rightOp)')
+                            li.leaf
+                                +navigationLink('builders/select#right-join', 'rightJoin(table, leftOp, rightOp)')
+                            li.leaf
+                                +navigationLink('builders/select#on', '.on(leftOperand, operator, rightOperand)')
+                    li
+                        +navigationLink('builders/select#group','Group')
+                        ul
+                            li.leaf
+                                +navigationLink('builders/select#group-by', '.groupBy(...columns)')
+                            li.leaf
+                                +navigationLink('builders/select#having', '.having(leftOp, operator, rightOp)')
+                    li
+                        +navigationLink('builders/select#where','.where(leftOp, operator, rightOp)')
+                    li
+                        +navigationLink('builders/select#pagination','Pagination')
+                        ul
+                            li.leaf
+                                +navigationLink('builders/select#limit', '.limit(size, offset)')
+

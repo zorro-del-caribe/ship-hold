@@ -2,12 +2,10 @@
 
 Ship-hold is built around few sql query builders for regular database operations (SELECT, INSERT, UPDATE, DELETE). You can access them from the ship-hold instance itself of from the different [model services](#models) (in this case the builders will be bound to the table related to the model service).
 All the query builders have a **build** method which will return an object with the sql statement as the **text** property and the [parameters values](query-with-parameters) as the **values** property. This is only string manipulation so you don't need a
-real database connection to use the build method.
-
-Note: query builders are extended with [query runner](query-runner-and-api-adapters) which will allow you to run the query (and parse the response) against a real database.
+real database connection to use the **build** method.
 
 ### Select query builder.
-    
+
 Parameters: the list of field you want to return (nothing is equivalent to '*').
 
 Returns: a select query builder.
@@ -20,16 +18,16 @@ sh
     .select('id','age')
     .from('users')
     .build() // { text: 'SELECT "id", "age" FROM "users"', values: [] }
-    
+
 //equivalent too
 Users
     .select('id','age')
     .build();
-  
+
 ```
 
 #### Select query builder api
-    
+
 * ##### from
 
  Will add a **FROM** clause.
@@ -41,27 +39,27 @@ Users
  Example:
 
  ```Javascript
- 
+
  sh
     .select('id','age','number')
     .from('users','phones')
     .build() // { text: 'SELECT "id", "age", "number" FROM "users", "phones"', values: [] }
-   
+
  ```
 
  Alternatively, you can pass another builder as argument
 
  ```Javascript
- 
+
  sh
     .select()
     .from({value:sh.select('id').from('users'),as:'users'}) //sql subquery must have an alias
     .build() //{ text: 'SELECT * FROM (SELECT "id" FROM "users") AS "users"',values: [] }
- 
+
  ```
 
-* ##### where 
-    
+* ##### where
+
  Will add a **WHERE** clause.
 
  Parameters: (leftOperand,[operator],rightOperand) if no operator is provided the default '=' operator is used.
@@ -77,59 +75,59 @@ Users
     .where('name','laurent')
     .and('age','>',20) // chain with condition builder method
     .orderBy('name') // proxy back to main select builder
-    .build() // {text:'SELECT * FROM "users" WHERE "name" = \'laurent\' AND "age" > 20 ORDER BY "name"' ORDER BY "name", values:[]} 
- 
+    .build() // {text:'SELECT * FROM "users" WHERE "name" = \'laurent\' AND "age" > 20 ORDER BY "name"' ORDER BY "name", values:[]}
+
  ```
-    
+
  alternatively you can pass another builder as operand.
 
  ```Javascript
- 
+
  sh
     .select()
     .from('users')
     .where('id','in',sh.select('id').from('users').orderBy('name').limit(10))
     .build() // {text: 'SELECT * FROM "users" WHERE "id" in (SELECT "id" FROM "users" ORDER BY "name" LIMIT 10)', values:[]}
- 
+
  ```
 
  Note: a left operand string is considered as identifier by default whereas the right operand string will be considered as value. So if you want to use an identifier instead, you will need to wrap it with quotes.
 
  ```Javascript
- 
+
  sh
     .select()
     .from('users','products')
     .where('users.id','"products"."userId"')
     .build() // { text: 'SELECT * FROM "users", "products" WHERE "users"."id" = "products"."userId"', values: [] }
- 
+
  ```
-    
+
 * ##### orderBy
-    
+
  Will add a **ORDER BY** clause.
 
  Parameters: (property,[direction]). direction can be omitted or either 'desc' or 'asc'.
-  
+
  Returns: itself.
- 
+
  Example:
- 
+
  ```Javascript
- 
+
  sh
     .select()
     .from('users')
     .orderBy('age','desc')
     .orderBy('email')
     .build() // { text: 'SELECT * FROM "users" ORDER BY "age" DESC, "email"', values: [] }
- 
+
  ```
 
 * ##### limit
- 
+
  Will add a **LIMIT** clause.
-    
+
  Parameters: (limit, [offset]) offset can be omitted.
 
  Returns: itself.
@@ -137,27 +135,27 @@ Users
  Example:
 
  ```Javascript
- 
+
  sh
     .select()
     .from('users')
     .limit(10, 3)
     .build() // {text: 'SELECT * FROM "users" LIMIT 10 OFFSET 3', values:[]}
-   
+
  ```
 
-* ##### join 
+* ##### join
 
  Will add a **JOIN** clause.
 
- Parameters: (table name). 
+ Parameters: (table name).
 
  Returns: itself.
 
  Example:
 
  ```Javascript
- 
+
  sh
     .select()
     .from('users')
@@ -165,35 +163,35 @@ Users
     .on('users.id','"products"."userId"')
     .and('price','>',50)// "on" returns a conditional query builder proxied with the main select builder in the same way as where method
     .build()// { text: 'SELECT * FROM "users" JOIN "products" ON "users"."id" = "products"."userId" AND "price" > 50', values: [] }
- 
+
  ```
 
  Alternatively, you can pass another builder.
 
  ```Javascript
- 
+
  sh
     .select()
     .from('users')
     .join({value:sh.select().from('products').where('price','>',50).noop(),as:'high_price_products'})
     .on('users.id','"high_price_products"."userId"')
     .build() //{ text: 'SELECT * FROM "users" JOIN (SELECT * FROM "products" WHERE "price" > 50) AS "high_price_products" ON "users"."id" = "high_price_products"."userId"', values: [] }
- 
+
  ```
  Note: the "noop" method is necessary to revoke the proxy created by the where clause and make sure we actually pass a select builder as argument.
 
 * ##### leftJoin
 
- Same as **join** but with left join. 
+ Same as **join** but with left join.
 
 * ##### rightJoin
-    
+
  Same as **join** but with right join.
- 
+
 * ##### fullJoin.
-    
- Same as **join** but with full join. 
-    
+
+ Same as **join** but with full join.
+
 ### Insert query builder.
 
 Parameters: ([object]) a list of key, value pair to insert.
@@ -234,7 +232,7 @@ sh
  Users
    .insert({name:'Laurent',age:29})
    .build()
- 
+
  ```
 
 * ##### value
@@ -246,18 +244,18 @@ sh
  Example:
 
  ```Javascript
- 
+
  sh
     .insert()
     .into('users')
     .value('name','Laurent')
     .value('age')
     .build() //{ text: 'INSERT INTO "users" ( "name", "age" ) VALUES ( \'Laurent\', DEFAULT )', values: [] }
- 
+
  ```
 
 * ##### returning
- 
+
  Add a **RETURNING** statement to the query.
 
  Parameters: (property list).
@@ -265,7 +263,7 @@ sh
  Example:
 
  ```Javascript
- 
+
  sh
     .insert({
      name:'Laurent',
@@ -274,20 +272,20 @@ sh
     .into('users')
     .returning('id', 'name')
     .build() // { text: 'INSERT INTO "users" ( "name", "age" ) VALUES ( \'Laurent\', 29 ) RETURNING "id", "name"', values: [] }
- 
+
  ```
 
  Note if you use the insert method from the model service, it automatically returns the whole object ('*')
 
  ```Javascript
- 
+
  Users
     .insert({
      name:'Laurent',
      age:29
    })
     .build() // { text: 'INSERT INTO "users" ( "name", "age" ) VALUES ( \'Laurent\', 29 ) RETURNING *', values: [] }
- 
+
  ```
 
 ### Update query builder
@@ -331,15 +329,15 @@ Users
  Example:
 
  ```Javascript
- 
+
  sh
     .update('users')
     .set('name','Laurent')
     .set('age',29)
     .build() // { text: 'UPDATE "users" SET "name" = \'Laurent\', "age" = 29', values: [] }
-  
- // is equivalent to 
-  
+
+ // is equivalent to
+
  sh
     .update('users')
     .set({
@@ -347,7 +345,7 @@ Users
         age:29
     })
     .build()
- 
+
  ```
 
 * ##### where
@@ -361,26 +359,26 @@ Users
  Example:
 
  ```Javascript
- 
+
  sh
     .update('users')
     .set('name','what')
     .where('name','laurent')
     .and('age','>',20) // chain with condition builder method
     .build() // { text: 'UPDATE "users" SET "name" = \'what\' WHERE "name" = \'laurent\' AND "age" > 20', values: [] }
- 
+
  ```
-    
+
  alternatively you can pass another builder as operand.
 
  ```Javascript
- 
+
  sh
     .update('users')
     .set('name','Laurent')
     .where('id','in',sh.select('id').from('users').orderBy('name').limit(10))
     .build() // { text: 'UPDATE "users" SET "name" = \'Laurent\' WHERE "id" in (SELECT "id" FROM "users" ORDER BY "name" LIMIT 10)', values: [] }
- 
+
  ```
 
  Note: a left operand string is considered as identifier by default whereas the right operand string will be considered as value. So if you want to use an identifier instead, you will need to wrap it with quotes
@@ -396,7 +394,7 @@ Users
  Example:
 
  ```Javascript
- 
+
  sh
     .update('employees')
     .set('sales_count', 1000)
@@ -404,11 +402,11 @@ Users
     .where('accounts.name', 'Acme Corporation')
     .and('employees.id', '"accounts"."sales_person"')
     .build() // { text: 'UPDATE "employees" SET "sales_count" = 1000 FROM "accounts" WHERE "accounts"."name" = \'Acme Corporation\' AND "employees"."id" = "accounts"."sales_person"', values: [] }
- 
+
  ```
 
 * ##### returning
- 
+
  Add a **RETURNING** statement to the query.
 
  Parameters: (property list).
@@ -416,7 +414,7 @@ Users
  Example:
 
  ```Javascript
- 
+
  sh
     .update('users')
     .set({
@@ -425,13 +423,13 @@ Users
     })
     .returning('id', 'name')
     .build() // { text: 'UPDATE "users" SET "name" = \'Laurent\', "age" = 29 RETURNING "id", "name"', values: [] }
- 
+
  ```
 
  Note if you use the update method from the model service, it automatically returns the whole object ('*')
 
  ```Javascript
- 
+
  Users
     .update()
     .set({
@@ -439,7 +437,7 @@ Users
         age:29
     })
     .build() { text: 'UPDATE "users" SET "name" = \'Laurent\', "age" = 29 RETURNING *', values: [] }
- 
+
  ```
 
 ### Delete query builder
@@ -455,7 +453,7 @@ Example:
 sh
     .delete('users')
     .build() // { text: 'DELETE FROM "users"', values: [] }
-  
+
 // is equivalent to
 
 Users
@@ -485,7 +483,7 @@ Users
     .build() // { text: 'DELETE FROM "users" WHERE "name" = \'laurent\' AND "age" > 20', values: [] }
 
  ```
-    
+
  alternatively you can pass another builder as operand.
 
  ```Javascript
@@ -518,7 +516,7 @@ Users
     .and('producers.name', 'foo')
     .build() // { text: 'DELETE FROM "films" USING "producers" WHERE "producer_id" = "producers"."id" AND "producers"."name" = \'foo\'', values: [] }
 
- ``` 
+ ```
 
 ### Condition query builder (if)
 
@@ -540,7 +538,7 @@ sh
 
 Note: any operand can be replaced by another builder to combine/nest conditions.
 
-#### Condition query builder API 
+#### Condition query builder API
 
 * ##### and
 
@@ -598,12 +596,12 @@ Users
     .select()
     .where('age','>',20)
     .build() // {text: 'SELECT * FROM "users" WHERE "age" > 20', values:[]}
-    
+
 Users
     .select()
     .where('age','>','$age')
-    .and('name','$laurent')
-    .build({age:20, laurent:'Laurent'}) // {text: 'SELECT * FROM "users" WHERE "age" > $1 AND "name" = $2', values:[20,'Laurent']}
+    .and('name','$name')
+    .build({age:20, name:'Laurent'}) // {text: 'SELECT * FROM "users" WHERE "age" > $1 AND "name" = $2', values:[20,'Laurent']}
 
 ```
 

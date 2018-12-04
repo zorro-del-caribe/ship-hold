@@ -5,11 +5,15 @@
 
 ## Introduction
 
-**ship-hold** is a data access framework for [Postgres](https://www.postgresql.org/) relational database system, developed for the [nodejs](https://nodejs.org/) platform (version > 6, if not transpiled).
-It is based around intuitive [sql query builders](#query-builders) and allows you as well to manage model definitions and relations (with eager loading, etc). It defers quite a lot from other popular libraries so called **ORM** such [sequelize](http://docs.sequelizejs.com/) or [Bookshelf](http://bookshelfjs.org/):  
-they usually come with a lot of features (schema management, migrations, validations, etc) and more complex API's / code base (few thousands of sloc). 
-However, ship-hold focuses on a limited set of features and a very powerful [extension mechanism](#extend-ship-hold). As a result, [ship-hold-querybuilder](https://github.com/zorro-del-caribe/ship-hold-querybuilder) code base is less than 450 sloc and less than 600 for ship-hold itself. The idea is to build [extension modules](#list-of-extension-modules) with their own purposes/opinions, a little bit like popular web frameworks such [koajs](http://koajs.com/).
-  
+**ship-hold** is a *small* and *[fast]()* data access framework for [Postgres](https://www.postgresql.org/) relational database system, developed for the [nodejs](https://nodejs.org/) environment.
+
+It is based around intuitive [sql query builders](#query-builders) which mirror closely the SQL syntax while keeping the flexibility functions may have. It also allows you to create convenient services and relations between them in order to easily query related resources (aka "eager loading").
+It is actually the only library I know of which has it right when it comes to nested pagination !
+
+It defers quite a lot from other popular libraries so called **ORM** such [sequelize](http://docs.sequelizejs.com/) or [Bookshelf](http://bookshelfjs.org/):
+they usually come with a lot of features (schema management, migrations, validations, different sql dialects, model instances, etc) and more complex API's / code base (we are usually talking about more than 200 api functions and more than 10/20 thousands of source lines of code).
+However, ship-hold focuses on a limited set of features while remaining extensible (builders are just functions !)
+
 ## table of content
 
 1. [getting started](#getting-started)
@@ -32,7 +36,7 @@ Pass database connection information to the ship-hold factory
 
 ```Javascript
 
-const shiphold = require('ship-hold');
+const {shiphold} = require('ship-hold');
 const sh = shiphold({
     hostname:'192.168.99.100'
     username:'docker',
@@ -42,29 +46,17 @@ const sh = shiphold({
 
 ```
 
-Define your models and the relations between them.
+Every option the driver [pg]() takes, can be passed.
+
+That's it ! You can start to use your database.
 
 ```Javascript
-
-const Users=sh.model('Users',{
-    table:'users',
-    columns:{
-        id:'integer',
-        age:'integer',
-        name:'varchar'
-    }
-});
-
+const users = await sh.select()
+    .from('users')
+    .where('age','>', '$age')
+    .and('name', 'ILIKE', '$name')
+    .run({
+        age:42,
+        name:'lorenzo'
+    })
 ```
-
-And start using the query builders.
-
-```Javascript
-
-Users
-    .select('name','age')
-    .where('name','Laurent')
-    .run()
-    .then(rows => {console.log(rows)}); // [{name:'Laurent',age:29}]
-```
-

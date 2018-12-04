@@ -17,3 +17,14 @@ export const normaliseInclude = (aliasToService, targetBuilder) => (rel) => {
         as
     };
 };
+const uppercaseTheFirstLetter = (word) => {
+    const copy = word;
+    copy[0].toUpperCase();
+    return copy;
+};
+export const toCamelCase = (input) => {
+    return input
+        .split('_')
+        .map(uppercaseTheFirstLetter)
+        .join();
+};

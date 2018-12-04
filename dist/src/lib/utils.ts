@@ -25,3 +25,16 @@ export const normaliseInclude = (aliasToService: Map<string, EntityService>, tar
             as
         };
     };
+
+const uppercaseTheFirstLetter = (word: string): string => {
+    const copy = word;
+    copy[0].toUpperCase();
+    return copy;
+};
+
+export const toCamelCase = (input: string): string => {
+    return input
+        .split('_')
+        .map(uppercaseTheFirstLetter)
+        .join();
+};

@@ -11,9 +11,9 @@ test('service registry', t => {
 test('create only a service registry per instance (not shared)', t => {
     const sh1 = shiphold();
     sh1.service({
-        name: 'foo'
+        table: 'foo'
     });
     const sh2 = shiphold();
-    sh2.service({name: 'bar'});
+    sh2.service({table: 'bar'});
     t.equal([...sh1].length, 1);
 });

@@ -191,6 +191,8 @@ const createRelationBuilder = (pivotAlias: string, alias: string, targetPivotKey
     return builder;
 };
 
+const aggregateAndClean = (arg, toRemove) => coalesce([jsonAgg(`to_jsonb(${arg}) - '${toRemove}'`), `'[]'::json`]);
+
 const manyToMany = (targetBuilder: SelectServiceBuilder, relation: InclusionInput, sh: ShipHoldBuilders) => {
     const {builder: relationBuilder, as: alias} = relation;
     const {pivotKey: targetPivotKey, pivotTable} = <BelongsToManyRelationDefinition>targetBuilder.service.getRelationWith(relationBuilder.service);
@@ -232,7 +234,7 @@ const manyToMany = (targetBuilder: SelectServiceBuilder, relation: InclusionInpu
     const relationWith = createRelationBuilder(pivotAlias, alias, targetPivotKey, relationBuilder);
 
     const relationBuilderInMainQuery = sh.select({
-        value: coalesceAggregation(`"${alias}"`), as: alias
+        value: aggregateAndClean(`"${alias}"`, targetPivotKey), as: alias
     })
         .from({
             value: value,

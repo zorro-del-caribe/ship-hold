@@ -15,7 +15,7 @@ export interface WithConditionsBuilderFactory {
 }
 export interface EntityDefinition {
     table: string;
-    name: string;
+    name?: string;
     primaryKey?: string;
 }
 export interface EntityBuilder {

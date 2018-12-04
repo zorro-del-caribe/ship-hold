@@ -1,11 +1,5 @@
-const {iterations, pageSize, breath} = require('../config/bench');
 const {Users, Tags, Posts, Comments} = require('./models');
-const Sequelize = require('sequelize');
-const collectorFactory = require('../collector');
 
-const wait = () => new Promise(resolve => {
-    setTimeout(() => resolve(), breath);
-});
 
 /*
 
@@ -32,28 +26,20 @@ at processImmediate (timers.js:647:5)
 
 (async function () {
     try {
-        let iter = 1;
-        // const collector = collectorFactory();
-        // while (iter <= iterations) {
         const start = Date.now();
         const tag = await Tags
             .findOne({
                 include: [{
                     model:Posts,
                     include:[Users],
-                    // orderBy:[['published_at','desc']],
-                    // limit:5
+                    orderBy:[['published_at','desc']],
+                    limit:5
                 }],
                 where:{tag:'nisi'}
             });
         console.log(`executed in ${Date.now() - start}ms`);
         console.log(JSON.stringify(tag));
 
-        // collector.collect(Date.now() - start);
-        await wait();
-        iter++;
-        // }
-        // collector.print();
     } catch (e) {
         console.log(e);
     } finally {

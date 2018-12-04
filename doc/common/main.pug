@@ -1,0 +1,16 @@
+html
+    head
+        title Ship-hold | #{title}
+        base(href='/ship-hold/doc/')
+        link(rel='stylesheet' type='text/css' href='common/theme.css')
+        link(rel='stylesheet' type='text/css' href='../node_modules/highlight.js/styles/darkula.css')
+    body
+        header
+            div#logo-wrapper
+                img(alt='ship-hold logo', src='resources/ship-hold-logo.svg')
+                span SHIP
+                span -
+                span HOLD
+            include ./navigation
+        main#main
+                block content
