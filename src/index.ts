@@ -1,7 +1,8 @@
-import {createPoolConnection, DBConnectionsPool} from './lib/connections';
-import {ShipHoldBuilders, buildersFactory} from './lib/builders';
-import {serviceRegistry, ServiceRegistry} from './lib/service-registry';
+import {createPoolConnection} from './lib/connections';
+import {buildersFactory} from './lib/builders';
+import {serviceRegistry} from './lib/service-registry';
 import {PoolConfig} from 'pg';
+import {DBConnectionsPool, ServiceRegistry, ShipHoldBuilders} from './interfaces';
 
 export interface ShipHold extends ShipHoldBuilders, DBConnectionsPool, ServiceRegistry {
 }

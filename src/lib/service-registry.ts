@@ -1,21 +1,18 @@
-import {service, EntityDefinition, EntityService} from './service';
-import {ShipHoldBuilders} from './builders';
-
-export interface ServiceRegistry extends Iterable<[string, EntityService]> {
-    service(def: EntityDefinition | string): EntityService;
-}
+import {service} from './service';
+import {EntityDefinition, EntityService, ServiceRegistry, ShipHoldBuilders} from '../interfaces';
+import {toCamelCase} from './utils';
 
 // Create a registry of services bound to a specific table
 export const serviceRegistry = (builders: ShipHoldBuilders): ServiceRegistry => {
     const registry = new Map<string, EntityService>();
     const getService = (name: string) => {
         if (registry.has(name) === false) {
-            throw new Error(`could not find the model ${name}`);
+            throw new Error(`could not find the service ${name}`);
         }
         return registry.get(name);
     };
     const setService = function (def: EntityDefinition) {
-        const definition = Object.assign({}, def);
+        const definition = Object.assign({primaryKey: 'id', name: toCamelCase(def.table)}, def);
         const {name} = definition;
         registry.set(name, service(definition, builders));
         return getService(name);

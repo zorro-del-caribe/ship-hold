@@ -1,9 +1,11 @@
 const test = require('zora');
-const {default:shiphold} = require('../../src-old/shiphold');
+const {shiphold} = require('../../dist/bundle');
+
+const createService = () => shiphold()
+    .service({name: 'Users', table: 'users', primaryKey: 'id'});
 
 test('bind query to proper table', t => {
-	const query = shiphold()
-		.model('Users', sh => ({table: 'users', columns: {}, relations: {}}))
+	const query = createService()
 		.select()
 		.build()
 		.text;
@@ -13,10 +15,7 @@ test('bind query to proper table', t => {
 });
 
 test('bind query to proper table with forwarded arguments', t => {
-	const query = shiphold()
-		.model('Users', sh => (
-			{table: 'users', columns: {}, relations: {}}
-		))
+	const query = createService()
 		.select('foo', {value: 'bar', as: 'blah'})
 		.build()
 		.text;

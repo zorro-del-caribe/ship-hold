@@ -1,117 +1,236 @@
-import {SelectServiceBuilder} from './service';
-import {jsonAgg, toJson} from 'ship-hold-querybuilder';
+import {
+    jsonAgg,
+    SelectBuilder,
+    toJson,
+    coalesce,
+    compositeNode,
+    SQLComparisonOperator, Builder
+} from 'ship-hold-querybuilder';
+import {
+    BelongsToManyRelationDefinition,
+    BelongsToRelationDefinition,
+    InclusionInput,
+    RelationType,
+    SelectServiceBuilder,
+    ShipHoldBuilders
+} from '../interfaces';
+import {setAsServiceBuilder} from './with-service-builder-mixin';
 
-export const enum RelationType {
-    BELONGS_TO = 'BELONGS_TO',
-    HAS_ONE = 'HAS_ONE',
-    HAS_MANY = 'HAS_MANY',
-    BELONGS_TO_MANY = 'BELONGS_TO_MANY'
-}
+export const morphBuilder = (sh: ShipHoldBuilders) => (targetBuilder: SelectServiceBuilder, relation: InclusionInput) => {
+    const {value: relationBuilder} = relation;
 
-export interface RelationDefinition {
-    type: RelationType;
-    alias: string;
-    foreignKey?: string;
-}
-
-export const buildRelation = (target: SelectServiceBuilder, relationBuilder: SelectServiceBuilder) => {
-    const relDef = target.service.getRelationWith(relationBuilder.service);
-    const reverse = relationBuilder.service.getRelationWith(target.service);
-
-    if (relDef.type === RelationType.HAS_MANY) {
-        return oneToMany(target, relationBuilder);
+    if (targetBuilder === relationBuilder) {
+        return self(targetBuilder, sh);
     }
 
-    if (relDef.type === RelationType.HAS_ONE) {
-        return hasOne(target, relationBuilder);
+    const relDef = targetBuilder.service.getRelationWith(relationBuilder.service);
+
+    let relFunc;
+
+    switch (relDef.type) {
+        case RelationType.HAS_MANY: {
+            relFunc = oneToMany;
+            break;
+        }
+        case RelationType.HAS_ONE: {
+            relFunc = hasOne;
+            break;
+        }
+        case RelationType.BELONGS_TO_MANY: {
+            relFunc = manyToMany;
+            break;
+        }
+        case RelationType.BELONGS_TO: {
+            relFunc = belongsTo;
+            break;
+        }
     }
 
-    if (relDef.type === RelationType.BELONGS_TO && reverse.type === RelationType.HAS_MANY) {
-        return manyToOne(target, relationBuilder);
+    if (!relFunc) {
+        throw new Error('Unknown relation type');
     }
 
-    if (relDef.type === RelationType.BELONGS_TO && reverse.type === RelationType.HAS_ONE) {
-        return oneBelongsToOne(target, relationBuilder);
-    }
-
-    //todo many to many
-
-
-    throw new Error('Unknown relation type');
+    return relFunc(targetBuilder, relation, sh);
 };
 
-const has = aggregateFunc => (targetBuilder: SelectServiceBuilder, relationBuilder: SelectServiceBuilder) => {
-    const {alias} = targetBuilder.service.getRelationWith(relationBuilder.service);
-    const {foreignKey} = relationBuilder.service.getRelationWith(targetBuilder.service);
-    const {table: targetTable, primaryKey} = targetBuilder.service.definition;
-    const {table: relationTable} = relationBuilder.service.definition;
+const belongsTo = (targetBuilder: SelectServiceBuilder, relation: InclusionInput, sh: ShipHoldBuilders) => {
+    const {value: relationBuilder, as} = relation;
+    const {foreignKey} = <BelongsToRelationDefinition>targetBuilder.service.getRelationWith(relationBuilder.service);
+    const {cte: targetName} = targetBuilder;
+    const {primaryKey, cte: relationTable} = relationBuilder;
 
-    const relSelect = relationBuilder.service.select;
-    const targetSelect = targetBuilder.service.select;
+    const selectLeftOperand = `"${as}"."${primaryKey}"`;
+    const selectRightOperand = `"${targetName}"."${foreignKey}"`;
+    const withLeftOperand = `"${relationTable}"."${primaryKey}"`;
+    const withRightOperand = sh.select(foreignKey).from(targetName);
 
-    const leftOperand = `"${relationTable}"."${foreignKey}"`;
-    const withRightOperand = targetSelect(primaryKey);
-    const selectRightOperand = `"${targetTable}"."${primaryKey}"`;
+    const selectValue = {
+        value: toJson(`"${as}".*`),
+        as
+    };
+
     return targetBuilder
         .select({
-            value: relSelect(aggregateFunc(`"${relationTable}".*`, alias))
+            value: sh.select(selectValue)
+                .from(as)
+                .where(selectLeftOperand, selectRightOperand)
+                .noop(),
+            as
+        })
+        .with(as,
+            relationBuilder.where(withLeftOperand, SQLComparisonOperator.IN, withRightOperand).noop());
+};
+
+const hasOne = (targetBuilder: SelectServiceBuilder, relation: InclusionInput, sh: ShipHoldBuilders) => {
+    const {value: relationBuilder, as} = relation;
+    const {foreignKey} = <BelongsToRelationDefinition>relationBuilder.service.getRelationWith(targetBuilder.service);
+    const {cte: targetName, primaryKey} = targetBuilder;
+    const {cte: relationName} = relationBuilder;
+
+    const selectLeftOperand = `"${as}"."${foreignKey}"`;
+    const selectRightOperand = `"${targetName}"."${primaryKey}"`;
+    const withLeftOperand = `"${relationName}"."${foreignKey}"`;
+    const withRightOperand = sh.select(primaryKey).from(targetName);
+
+    return targetBuilder
+        .select({
+            value: sh.select({value: toJson(`"${as}".*`), as: as})
+                .from(as)
                 .where(
-                    leftOperand,
+                    selectLeftOperand,
                     selectRightOperand)
                 .noop()
         })
-        .with(relationTable,
-            // @ts-ignore
-            relationBuilder.where(leftOperand, 'IN', withRightOperand).noop());
+        .with(as,
+            relationBuilder.where(withLeftOperand, SQLComparisonOperator.IN, withRightOperand).noop());
 };
 
-const oneToMany = has(jsonAgg);
+const movePaginationNode = (from: Builder, to: Builder) => {
+    const orderBy = from.node('orderBy');
+    const limit = from.node('limit');
 
-const manyToOne = (targetBuilder: SelectServiceBuilder, relationBuilder: SelectServiceBuilder) => {
-    const {foreignKey, alias} = targetBuilder.service.getRelationWith(relationBuilder.service);
-    const {table: targetTable} = targetBuilder.service.definition;
-    const {primaryKey, table: relTable} = relationBuilder.service.definition;
+    from.node('orderBy', compositeNode());
+    from.node('limit', compositeNode());
 
-    const relSelect = relationBuilder.service.select;
-    const targetSelect = targetBuilder.service.select;
+    to.node('orderBy', orderBy);
+    to.node('limit', limit);
+};
 
-    const withLeftOperand = `"${relTable}"."${primaryKey}"`;
-    const withRightOperand = targetSelect(foreignKey);
-    const selectRightOperand = `"${targetTable}"."${foreignKey}"`;
+const coalesceAggregation = (arg) => coalesce([jsonAgg(arg), `'[]'::json`]); // we return empty array instead of null
+const oneToMany = (targetBuilder: SelectServiceBuilder, relation: InclusionInput, sh) => {
+    const {value: relationBuilder, as} = relation;
+    const {foreignKey} = <BelongsToRelationDefinition>relationBuilder.service.getRelationWith(targetBuilder.service);
+    const {cte: targetName, primaryKey} = targetBuilder;
+    const {cte: relationName} = relationBuilder;
+
+    const selectLeftOperand = `"${as}"."${foreignKey}"`;
+    const selectRightOperand = `"${targetName}"."${primaryKey}"`;
+    const withLeftOperand = `"${relationName}"."${foreignKey}"`;
+    const withRightOperand = sh.select(primaryKey).from(targetName);
+
+    const value = sh.select()
+        .from(as)
+        .where(
+            selectLeftOperand,
+            selectRightOperand)
+        .noop();
+
+    // We need to paginate the subquery
+    movePaginationNode(relationBuilder, value);
+
+    const relationBuilderInMainQuery = sh.select({
+        value: coalesceAggregation(`"${as}".*`), as
+    })
+        .from({
+            value,
+            as
+        });
 
     return targetBuilder
         .select({
-            value: relSelect(toJson(`"${relTable}".*`, alias)).where(withLeftOperand, selectRightOperand)
-                .noop()
+            value: relationBuilderInMainQuery
         })
-        .with(relTable,
-            // @ts-ignore
-            relationBuilder.where(withLeftOperand, 'IN', withRightOperand).noop());
+        .with(as,
+            relationBuilder.where(withLeftOperand, SQLComparisonOperator.IN, withRightOperand).noop());
 };
 
-const hasOne = has(toJson);
+const createRelationBuilder = (pivotAlias: string, alias: string, targetPivotKey: string, relationBuilder: SelectServiceBuilder) => {
+    const {service} = relationBuilder;
+    const builder = <SelectServiceBuilder>service.rawSelect(`("${pivotAlias}"."${alias}").*`, `"${pivotAlias}"."${targetPivotKey}"`).from(pivotAlias);
 
-const oneBelongsToOne = (targetBuilder: SelectServiceBuilder, relationBuilder: SelectServiceBuilder) => {
-    const {foreignKey, alias} = targetBuilder.service.getRelationWith(relationBuilder.service);
-    const {table: targetTable} = targetBuilder.service.definition;
-    const {table: relationTable, primaryKey} = relationBuilder.service.definition;
+    // pass the inclusions along
+    builder.include(...relationBuilder.inclusions);
 
-    const relSelect = relationBuilder.service.select;
-    const targetSelect = targetBuilder.service.select;
+    return builder;
+};
 
-    const leftOperand = `"${relationTable}"."${primaryKey}"`;
-    const rightOperand = `"${targetTable}"."${foreignKey}"`;
-    const withRightOperand = targetSelect(foreignKey);
+const aggregateAndClean = (arg, toRemove) => coalesce([jsonAgg(`to_jsonb(${arg}) - '${toRemove}'`), `'[]'::json`]);
+const manyToMany = (targetBuilder: SelectServiceBuilder, relation: InclusionInput, sh: ShipHoldBuilders) => {
+    const {value: relationBuilder, as: alias} = relation;
+    const {pivotKey: targetPivotKey, pivotTable} = <BelongsToManyRelationDefinition>targetBuilder.service.getRelationWith(relationBuilder.service);
+    const {pivotKey: relationPivotKey} = <BelongsToManyRelationDefinition>relationBuilder.service.getRelationWith(targetBuilder.service);
+    const {cte: targetName, primaryKey: targetPrimaryKey} = targetBuilder;
+    const {primaryKey: relationPrimaryKey} = relationBuilder;
+
+    const pivotAlias = ['_sh', targetName, alias, 'pivot'].join('_');
+    const orderByNode = relationBuilder.node('orderBy');
+    const value = sh
+        .select(`"${alias}"`)
+        .from(alias)
+        .where(`"${alias}"."${targetPivotKey}"`, `"${targetName}"."${targetPrimaryKey}"`)
+        .noop();
+
+    // re map orderBy nodes to alias
+    for (const orderMember of [...orderByNode]) {
+        // @ts-ignore
+        const [prop, direction] = [...orderMember].map(({value}) => value);
+        value.orderBy(`"${alias}"."${prop}"`, direction);
+    }
+
+    movePaginationNode(relationBuilder, value);
+
+    const relationInJoin = relationBuilder.clone(false);
+
+    const pivotWith = (<SelectBuilder>sh
+        .select(`"${pivotTable}"."${targetPivotKey}"`, `"${pivotTable}"."${relationPivotKey}"`, {
+            value: `"${alias}"`,
+            as: alias
+        })
+        .from(pivotTable))
+        .where(`"${pivotTable}"."${targetPivotKey}"`, SQLComparisonOperator.IN, sh.select(targetPrimaryKey).from(targetName))
+        .join({value: relationInJoin, as: alias})
+        .on(`"${pivotTable}"."${relationPivotKey}"`, `"${alias}"."${relationPrimaryKey}"`)
+        .noop();
+
+    // we create a temporary service for the pivot
+    const relationWith = createRelationBuilder(pivotAlias, alias, targetPivotKey, relationBuilder);
+
+    const relationBuilderInMainQuery = sh.select({
+        value: aggregateAndClean(`"${alias}"`, targetPivotKey), as: alias
+    })
+        .from({
+            value: value,
+            as: alias
+        });
 
     return targetBuilder
         .select({
-            value: relSelect(toJson(`"${relationTable}".*`, alias))
-                .where(
-                    leftOperand,
-                    rightOperand)
-                .noop()
+            value: relationBuilderInMainQuery
         })
-        .with(relationTable,
-            // @ts-ignore
-            relationBuilder.where(leftOperand, 'IN', withRightOperand).noop());
+        .with(pivotAlias, pivotWith)
+        .with(alias, relationWith);
+};
+
+const self = (builder: SelectServiceBuilder, sh) => {
+    const name = builder.service.definition.name;
+    const setAsServiceB = setAsServiceBuilder(builder.service);
+
+    const targetBuilder = setAsServiceB(sh.select(`"${name}".*`)
+        .from(name)
+        .with(name, builder), name);
+
+    // We need to re apply pagination settings to ensure pagination works for complex queries etc.
+    targetBuilder.node('orderBy', builder.node('orderBy'));
+
+    return targetBuilder;
 };

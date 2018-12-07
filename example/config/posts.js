@@ -1,0 +1,2 @@
+exports.POSTS_NUMBER = 20000;
+exports.BATCH_SIZE = 5000;

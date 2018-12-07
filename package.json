@@ -1,6 +1,6 @@
 {
   "name": "ship-hold",
-  "version": "2.0.0-1",
+  "version": "2.0.0",
   "description": "data access framework for postgres sql",
   "main": "./dist/bundle/index",
   "module": "./dist/bundle/module",
@@ -10,32 +10,32 @@
     "dist/declarations"
   ],
   "scripts": {
-    "bench:setup": "node ./benchmark/scripts/setup.js",
-    "bench:fixture:users": "node ./benchmark/scripts/fixture_users.js",
-    "bench:fixture:products": "node ./benchmark/scripts/fixture_products.js",
-    "bench:build": "npm run bench:setup && npm run bench:fixture:users && npm run bench:fixture:products",
+    "example:setup": "node ./example/scripts/setup.js",
+    "example:fixture": "node ./example/scripts/fixture_users.js && node ./example/scripts/fixture_posts.js && node ./example/scripts/fixture_comments.js && node ./example/scripts/fixture_tags.js",
+    "example:build": "npm run example:setup && npm run example:fixture",
     "test": "npm run test:unit && npm run test:int",
     "test:int": "node ./test/integrations/index.js",
     "test:unit": "node ./test/units/index.js",
     "test:ci": "(npm run test:unit | tap-set-exit) && (npm run test:int | tap-set-exit)",
-    "build:doc": "cat ./doc/*.md > README.md",
-    "build:clean": "rm -rf ./dist && mkdir -p ./dist/bundle ./dist/declarations && cp -r ./src ./dist/src",
+    "doc:build": "node ./doc/scripts/compile.js && cp -r ./doc/resources ./dist/doc",
+    "build:clean": "rm -rf ./dist && mkdir -p ./dist/bundle ./dist/declarations ./dist/doc && cp -r ./src ./dist/src",
     "build:compile": "tsc",
     "build:bundle": "rollup -c ./rollup/build.js",
-    "build": "npm run build:clean && npm run build:compile && npm run build:bundle && npm run build:doc"
+    "build": "npm run build:clean && npm run build:compile && npm run build:bundle && npm run doc:build"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/zorro-del-caribe/ship-hold.git"
   },
   "keywords": [
+    "data",
+    "relational",
     "postgresql",
     "postgres",
-    "orm",
     "database",
-    "model",
     "sql",
-    "ship-hold"
+    "ship-hold",
+    "pg"
   ],
   "engines": {
     "node": ">=6.0.0"
@@ -43,23 +43,23 @@
   "author": "Laurent RENARD",
   "license": "MIT",
   "dependencies": {
-    "pg": "^7.6.1",
+    "knex": "^0.15.2",
+    "objection": "^1.4.0",
+    "pg": "^7.7.1",
     "pg-query-stream": "^1.1.2",
-    "ship-hold-querybuilder": "^2.0.0-3"
+    "sequelize": "^4.41.2",
+    "ship-hold-querybuilder": "^2.0.0"
   },
   "devDependencies": {
-    "@types/node": "^10.12.3",
+    "@types/node": "^10.12.11",
     "@types/pg": "^7.4.11",
     "@types/pg-query-stream": "^1.0.2",
-    "bookshelf": "^0.13.3",
-    "casual": "^1.5.19",
-    "knex": "^0.15.2",
-    "reflect-metadata": "^0.1.12",
-    "rollup": "^0.66.6",
-    "sequelize": "^4.41.1",
+    "jstransformer-highlight": "^2.0.0",
+    "mkdirp": "^0.5.1",
+    "pug": "^2.0.3",
+    "rollup": "^0.67.3",
     "tap-set-exit": "^1.1.1",
-    "typeorm": "^0.2.9",
-    "typescript": "^3.1.6",
+    "typescript": "^3.2.1",
     "zora": "^2.0.1"
   }
 }

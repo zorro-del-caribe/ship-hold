@@ -1,0 +1,267 @@
+<html><head><title>Ship-hold | Services</title><base href="/ship-hold/dist/doc/"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><link rel="stylesheet" type="text/css" href="resources/theme.css"/><link rel="stylesheet" type="text/css" href="resources/darkula.css"/><link rel="icon" href="resources/ship-hold-logo.svg"/></head><body><header><div id="logo-wrapper"><img alt="ship-hold logo" src="resources/ship-hold-logo.svg"/><div><span>SHIP</span><span>-</span><span>HOLD</span></div></div><div id="main-navigation-container"><nav><ul><li class="top"><a href="./"><span>Introduction</span></a><ul><li><a href="./#getting-started"><span>Getting started</span></a><ul><li class="leaf"><a href="./#installation"><span>Installation</span></a></li><li class="leaf"><a href="./#initialisation"><span>Initialisation</span></a></li></ul></li><li><a href="./#how-to-read"><span>How to read this documentation</span></a></li></ul></li><li class="top"><a href="builders"><span>Builders</span></a><ul><li><a href="builders#build"><span>.build()</span></a><ul><li class="leaf"><a href="builders#parameterized-query"><span>Parameterized queries</span></a></li></ul></li><li><a href="builders#clone"><span>.clone()</span></a></li><li><a href="builders#with"><span>.with(as, build)</span></a></li><li><a href="builders#common-types"><span>Common types</span></a><ul><li class="leaf"><a href="builders#pointers"><span>Pointers</span></a></li><li class="leaf"><a href="builders#values"><span>Values</span></a></li></ul></li></ul></li><li class="top"><a href="builders/insert"><span>INSERT builder</span></a><ul><li><a href="builders/insert#insert"><span>.insert(map,...othersProps)</span></a></li><li><a href="builders/insert#into"><span>.into(tableName)</span></a></li><li><a href="builders/insert#values"><span>.values(rows)</span></a></li><li><a href="builders/insert#returning"><span>.returning(...properties)</span></a></li></ul></li><li class="top"><a href="builders/update"><span>UPDATE builder</span></a><ul><li><a href="builders/update#update"><span>.update(tableName)</span></a></li><li><a href="builders/update#set"><span>.set(mapOrString, ?value)</span></a></li><li><a href="builders/update#from"><span>.from(...pointers)</span></a></li><li><a href="builders/update#where"><span>.where(leftOperand, operator, rightOperand)</span></a></li><li><a href="builders/update#returning"><span>.returning(...properties)</span></a></li></ul></li><li class="top"><a href="builders/delete"><span>DELETE builder</span></a><ul><li><a href="builders/delete#delete"><span>.delete(tableName)</span></a></li><li><a href="builders/delete#using"><span>.using(...pointers)</span></a></li><li><a href="builders/delete#where"><span>.where(leftOperand, operator, rightOperand)</span></a></li><li><a href="builders/delete#returning"><span>.returning(...properties)</span></a></li></ul></li><li class="top"><a href="builders/select"><span>SELECT builder</span></a><ul><li><a href="builders/select#select"><span>.select(...pointers)</span></a></li><li><a href="builders/select#from"><span>.from(...pointers)</span></a></li><li><a href="builders/select#joins"><span>Joins</span></a><ul><li class="leaf"><a href="builders/select#join"><span>.join(table, leftOp, rightOp)</span></a></li><li class="leaf"><a href="builders/select#left-join"><span>.leftJoin(table, leftOp, rightOp)</span></a></li><li class="leaf"><a href="builders/select#right-join"><span>rightJoin(table, leftOp, rightOp)</span></a></li><li class="leaf"><a href="builders/select#on"><span>.on(leftOperand, operator, rightOperand)</span></a></li></ul></li><li><a href="builders/select#group"><span>Group</span></a><ul><li class="leaf"><a href="builders/select#group-by"><span>.groupBy(...columns)</span></a></li><li class="leaf"><a href="builders/select#having"><span>.having(leftOp, operator, rightOp)</span></a></li></ul></li><li><a href="builders/select#where"><span>.where(leftOp, operator, rightOp)</span></a></li><li><a href="builders/select#pagination"><span>Pagination</span></a><ul><li class="leaf"><a href="builders/select#limit"><span>.limit(size, offset)</span></a></li></ul></li></ul></li><li class="top"><a href="builders/conditions"><span>Conditions builder</span></a><ul><li><a href="builders/conditions#factories"><span>Factories</span></a></li></ul></li><li class="top"><a href="run-queries"><span>Run queries</span></a><ul><li><a href="run-queries#run"><span>.run(params?:object)</span></a></li><li><a href="run-queries#debug"><span>.debug(params?:object)</span></a></li><li><a href="run-queries#stream"><span>.stream(sink: Generator, params?:object)</span></a></li></ul></li><li class="top"><a href="services"><span>Services</span></a><ul><li><a href="services#create-a-service"><span>Create a service</span></a><ul><li class="leaf"><a href="services#service"><span>.service(keyOrDef)</span></a></li></ul></li><li><a href="services#service-builders"><span>Service builders</span></a><ul><li class="leaf"><a href="services#insert"><span>.insert(...args)</span></a></li><li class="leaf"><a href="services#update"><span>.update(prosMap)</span></a></li><li class="leaf"><a href="services#delete"><span>.delete()</span></a></li><li class="leaf"><a href="services#select"><span>.select(...args)</span></a></li></ul></li></ul><li><a href="services#create-relations"><span>Create Relations</span></a><ul><li class="leaf"><a href="services#one-to-one"><span>One to one</span></a></li><li class="leaf"><a href="services#one-to-many"><span>One to many</span></a></li><li class="leaf"><a href="services#many-to-many"><span>Many to many</span></a></li></ul></li><li><a href="services#query-with-associations"><span>Queries with associations</span></a><ul><li class="leaf"><a href="services#include"><span>.include(...associations)</span></a></li></ul></li></li></ul></nav></div></header><main id="main"><h1 id="services">Services</h1><p>With services, you can create builders bound to a specific table in your database. They bring before all syntactic sugar, but they
+also are very useful to query related data (from different tables) by composing service builders together.
+</p><article><h2 id="create-a-service">Create a service</h2><p>To create a service you have to pass a service definition object whose unique mandatory property is <code>table</code> which refers to
+the table your service will be bound to.
+</p><h3 class="method" id="service">.service(definitionOrKey: ServiceDefinition | string)</h3><p>If you pass a service definition you can also pass a <code>primaryKey</code> property (default will be <code>'id'</code>) and a <code>name</code> property.
+The <code>primaryKey</code> property is mainly used in <a href="services#query-with-associations">queries with associations</a>.
+The <code>name</code> property is used as a key in a service registry and as alias for common table expressions in some queries.
+If not provided it will be based on the table name putting the first letter of each word in capital.
+</p><p>If you pass a string as argument you are actually trying to get the service for that given key. Note that
+all services are <strong>singletons</strong>.
+</p><pre class="hljs"><code><span class="hljs-keyword">const</span> Users = sh.service({
+    <span class="hljs-attr">table</span>: <span class="hljs-string">'test_users'</span>
+    <span class="hljs-comment">// name will be 'TestUsers'</span>
+    <span class="hljs-comment">// primaryKey will be 'id'</span>
+});
+
+Users === sh.service(<span class="hljs-string">'TestUsers'</span>); <span class="hljs-comment">// true</span>
+</code></pre><p class="tip">It is highly recommended to use a <strong>different</strong> name for your service name that the one used for the table.
+It is used as alias for some CTE and if you use the same value for both the service name and the table, some queries might have unexpected result.
+</p></article><article><h2 id="service-builders">Service builders</h2><p>Service builders are standard <a href="builders">ship hold builders</a> with some light syntax differences.
+</p><article><h3 class="method" id="insert">.insert(...args)</h3><p>A <i>insert</i> builder created with a service simply binds the builder to the service table. It also returns the inserted rows by default.
+</p><pre class="hljs"><code><span class="hljs-keyword">const</span> Users = sh.service({
+    <span class="hljs-attr">table</span>: <span class="hljs-string">'users'</span>,
+    <span class="hljs-attr">primaryKey</span>: <span class="hljs-string">'user_id'</span>
+});
+
+Users
+    .insert({<span class="hljs-attr">email</span>: <span class="hljs-string">'foo@bar.com'</span>, <span class="hljs-attr">biography</span>: <span class="hljs-string">'blah blah'</span>, <span class="hljs-attr">first_name</span>: <span class="hljs-string">'john'</span>, <span class="hljs-attr">last_name</span>: <span class="hljs-string">'Doe'</span>})
+    .run();
+
+<span class="hljs-comment">// is equivalent to</span>
+
+sh
+    .insert({<span class="hljs-attr">email</span>: <span class="hljs-string">'foo@bar.com'</span>, <span class="hljs-attr">biography</span>: <span class="hljs-string">'blah blah'</span>, <span class="hljs-attr">first_name</span>: <span class="hljs-string">'john'</span>, <span class="hljs-attr">last_name</span>: <span class="hljs-string">'Doe'</span>})
+    .into(<span class="hljs-string">'users'</span>)
+    .returning(<span class="hljs-string">'*'</span>);
+</code></pre></article><article><h3 class="method" id="update">.update(map: objecMap)</h3><p>An <i>update</i> builder created with a service binds the builder to the service table. You can also directly pass as argument an object map with the properties/values
+to update. It will return the updated rows by default.
+</p><pre class="hljs"><code><span class="hljs-keyword">const</span> Users = sh.service({
+    <span class="hljs-attr">table</span>: <span class="hljs-string">'users'</span>,
+    <span class="hljs-attr">primaryKey</span>: <span class="hljs-string">'user_id'</span>
+});
+
+Users
+    .update({<span class="hljs-attr">biography</span>: <span class="hljs-string">'blah blah blah'</span>})
+    .where(<span class="hljs-string">'user_id'</span>, <span class="hljs-number">42</span>)
+    .run();
+
+<span class="hljs-comment">// is equivalent to</span>
+
+sh
+    .update(<span class="hljs-string">'users'</span>)
+    .set(<span class="hljs-string">'biography'</span>, <span class="hljs-string">'blah blah blah'</span>)
+    .where(<span class="hljs-string">'user_id'</span>, <span class="hljs-number">42</span>)
+    .returning(<span class="hljs-string">'*'</span>)
+    .run();
+</code></pre></article><article><h3 class="method" id="delete">.delete()</h3><p>An <i>delete</i> builder created with a service binds the builder to the service table.
+</p><pre class="hljs"><code><span class="hljs-keyword">const</span> Users = sh.service({
+    <span class="hljs-attr">table</span>: <span class="hljs-string">'users'</span>,
+    <span class="hljs-attr">primaryKey</span>: <span class="hljs-string">'user_id'</span>
+});
+
+Users
+    .delete()
+    .where(<span class="hljs-string">'user_id'</span>, <span class="hljs-number">42</span>)
+    .run();
+
+<span class="hljs-comment">// is equivalent to</span>
+
+sh
+    .delete(<span class="hljs-string">'users'</span>)
+    .where(<span class="hljs-string">'user_id'</span>, <span class="hljs-number">42</span>)
+    .run();
+</code></pre></article><article><h3 class="method" id="select">.select(...args)</h3><p>A <i>select</i> builder created with a service simply binds the builder to the service table. It also has
+an <code>include</code> method. You can refer to the <a href="services#create-relations">relations</a> section for more details.
+</p><pre class="hljs"><code><span class="hljs-keyword">const</span> Users = sh.service({
+    <span class="hljs-attr">table</span>: <span class="hljs-string">'users'</span>,
+    <span class="hljs-attr">primaryKey</span>: <span class="hljs-string">'user_id'</span>
+});
+
+Users
+    .select()
+    .run();
+
+<span class="hljs-comment">// is equivalent to</span>
+
+sh
+    .select()
+    .from(<span class="hljs-string">'users'</span>)
+    .run();
+</code></pre></article></article><article><h2 id="create-relations">Create Relations</h2><p>The other great feature with services is the ability to combine service builders together to load related data whereas they don't belong to the same table.
+We usually call it <strong>eager loading</strong>.
+</p><article><h3 id="one-to-one">Define a one-to-one relationship</h3><p>This kind of relationship happens when a foreign key in a table references the primary key of another table.
+In ship-hold you define this relationship using the <code>hasOne</code> method on the relationship holder and the <code>belongsTo</code> method on the other side.</p><p><code>hasOne</code> takes as arguments the service related to the <em>target</em> table and an <em>alias</em> which will be used as property when aggregating the data.</p><p><code>belongsTo</code> takes as arguments the service related to the <em>holder</em> of the relationship, the <em>foreign key</em> used to reference the holder table and an alias too.
+</p><pre class="hljs"><code><span class="hljs-keyword">const</span> Users = sh.service({
+    <span class="hljs-attr">table</span>: <span class="hljs-string">'users'</span>
+});
+
+<span class="hljs-keyword">const</span> Phones = sh.service({
+    <span class="hljs-attr">table</span>: <span class="hljs-string">'phones'</span>
+});
+
+<span class="hljs-comment">//Users have one phone</span>
+Users.hasOne(Phones, <span class="hljs-string">'phone'</span>);
+
+<span class="hljs-comment">//A phone belongs to a given user</span>
+<span class="hljs-comment">//The foreign key in the phones table which references users table is "user_id"</span>
+Phones.belongsTo(Users, <span class="hljs-string">'user_id'</span>, <span class="hljs-string">'owner'</span>);
+
+</code></pre></article><article><h3 id="one-to-many">Define a one-to-many relationship</h3><p>This kind of relationship happens in the same condition as the <a href="services#one-to-one">one-to-one</a>, but your data model allows an item of the holder to have several items
+of the target reference it.</p><p><code>hasMany</code> takes as arguments the service related to the <em>target</em> table and an <em>alias</em> which will be used as property when aggregating the data.</p><p><code>belongsTo</code> takes as arguments the service related to the <em>holder</em> of the relationship, the <em>foreign key</em> used to reference the holder table and an alias too.
+</p><pre class="hljs"><code><span class="hljs-keyword">const</span> Users = sh.service({
+    <span class="hljs-attr">table</span>: <span class="hljs-string">'users'</span>,
+    <span class="hljs-attr">primaryKey</span>: <span class="hljs-string">'user_id'</span>
+});
+
+<span class="hljs-keyword">const</span> Posts = sh.service({
+    <span class="hljs-attr">table</span>: <span class="hljs-string">'posts'</span>,
+    <span class="hljs-attr">primaryKey</span>: <span class="hljs-string">'post_id'</span>
+});
+
+<span class="hljs-comment">//A user may have written several posts</span>
+Users.hasMany(Posts, <span class="hljs-string">'articles'</span>);
+
+<span class="hljs-comment">//A post has only one author</span>
+Posts.belongsTo(Users, <span class="hljs-string">'user_id'</span>, <span class="hljs-string">'author'</span>);
+</code></pre></article><article><h3 id="many-to-many">Define a many-to-many relationship</h3><p>Sometimes we have a many to many relationship. In that case we use a <em>pivot</em> table which have as rows at least a pair of key whose each member references an item
+in each table of the relationship.</p><p><code>belongsToMany</code> takes as arguments the service related to the <em>target</em> table, the name of the pivot table, the key which references this side of the relationship and an alias.</p><pre class="hljs"><code><span class="hljs-keyword">const</span> Tags = sh.service({
+    <span class="hljs-attr">table</span>: <span class="hljs-string">'tags'</span>,
+    <span class="hljs-attr">primaryKey</span>: <span class="hljs-string">'tag'</span>
+});
+
+<span class="hljs-keyword">const</span> Posts = sh.service({
+    <span class="hljs-attr">table</span>: <span class="hljs-string">'posts'</span>,
+    <span class="hljs-attr">primaryKey</span>: <span class="hljs-string">'post_id'</span>
+});
+
+<span class="hljs-comment">//A tag can be applied to many posts</span>
+Tags.belongsToMany(Posts, <span class="hljs-string">'posts_tag'</span>, <span class="hljs-string">'tag'</span>, <span class="hljs-string">'posts'</span>);
+
+<span class="hljs-comment">//A posts may be tagged with multiple tags</span>
+Posts.belongsToMany(Tags, <span class="hljs-string">'posts_tag'</span>, <span class="hljs-string">'post_id'</span>, <span class="hljs-string">'tags'</span>);
+</code></pre></article></article><article><h2 id="query-with-associations">Queries with associations</h2><p>Once you have defined relationships between your services, you can combine service builders together to <em>include</em> related association data when fetching
+a given type of data. This is particularly helpful as you avoid the trouble of making many joins or sub queries yourself. It will also aggregate the data based on the nature of
+the relationship and the aliases you have provided.
+</p><p>  All the examples below will use our test database with the following service definitions</p><pre class="hljs"><code><span class="hljs-keyword">const</span> Users = sh.service({
+    <span class="hljs-attr">name</span>: <span class="hljs-string">'Users'</span>,
+    <span class="hljs-attr">table</span>: <span class="hljs-string">'users'</span>,
+    <span class="hljs-attr">primaryKey</span>: <span class="hljs-string">'user_id'</span>
+});
+
+<span class="hljs-keyword">const</span> Posts = sh.service({
+    <span class="hljs-attr">name</span>: <span class="hljs-string">'Posts'</span>,
+    <span class="hljs-attr">table</span>: <span class="hljs-string">'posts'</span>,
+    <span class="hljs-attr">primaryKey</span>: <span class="hljs-string">'post_id'</span>
+});
+
+<span class="hljs-keyword">const</span> Comments = sh.service({
+    <span class="hljs-attr">name</span>: <span class="hljs-string">'Comments'</span>,
+    <span class="hljs-attr">table</span>: <span class="hljs-string">'comments'</span>,
+    <span class="hljs-attr">primaryKey</span>: <span class="hljs-string">'comment_id'</span>
+});
+
+<span class="hljs-keyword">const</span> Tags = sh.service({
+    <span class="hljs-attr">name</span>: <span class="hljs-string">'Tags'</span>,
+    <span class="hljs-attr">table</span>: <span class="hljs-string">'tags'</span>,
+    <span class="hljs-attr">primaryKey</span>: <span class="hljs-string">'tag'</span>
+});
+
+Users.hasMany(Posts);
+Posts.belongsTo(Users, <span class="hljs-string">'user_id'</span>, <span class="hljs-string">'author'</span>);
+
+Users.hasMany(Comments);
+Posts.hasMany(Comments);
+Comments.belongsTo(Users, <span class="hljs-string">'user_id'</span>, <span class="hljs-string">'author'</span>);
+Comments.belongsTo(Posts, <span class="hljs-string">'post_id'</span>, <span class="hljs-string">'article'</span>);
+
+Posts.belongsToMany(Tags, <span class="hljs-string">'posts_tags'</span>, <span class="hljs-string">'post_id'</span>);
+Tags.belongsToMany(Posts, <span class="hljs-string">'posts_tags'</span>, <span class="hljs-string">'tag'</span>);
+</code></pre><article><h3 class="method" id="include">.include(...associations: InclusionInput)</h3><p>The include method lets you query for as many related table data as you want.
+An inclusion input can be one of the following:</p><ul><li>Service select builder</li><li>Service: in this case it will be equivalent to <code>Service.select()</code></li><li>An alias string as specified when you have created your relations. Again it will be equivalent in this case to <code>Service.select()</code></li></ul><pre class="hljs"><code><span class="hljs-comment">// Find all the posts including their author, tags and comments</span>
+Posts
+    .select()
+    .include(Tags.select(), Comments, <span class="hljs-string">'author'</span>)
+    .run()
+    .then(<span class="hljs-function"><span class="hljs-params">posts</span> =&gt;</span> {
+        <span class="hljs-comment">/* posts will be something
+        [{
+            "post_id":3,
+            "title":"Fugit facilis facilis",
+            "content":"Veniam aliquam aut ...",
+            "published_at":"2014-03-08T05:00:00.000Z",
+            "user_id":26365,
+            "tags":[{
+                    "tag":"nobis",
+                    "description":"Et rerum ..."
+                },
+                ...],
+            "comments":[{
+                    "comment_id":31110,
+                    "content":"Culpa dolores ...",
+                    "published_at":"1979-03-08T00:00:00",
+                    "user_id":59043,
+                    "post_id":3
+                },
+                ...],
+            "author":{
+                "user_id":26365,
+                "email":"Wilhelm_Collins@Windler.name",
+                "biography":"Et sit neque aliquid... ",
+                "first_name":"Felix",
+                "last_name":"Stokes"
+                }
+        },
+        ...]
+        */</span>
+    });
+
+</code></pre><p>If you use the version with select builders, you have to understand that any clause will be scoped to the given builder.
+It makes it particularly easy to reason when you are building your query, especially if you want to paginate or filter your result: you don't have to worry
+whether you are going to miss some data if you do not apply the <code>limit</code> clause to the appropriate builder for example.
+It just translates what you would say in plain English.
+</p><blockquote>I want to get the ten latest posts including for each the author name and the three last published comments.</blockquote><p>It may seem pretty easy, but it is actually <em>not</em> trivial SQL. Worst, some ORMs you think you could rely on would give you wrong result.
+With ship-hold, it <em>is</em> easy. You just have to write your builders how you would say it in plain English.
+</p><pre class="hljs"><code><span class="hljs-keyword">const</span> authors = Users.select(<span class="hljs-string">'user_id'</span>, <span class="hljs-string">'first_name'</span>, <span class="hljs-string">'last_name'</span>);
+
+<span class="hljs-keyword">const</span> lastThreeComments = Comments
+    .select()
+    .orderBy(<span class="hljs-string">'published_at'</span>, <span class="hljs-string">'desc'</span>)
+    .limit(<span class="hljs-number">3</span>);
+
+Posts
+    .select()
+    .orderBy(<span class="hljs-string">'published_at'</span>, <span class="hljs-string">'desc'</span>)
+    .limit(<span class="hljs-number">10</span>)
+    .include(authors, lastThreeComments)
+    .run()
+    .then(<span class="hljs-function"><span class="hljs-params">lastTenPosts</span> =&gt;</span> {
+
+    });
+</code></pre><p class="tip">You <strong>have to include in your select clauses the required primary keys and foreign keys</strong>. ship-hold does not know much about your table columns, it just does what you are asking for.
+</p><p>You can also perform nested include. However the cost on the database will be higher although ship-hold <a href="performances">performs quite well</a>.
+</p><p>One last things good to know is that you can overwrite the aliases defined by your relations providing instead of a builder an object
+with the <code>value</code> property and the <code>as</code> property. It is particularly handy if you want to include several times the same service with different filter clauses
+</p><blockquote>I want to get details for user Laurent Renard including its comments split into two collections: an old one with comments older than 2010, and a recent one with comments published after 2010.
+All comments should come with the title and the id of the post and should be sorted by publication date.
+</blockquote><p>Easy !
+</p><pre class="hljs"><code><span class="hljs-keyword">const</span> postReferences = Posts.select(<span class="hljs-string">'post_id'</span>, <span class="hljs-string">'title'</span>);
+
+<span class="hljs-keyword">const</span> getComments = <span class="hljs-function">(<span class="hljs-params">operator = <span class="hljs-string">'&lt;'</span></span>) =&gt;</span> Comments
+    .select()
+    .where(<span class="hljs-string">'published_at'</span>, operator, <span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>(<span class="hljs-number">2010</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>))
+    .orderBy(<span class="hljs-string">'published_at'</span>, <span class="hljs-string">'desc'</span>)
+    .include(postReferences.clone());
+
+<span class="hljs-keyword">const</span> [user] = Users
+    .select()
+    .where(<span class="hljs-string">'first_name'</span>, <span class="hljs-string">'Laurent'</span>)
+    .and(<span class="hljs-string">'last_name'</span>, <span class="hljs-string">'Renard'</span>)
+    .include(
+        {<span class="hljs-attr">as</span>: <span class="hljs-string">'oldComments'</span>, <span class="hljs-attr">value</span>: getComments()},
+        {<span class="hljs-attr">as</span>: <span class="hljs-string">'recentComments'</span>, <span class="hljs-attr">value</span>: getComments(<span class="hljs-string">'&gt;'</span>)})
+    .run()
+    .then(<span class="hljs-function"><span class="hljs-params">laurentRenard</span> =&gt;</span> {
+        <span class="hljs-comment">//</span>
+    });
+</code></pre><p class="tip">If the included builders finish on a condition clause, remember to call <code>noop</code> method in order to revoke any ongoing proxy.</p></article></article></main></body></html>

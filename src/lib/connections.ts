@@ -1,11 +1,5 @@
-import {Pool, PoolClient, QueryResult} from 'pg';
-import {SQLQuery} from 'ship-hold-querybuilder';
-
-export interface DBConnectionsPool {
-    query: (q: SQLQuery) => Promise<QueryResult>;
-    connect: () => Promise<PoolClient>;
-    stop: () => Promise<void>;
-}
+import {Pool} from 'pg';
+import {DBConnectionsPool} from '../interfaces';
 
 export const createPoolConnection = (conf: any): DBConnectionsPool => {
     const pool: Pool = new Pool(conf);

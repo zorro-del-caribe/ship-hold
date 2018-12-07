@@ -1,6 +1,2 @@
-import { EntityDefinition, EntityService } from './service';
-import { ShipHoldBuilders } from './builders';
-export interface ServiceRegistry extends Iterable<[string, EntityService]> {
-    service(def: EntityDefinition | string): EntityService;
-}
+import { ServiceRegistry, ShipHoldBuilders } from '../interfaces';
 export declare const serviceRegistry: (builders: ShipHoldBuilders) => ServiceRegistry;
