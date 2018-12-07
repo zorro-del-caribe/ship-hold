@@ -1,0 +1,197 @@
+extends ../common/main
+
+include ../common/mixins
+
+block content
+    h1#services Services
+
+    p.
+        With services, you can create builders bound to a specific table in your database. They bring before all syntactic sugar, but they
+        also are very useful to query related data (from different tables) by composing service builders together.
+
+    article
+        h2#create-a-service Create a service
+
+        p.
+            To create a service you have to pass a service definition object whose unique mandatory property is #[code table] which refers to
+            the table your service will be bound to.
+
+        h3.method#service .service(definitionOrKey: ServiceDefinition | string)
+
+        p.
+            If you pass a service definition you can also pass a #[code primaryKey] property (default will be #[code 'id']) and a #[code name] property.
+            The #[code primaryKey] property is mainly used in #[+link('services#query-with-associations','queries with associations')].
+            The #[code name] property is used as a key in a service registry and as alias for common table expressions in some queries.
+            If not provided it will be based on the table name putting the first letter of each word in capital.
+
+        p.
+            If you pass a string as argument you are actually trying to get the service for that given key. Note that
+            all services are #[strong singletons].
+
+        +codeblock
+            include:highlight(lang='javascript') snippets/service.js
+
+        p.tip.
+            It is highly recommended to use a #[strong different] name for your service name that the one used for the table.
+            It is used as alias for some CTE and if you use the same value for both the service name and the table, some queries might have unexpected result.
+
+    article
+        h2#service-builders Service builders
+
+        p.
+            Service builders are standard #[+link('builders','ship hold builders')] with some light syntax differences.
+
+        article
+            h3.method#insert .insert(...args)
+
+            p.
+                A #[i insert] builder created with a service simply binds the builder to the service table. It also returns the inserted rows by default.
+
+            +codeblock
+                include:highlight(lang='javascript') snippets/service-insert.js
+
+        article
+            h3.method#update .update(map: objecMap)
+
+            p.
+                An #[i update] builder created with a service binds the builder to the service table. You can also directly pass as argument an object map with the properties/values
+                to update. It will return the updated rows by default.
+
+            +codeblock
+                include:highlight(lang='javascript') snippets/service-update.js
+
+        article
+            h3.method#delete .delete()
+
+            p.
+                An #[i delete] builder created with a service binds the builder to the service table.
+
+            +codeblock
+                include:highlight(lang='javascript') snippets/service-delete.js
+
+        article
+            h3.method#select .select(...args)
+
+            p.
+                A #[i select] builder created with a service simply binds the builder to the service table. It also has
+                an #[code include] method. You can refer to the #[+link('services#create-relations','relations')] section for more details.
+
+            +codeblock
+                include:highlight(lang='javascript') snippets/service-select.js
+
+
+
+
+    article
+        h2#create-relations Create Relations
+
+        p.
+            The other great feature with services is the ability to combine service builders together to load related data whereas they don't belong to the same table.
+            We usually call it #[strong eager loading].
+
+        article
+            h3#one-to-one Define a one-to-one relationship
+
+            p.
+                This kind of relationship happens when a foreign key in a table references the primary key of another table.
+                In ship-hold you define this relationship using the #[code hasOne] method on the relationship holder and the #[code belongsTo] method on the other side.
+            p.
+                #[code hasOne] takes as arguments the service related to the #[em target] table and an #[em alias] which will be used as property when aggregating the data.
+            p.
+                #[code belongsTo] takes as arguments the service related to the #[em holder] of the relationship, the #[em foreign key] used to reference the holder table and an alias too.
+
+            +codeblock
+                include:highlight(lang='javascript') snippets/one-to-one.js
+
+        article
+            h3#one-to-many Define a one-to-many relationship
+
+            p.
+                This kind of relationship happens in the same condition as the #[+link('services#one-to-one','one-to-one')], but your data model allows an item of the holder to have several items
+                of the target reference it.
+            p.
+                #[code hasMany] takes as arguments the service related to the #[em target] table and an #[em alias] which will be used as property when aggregating the data.
+            p.
+                #[code belongsTo] takes as arguments the service related to the #[em holder] of the relationship, the #[em foreign key] used to reference the holder table and an alias too.
+
+            +codeblock
+                include:highlight(lang='javascript') snippets/one-to-many.js
+
+        article
+            h3#many-to-many Define a many-to-many relationship
+
+            p.
+                Sometimes we have a many to many relationship. In that case we use a #[em pivot] table which have as rows at least a pair of key whose each member references an item
+                in each table of the relationship.
+            p.
+                #[code belongsToMany] takes as arguments the service related to the #[em target] table, the name of the pivot table, the key which references this side of the relationship and an alias.
+            +codeblock
+                include:highlight(lang='javascript') snippets/many-to-many.js
+
+    article
+        h2#query-with-associations Queries with associations
+
+        p.
+            Once you have defined relationships between your services, you can combine service builders together to #[em include] related association data when fetching
+            a given type of data. This is particularly helpful as you avoid the trouble of making many joins or sub queries yourself. It will also aggregate the data based on the nature of
+            the relationship and the aliases you have provided.
+
+        p   All the examples below will use our test database with the following service definitions
+
+        +codeblock
+            include:highlight(lang='javascript') snippets/service-include-definition.js
+
+        article
+            h3.method#include .include(...associations: InclusionInput)
+
+            p.
+                The include method lets you query for as many related table data as you want.
+                An inclusion input can be one of the following:
+            ul
+                li Service select builder
+                li.
+                    Service: in this case it will be equivalent to #[code Service.select()]
+                li.
+                    An alias string as specified when you have created your relations. Again it will be equivalent in this case to #[code Service.select()]
+            +codeblock
+                include:highlight(lang='javascript') snippets/service-include.js
+
+            p.
+                If you use the version with select builders, you have to understand that any clause will be scoped to the given builder.
+                It makes it particularly easy to reason when you are building your query, especially if you want to paginate or filter your result: you don't have to worry
+                whether you are going to miss some data if you do not apply the #[code limit] clause to the appropriate builder for example.
+                It just translates what you would say in plain English.
+
+            blockquote I want to get the ten latest posts including for each the author name and the three last published comments.
+
+            p.
+                It may seem pretty easy, but it is actually #[em not] trivial SQL. Worst, some ORMs you think you could rely on would give you wrong result.
+                With ship-hold, it #[em is] easy. You just have to write your builders how you would say it in plain English.
+
+            +codeblock
+                include:highlight(lang='javascript') snippets/service-include-bis.js
+
+            p.tip.
+                You #[strong have to include in your select clauses the required primary keys and foreign keys]. ship-hold does not know much about your table columns, it just does what you are asking for.
+
+            p.
+                You can also perform nested include. However the cost on the database will be higher although ship-hold #[+link('performances','performs quite well')].
+
+            p.
+                One last things good to know is that you can overwrite the aliases defined by your relations providing instead of a builder an object
+                with the #[code value] property and the #[code as] property. It is particularly handy if you want to include several times the same service with different filter clauses
+
+            blockquote.
+                I want to get details for user Laurent Renard including its comments split into two collections: an old one with comments older than 2010, and a recent one with comments published after 2010.
+                All comments should come with the title and the id of the post and should be sorted by publication date.
+
+            p.
+                Easy !
+
+            +codeblock
+                include:highlight(lang='javascript') snippets/service-include-nested.js
+
+            p.tip.
+                If the included builders finish on a condition clause, remember to call #[code noop] method in order to revoke any ongoing proxy.
+
+

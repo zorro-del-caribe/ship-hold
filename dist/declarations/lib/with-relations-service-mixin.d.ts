@@ -1,6 +1,6 @@
 import { EntityService, RelationDefinition, WithRelations } from '../interfaces';
 /**
- * Mixin to be applied to an Entity Service
+ * Mixin to be applied to an Entity Service to support associations
  * @param {WeakMap<EntityService, RelationDefinition>} serviceToRelation
  * @param {Map<string, EntityService>} aliasToService
  * @returns {WithRelations<EntityService>}

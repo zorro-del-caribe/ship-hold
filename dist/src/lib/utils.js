@@ -8,12 +8,12 @@ export const normaliseInclude = (aliasToService, targetBuilder) => (rel) => {
     // Alias
     if (typeof rel === 'string') {
         const service = aliasToService.get(rel);
-        return { builder: service.select(), as: rel };
+        return { value: service.select(), as: rel };
     }
     const builder = ('build' in rel ? rel : rel.select()).noop();
     const as = targetBuilder.service.getRelationWith(builder.service).alias;
     return {
-        builder: builder,
+        value: builder,
         as
     };
 };

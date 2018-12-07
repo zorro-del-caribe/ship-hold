@@ -6,8 +6,8 @@ block content
     h1#select-builder Select Builder
 
     p.
-        The insert builder allows you to create #[+link('https://devdocs.io/postgresql~10/sql-insert','SELECT queries')],
-        to fetch data from your database
+        The select builder allows you to create #[+link('https://devdocs.io/postgresql~10/sql-insert','SELECT queries')],
+        to fetch data from your database.
 
     article
         h2.method#select .select(...columns:Pointers[])
@@ -124,7 +124,7 @@ block content
 
         p.
             To have your rows paginated you have to combine the SQL clauses LIMIT and OFFSET.
-            In ship hold this is controlled by the #[em limit] method
+            In ship hold this is controlled by the #[code limit] method
 
         h3.method#limit .limit(size: number, offset?: number)
 

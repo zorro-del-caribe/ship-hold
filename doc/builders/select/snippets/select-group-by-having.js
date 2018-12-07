@@ -5,7 +5,7 @@ sh
     .select(count('*'), 'user_id')
     .from('posts')
     .groupBy('user_id')
-    .having('posts.count','>',3)
+    .having('posts.count', '>', 3)
     .build();
 
 // { text:

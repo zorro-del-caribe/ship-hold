@@ -1,0 +1,71 @@
+extends ../common/main
+
+include ../common/mixins
+
+block content
+    h1#run-queries Run queries
+
+    p.
+        So far we have only seen how to output the generated SQL of a builder thanks to the #[+link('builders#build','build method')].
+        Obviously, at some point you will want to run your query against a true database. Depending on your use case and your preferences
+        one or the other of the following methods will be more adapted.
+
+    p.tip.
+        As for the #[code build] method every method mentioned below lets you pass parameters for your parameterized queries.
+
+    article
+        h2#run .run(params?:object)
+
+        p.
+            This method returns a #[em Promise] which will eventually resolve with an array containing the rows returned by the driver. The promise will be rejected in case
+            the driver forwards an error. This is probably the method you are going to use the most.
+
+        +codeblock
+            include:highlight(lang='javascript') snippets/run.js
+
+        p.tip.
+            In an async context, don't forget to use the #[code await] keyword
+
+        p.tip.
+            If you know your result will be a single row, you can use a #[strong destructuring pattern]: #[code #{'const [user] = await sh.select().from(\'users\').limit(1).run()'}]
+
+    article
+        h2#debug .debug(params?:object)
+
+        p.
+            This method is exactly the same than #[+link('run-queries#run','run method')], but il will also print in the console the result of
+            #[code build] (ie with the SQL query used).
+
+    article
+        h2#stream .stream(sink: Generator, params?:object)
+
+        p.
+            This method is very useful if you want to process each row one by one as they come out the driver parser.
+            It will be particularly efficient if you want to process big amount of data without consuming too much cpu/memory as no data is buffered.
+            Ship-hold itself does not do any extra work on the data coming out the driver so it would also be a good extension point if you want to add extra layers on top of ship-hold:
+            for example if you want to build an ORM, you could create here model instances from the rows.
+
+        p.
+            The first argument is a generator as data sink. You can have a look at that #[+link('','excellent book')] if you want more details.
+            The second argument will be an object map with the parameters' values if you want to use a parameterized query.
+
+        p.tip.
+            Note that such streams do not have back pressure implementation.
+
+        p.
+            Consider the following requirement:
+        blockquote.
+            I want to create a dump JSON file of all the posts in the database with their authors' data.
+        p.
+            Our test database has only #[em 20 000] posts but if you try to do something similar with others libraries you would likely hit a wall.
+            With ship-hold and the #[code stream] method it is pretty easy!
+
+        +codeblock
+            include:highlight(lang='javascript') snippets/posts-dump.js
+
+        p.
+            If I run the following command #[code time node ./my-program.js > dump.json] on my machine,
+            I manage to create a #[strong 13Mb] file in #[strong 1.25 second]!
+
+
+

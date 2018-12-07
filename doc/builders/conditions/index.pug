@@ -1,0 +1,41 @@
+extends ../../common/main
+
+include ../../common/mixins
+
+block content
+    h1#conditions-builder Conditions Builder
+
+    p.
+        The conditions builder allows you to create condition expression with logical operators such #[em AND] and #[em OR].
+        The first argument (or left operand) will be by default considered as a #[+link('builders#pointers','pointer')]. The second argument is an SQL operator which will allows you to
+        perform an actual comparison. The third argument is a #[+link('builders#values','value')] by default, which implies that if you want to use a pointer instead, you will need to wrap
+        it within quotes yourself. If you use the condition function with two arguments only (left operand and right operand), the operator will be #[code =] (equals).
+
+    p.tip.
+        You can pass a conditions builder to another one (as well as others builders, like a #[+link('builders/select','select builder')]), It this
+        case it will be considered as a sub expression and therefore will be between parentheses.
+
+    +codeblock
+        include:highlight(lang='javascript') snippets/conditions.js
+    article
+        h2#factories Factories
+
+        p.
+            There are different ways to create a conditions builder. You can use the #[code if] factory like in the example above. This case
+            will likely occur when you want to create a sub expression to pass to another condition builder.
+
+        p.
+            The second way will occur more often. It is by calling a method of a builder which returns a #[strong proxied] conditions builder:
+            #[+link('builders/select#where','select.where')] or #[+link('builders/select#on','select.on')] are good examples.
+            Using a proxy let you conveniently call the conditions builder methods as if they were part of the main builder.
+            Whenever a method or a property which does not belong to the conditions builder is called, the proxy is revoked.
+
+        +codeblock
+            include:highlight(lang='javascript') snippets/conditions-where.js
+
+        p.
+            A conditions builders has only two methods for the basic logical operators: #[code .or] and #[code .and]
+
+        p.tip.
+            If you want to pass around a builder (as argument of a function for example) you #[strong should make sure every proxy is revoked] first by calling the #[code noop] method, otherwise
+            it will definitely lead to some bugs.

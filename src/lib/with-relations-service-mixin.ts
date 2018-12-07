@@ -7,7 +7,7 @@ import {
 } from '../interfaces';
 
 /**
- * Mixin to be applied to an Entity Service
+ * Mixin to be applied to an Entity Service to support associations
  * @param {WeakMap<EntityService, RelationDefinition>} serviceToRelation
  * @param {Map<string, EntityService>} aliasToService
  * @returns {WithRelations<EntityService>}
@@ -73,16 +73,6 @@ export const withRelation = (
             }
 
             return serviceToRelation.get(key);
-        },
-        remove(service: EntityService) {
-            serviceToRelation.delete(service);
-            const toRemove = [...aliasToService.entries()]
-                .filter(([key, value]) => value === service)
-                .map(([key]) => key);
-
-            for (const k of toRemove) {
-                aliasToService.delete(k);
-            }
         }
     };
 };

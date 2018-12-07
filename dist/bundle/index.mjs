@@ -90,7 +90,7 @@ const buildersFactory = (pool) => {
 };
 
 /**
- * Mixin to be applied to an Entity Service
+ * Mixin to be applied to an Entity Service to support associations
  * @param {WeakMap<EntityService, RelationDefinition>} serviceToRelation
  * @param {Map<string, EntityService>} aliasToService
  * @returns {WithRelations<EntityService>}
@@ -150,15 +150,6 @@ const withRelation = (serviceToRelation, aliasToService) => {
                 throw new Error(message);
             }
             return serviceToRelation.get(key);
-        },
-        remove(service) {
-            serviceToRelation.delete(service);
-            const toRemove = [...aliasToService.entries()]
-                .filter(([key, value]) => value === service)
-                .map(([key]) => key);
-            for (const k of toRemove) {
-                aliasToService.delete(k);
-            }
         }
     };
 };
@@ -173,12 +164,12 @@ const normaliseInclude = (aliasToService, targetBuilder) => (rel) => {
     // Alias
     if (typeof rel === 'string') {
         const service = aliasToService.get(rel);
-        return { builder: service.select(), as: rel };
+        return { value: service.select(), as: rel };
     }
     const builder = ('build' in rel ? rel : rel.select()).noop();
     const as = targetBuilder.service.getRelationWith(builder.service).alias;
     return {
-        builder: builder,
+        value: builder,
         as
     };
 };
@@ -209,13 +200,12 @@ const setAsServiceBuilder = (service) => {
     });
 };
 
-const changeFromRelation = (sh) => (targetBuilder, relation) => {
-    const { builder: relationBuilder } = relation;
+const morphBuilder = (sh) => (targetBuilder, relation) => {
+    const { value: relationBuilder } = relation;
     if (targetBuilder === relationBuilder) {
         return self(targetBuilder, sh);
     }
     const relDef = targetBuilder.service.getRelationWith(relationBuilder.service);
-    const reverse = relationBuilder.service.getRelationWith(targetBuilder.service);
     let relFunc;
     switch (relDef.type) {
         case "HAS_MANY" /* HAS_MANY */: {
@@ -231,7 +221,7 @@ const changeFromRelation = (sh) => (targetBuilder, relation) => {
             break;
         }
         case "BELONGS_TO" /* BELONGS_TO */: {
-            relFunc = reverse.type === "HAS_MANY" /* HAS_MANY */ ? manyToOne : oneBelongsToOne;
+            relFunc = belongsTo;
             break;
         }
     }
@@ -240,66 +230,46 @@ const changeFromRelation = (sh) => (targetBuilder, relation) => {
     }
     return relFunc(targetBuilder, relation, sh);
 };
-const oneBelongsToOne = (targetBuilder, relation, sh) => {
-    const { builder: relationBuilder, as: alias } = relation;
+const belongsTo = (targetBuilder, relation, sh) => {
+    const { value: relationBuilder, as } = relation;
     const { foreignKey } = targetBuilder.service.getRelationWith(relationBuilder.service);
     const { cte: targetName } = targetBuilder;
     const { primaryKey, cte: relationTable } = relationBuilder;
-    const selectLeftOperand = `"${alias}"."${primaryKey}"`;
+    const selectLeftOperand = `"${as}"."${primaryKey}"`;
     const selectRightOperand = `"${targetName}"."${foreignKey}"`;
     const withLeftOperand = `"${relationTable}"."${primaryKey}"`;
     const withRightOperand = sh.select(foreignKey).from(targetName);
     const selectValue = {
-        value: toJson(`"${alias}".*`),
-        as: alias
+        value: toJson(`"${as}".*`),
+        as
     };
     return targetBuilder
         .select({
         value: sh.select(selectValue)
-            .from(alias)
+            .from(as)
             .where(selectLeftOperand, selectRightOperand)
-            .noop()
+            .noop(),
+        as
     })
-        .with(alias, relationBuilder.where(withLeftOperand, "IN" /* IN */, withRightOperand).noop());
-};
-const manyToOne = (targetBuilder, relation, sh) => {
-    const { as: alias, builder: relationBuilder } = relation;
-    const { foreignKey } = targetBuilder.service.getRelationWith(relationBuilder.service);
-    const { cte: targetName } = targetBuilder;
-    const { primaryKey, cte: relTable } = relationBuilder;
-    const selectLeftOperand = `"${alias}"."${primaryKey}"`;
-    const selectRightOperand = `"${targetName}"."${foreignKey}"`;
-    const withLeftOperand = `"${relTable}"."${primaryKey}"`;
-    const withRightOperand = sh.select(foreignKey).from(targetName);
-    return targetBuilder
-        .select({
-        value: sh.select({
-            value: toJson(`"${alias}".*`),
-            as: alias
-        })
-            .from(alias)
-            .where(selectLeftOperand, selectRightOperand)
-            .noop()
-    })
-        .with(alias, relationBuilder.where(withLeftOperand, "IN" /* IN */, withRightOperand).noop());
+        .with(as, relationBuilder.where(withLeftOperand, "IN" /* IN */, withRightOperand).noop());
 };
 const hasOne = (targetBuilder, relation, sh) => {
-    const { builder: relationBuilder, as: alias } = relation;
+    const { value: relationBuilder, as } = relation;
     const { foreignKey } = relationBuilder.service.getRelationWith(targetBuilder.service);
     const { cte: targetName, primaryKey } = targetBuilder;
-    const { cte: relationTable } = relationBuilder;
-    const withLeftOperand = `"${relationTable}"."${foreignKey}"`;
-    const withRightOperand = sh.select(primaryKey).from(targetName);
-    const selectLeftOperand = `"${alias}"."${foreignKey}"`;
+    const { cte: relationName } = relationBuilder;
+    const selectLeftOperand = `"${as}"."${foreignKey}"`;
     const selectRightOperand = `"${targetName}"."${primaryKey}"`;
+    const withLeftOperand = `"${relationName}"."${foreignKey}"`;
+    const withRightOperand = sh.select(primaryKey).from(targetName);
     return targetBuilder
         .select({
-        value: sh.select({ value: toJson(`"${alias}".*`), as: alias })
-            .from(alias)
+        value: sh.select({ value: toJson(`"${as}".*`), as: as })
+            .from(as)
             .where(selectLeftOperand, selectRightOperand)
             .noop()
     })
-        .with(alias, relationBuilder.where(withLeftOperand, "IN" /* IN */, withRightOperand).noop());
+        .with(as, relationBuilder.where(withLeftOperand, "IN" /* IN */, withRightOperand).noop());
 };
 const movePaginationNode = (from, to) => {
     const orderBy = from.node('orderBy');
@@ -309,16 +279,16 @@ const movePaginationNode = (from, to) => {
     to.node('orderBy', orderBy);
     to.node('limit', limit);
 };
-const coalesceAggregation = (arg) => coalesce([jsonAgg(arg), `'[]'::json`]);
+const coalesceAggregation = (arg) => coalesce([jsonAgg(arg), `'[]'::json`]); // we return empty array instead of null
 const oneToMany = (targetBuilder, relation, sh) => {
-    const { builder: relationBuilder, as } = relation;
+    const { value: relationBuilder, as } = relation;
     const { foreignKey } = relationBuilder.service.getRelationWith(targetBuilder.service);
-    const { cte: targetCTE, primaryKey } = targetBuilder;
-    const { cte: relationCTE } = relationBuilder;
+    const { cte: targetName, primaryKey } = targetBuilder;
+    const { cte: relationName } = relationBuilder;
     const selectLeftOperand = `"${as}"."${foreignKey}"`;
-    const selectRightOperand = `"${targetCTE}"."${primaryKey}"`;
-    const withLeftOperand = `"${relationCTE}"."${foreignKey}"`;
-    const withRightOperand = sh.select(primaryKey).from(targetCTE);
+    const selectRightOperand = `"${targetName}"."${primaryKey}"`;
+    const withLeftOperand = `"${relationName}"."${foreignKey}"`;
+    const withRightOperand = sh.select(primaryKey).from(targetName);
     const value = sh.select()
         .from(as)
         .where(selectLeftOperand, selectRightOperand)
@@ -347,7 +317,7 @@ const createRelationBuilder = (pivotAlias, alias, targetPivotKey, relationBuilde
 };
 const aggregateAndClean = (arg, toRemove) => coalesce([jsonAgg(`to_jsonb(${arg}) - '${toRemove}'`), `'[]'::json`]);
 const manyToMany = (targetBuilder, relation, sh) => {
-    const { builder: relationBuilder, as: alias } = relation;
+    const { value: relationBuilder, as: alias } = relation;
     const { pivotKey: targetPivotKey, pivotTable } = targetBuilder.service.getRelationWith(relationBuilder.service);
     const { pivotKey: relationPivotKey } = relationBuilder.service.getRelationWith(targetBuilder.service);
     const { cte: targetName, primaryKey: targetPrimaryKey } = targetBuilder;
@@ -419,11 +389,11 @@ const withInclude = (aliasToService, sh) => {
             clone(deep = true) {
                 const clone = include(originalClone());
                 if (deep === true && this.inclusions.length) {
-                    clone.include(...this.inclusions.map(({ as, builder }) => {
-                        const relationClone = builder.clone();
+                    clone.include(...this.inclusions.map(({ as, value }) => {
+                        const relationClone = value.clone();
                         return {
                             as,
-                            builder: relationClone
+                            value: relationClone
                         };
                     }));
                 }
@@ -433,10 +403,10 @@ const withInclude = (aliasToService, sh) => {
                 const clone = this.clone();
                 const fullRelationsList = [{
                         as: target.cte,
-                        builder: clone
+                        value: clone
                     }, ...clone.inclusions];
                 clone.inclusions.splice(0); // empty list
-                return include(fullRelationsList.reduce(changeFromRelation(sh), clone));
+                return include(fullRelationsList.reduce(morphBuilder(sh), clone));
             },
             build(params, offset) {
                 if (this.inclusions.length === 0) {
@@ -492,7 +462,7 @@ const serviceRegistry = (builders) => {
     const registry = new Map();
     const getService = (name) => {
         if (registry.has(name) === false) {
-            throw new Error(`could not find the model ${name}`);
+            throw new Error(`could not find the service ${name}`);
         }
         return registry.get(name);
     };

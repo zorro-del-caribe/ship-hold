@@ -23,7 +23,7 @@ export interface BelongsToManyRelationDefinition extends RelationDefinition {
 }
 
 export interface InclusionInput {
-    builder: SelectServiceBuilder;
+    value: SelectServiceBuilder;
     as: string
 }
 
@@ -37,8 +37,6 @@ export interface WithRelations<T> {
     belongsToMany(this: WithRelations<T> & T, service: T, pivot: T | string, keyInPivot: string, alias?: string): WithRelations<T> & T;
 
     getRelationWith(this: WithRelations<T> & T, rel: T | string): RelationDefinition;
-
-    remove(this: WithRelations<T> & T, service: T): void
 }
 
 export type RelationArgument = InclusionInput | string | SelectServiceBuilder | EntityService;

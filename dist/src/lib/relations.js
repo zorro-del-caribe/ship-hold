@@ -1,12 +1,11 @@
 import { jsonAgg, toJson, coalesce, compositeNode } from 'ship-hold-querybuilder';
 import { setAsServiceBuilder } from './with-service-builder-mixin';
-export const changeFromRelation = (sh) => (targetBuilder, relation) => {
-    const { builder: relationBuilder } = relation;
+export const morphBuilder = (sh) => (targetBuilder, relation) => {
+    const { value: relationBuilder } = relation;
     if (targetBuilder === relationBuilder) {
         return self(targetBuilder, sh);
     }
     const relDef = targetBuilder.service.getRelationWith(relationBuilder.service);
-    const reverse = relationBuilder.service.getRelationWith(targetBuilder.service);
     let relFunc;
     switch (relDef.type) {
         case "HAS_MANY" /* HAS_MANY */: {
@@ -22,7 +21,7 @@ export const changeFromRelation = (sh) => (targetBuilder, relation) => {
             break;
         }
         case "BELONGS_TO" /* BELONGS_TO */: {
-            relFunc = reverse.type === "HAS_MANY" /* HAS_MANY */ ? manyToOne : oneBelongsToOne;
+            relFunc = belongsTo;
             break;
         }
     }
@@ -31,66 +30,46 @@ export const changeFromRelation = (sh) => (targetBuilder, relation) => {
     }
     return relFunc(targetBuilder, relation, sh);
 };
-const oneBelongsToOne = (targetBuilder, relation, sh) => {
-    const { builder: relationBuilder, as: alias } = relation;
+const belongsTo = (targetBuilder, relation, sh) => {
+    const { value: relationBuilder, as } = relation;
     const { foreignKey } = targetBuilder.service.getRelationWith(relationBuilder.service);
     const { cte: targetName } = targetBuilder;
     const { primaryKey, cte: relationTable } = relationBuilder;
-    const selectLeftOperand = `"${alias}"."${primaryKey}"`;
+    const selectLeftOperand = `"${as}"."${primaryKey}"`;
     const selectRightOperand = `"${targetName}"."${foreignKey}"`;
     const withLeftOperand = `"${relationTable}"."${primaryKey}"`;
     const withRightOperand = sh.select(foreignKey).from(targetName);
     const selectValue = {
-        value: toJson(`"${alias}".*`),
-        as: alias
+        value: toJson(`"${as}".*`),
+        as
     };
     return targetBuilder
         .select({
         value: sh.select(selectValue)
-            .from(alias)
+            .from(as)
             .where(selectLeftOperand, selectRightOperand)
-            .noop()
+            .noop(),
+        as
     })
-        .with(alias, relationBuilder.where(withLeftOperand, "IN" /* IN */, withRightOperand).noop());
-};
-const manyToOne = (targetBuilder, relation, sh) => {
-    const { as: alias, builder: relationBuilder } = relation;
-    const { foreignKey } = targetBuilder.service.getRelationWith(relationBuilder.service);
-    const { cte: targetName } = targetBuilder;
-    const { primaryKey, cte: relTable } = relationBuilder;
-    const selectLeftOperand = `"${alias}"."${primaryKey}"`;
-    const selectRightOperand = `"${targetName}"."${foreignKey}"`;
-    const withLeftOperand = `"${relTable}"."${primaryKey}"`;
-    const withRightOperand = sh.select(foreignKey).from(targetName);
-    return targetBuilder
-        .select({
-        value: sh.select({
-            value: toJson(`"${alias}".*`),
-            as: alias
-        })
-            .from(alias)
-            .where(selectLeftOperand, selectRightOperand)
-            .noop()
-    })
-        .with(alias, relationBuilder.where(withLeftOperand, "IN" /* IN */, withRightOperand).noop());
+        .with(as, relationBuilder.where(withLeftOperand, "IN" /* IN */, withRightOperand).noop());
 };
 const hasOne = (targetBuilder, relation, sh) => {
-    const { builder: relationBuilder, as: alias } = relation;
+    const { value: relationBuilder, as } = relation;
     const { foreignKey } = relationBuilder.service.getRelationWith(targetBuilder.service);
     const { cte: targetName, primaryKey } = targetBuilder;
-    const { cte: relationTable } = relationBuilder;
-    const withLeftOperand = `"${relationTable}"."${foreignKey}"`;
-    const withRightOperand = sh.select(primaryKey).from(targetName);
-    const selectLeftOperand = `"${alias}"."${foreignKey}"`;
+    const { cte: relationName } = relationBuilder;
+    const selectLeftOperand = `"${as}"."${foreignKey}"`;
     const selectRightOperand = `"${targetName}"."${primaryKey}"`;
+    const withLeftOperand = `"${relationName}"."${foreignKey}"`;
+    const withRightOperand = sh.select(primaryKey).from(targetName);
     return targetBuilder
         .select({
-        value: sh.select({ value: toJson(`"${alias}".*`), as: alias })
-            .from(alias)
+        value: sh.select({ value: toJson(`"${as}".*`), as: as })
+            .from(as)
             .where(selectLeftOperand, selectRightOperand)
             .noop()
     })
-        .with(alias, relationBuilder.where(withLeftOperand, "IN" /* IN */, withRightOperand).noop());
+        .with(as, relationBuilder.where(withLeftOperand, "IN" /* IN */, withRightOperand).noop());
 };
 const movePaginationNode = (from, to) => {
     const orderBy = from.node('orderBy');
@@ -100,16 +79,16 @@ const movePaginationNode = (from, to) => {
     to.node('orderBy', orderBy);
     to.node('limit', limit);
 };
-const coalesceAggregation = (arg) => coalesce([jsonAgg(arg), `'[]'::json`]);
+const coalesceAggregation = (arg) => coalesce([jsonAgg(arg), `'[]'::json`]); // we return empty array instead of null
 const oneToMany = (targetBuilder, relation, sh) => {
-    const { builder: relationBuilder, as } = relation;
+    const { value: relationBuilder, as } = relation;
     const { foreignKey } = relationBuilder.service.getRelationWith(targetBuilder.service);
-    const { cte: targetCTE, primaryKey } = targetBuilder;
-    const { cte: relationCTE } = relationBuilder;
+    const { cte: targetName, primaryKey } = targetBuilder;
+    const { cte: relationName } = relationBuilder;
     const selectLeftOperand = `"${as}"."${foreignKey}"`;
-    const selectRightOperand = `"${targetCTE}"."${primaryKey}"`;
-    const withLeftOperand = `"${relationCTE}"."${foreignKey}"`;
-    const withRightOperand = sh.select(primaryKey).from(targetCTE);
+    const selectRightOperand = `"${targetName}"."${primaryKey}"`;
+    const withLeftOperand = `"${relationName}"."${foreignKey}"`;
+    const withRightOperand = sh.select(primaryKey).from(targetName);
     const value = sh.select()
         .from(as)
         .where(selectLeftOperand, selectRightOperand)
@@ -138,7 +117,7 @@ const createRelationBuilder = (pivotAlias, alias, targetPivotKey, relationBuilde
 };
 const aggregateAndClean = (arg, toRemove) => coalesce([jsonAgg(`to_jsonb(${arg}) - '${toRemove}'`), `'[]'::json`]);
 const manyToMany = (targetBuilder, relation, sh) => {
-    const { builder: relationBuilder, as: alias } = relation;
+    const { value: relationBuilder, as: alias } = relation;
     const { pivotKey: targetPivotKey, pivotTable } = targetBuilder.service.getRelationWith(relationBuilder.service);
     const { pivotKey: relationPivotKey } = relationBuilder.service.getRelationWith(targetBuilder.service);
     const { cte: targetName, primaryKey: targetPrimaryKey } = targetBuilder;

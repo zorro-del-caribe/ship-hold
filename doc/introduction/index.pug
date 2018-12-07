@@ -2,34 +2,41 @@ extends ../common/main
 include ../common/mixins
 block content
     h1#introduction Introduction
+
     p.
         #[strong ship-hold] is a #[em small] and #[+link('./performances', 'fast')] data access framework
-        for #[+link('https://www.postgresql.org', 'Postgres')] relational database system, developed for the
+        for #[+link('https://www.postgresql.org', 'Postgres')] relational database, developed for the
         #[+link('https://nodejs.org/', 'Nodejs')] environment.
+
     p.
-        It is based around intuitive #[+link('./builders','sql query builders')] which mirror closely the SQL syntax
+        It is based around intuitive #[+link('./builders','SQL query builders')] which mirror closely the #[abbr(title='structured query language') SQL] syntax
         while keeping the flexibility functions may have.
-        It also allows you to create convenient services and relations between them in order to easily query related resources (aka "eager loading").
-        It is actually the #[strong only] library I know of which has it right when it comes to pagination and nested pagination !
+        It also allows you to create convenient services and relations between them in order to easily fetch related resources (aka #[i eager loading]).
+        It is actually the #[strong only] library I know of which has it right when it comes to #[em pagination] and #[em nested pagination]!
+
     p.
-        It defers quite a lot from other popular libraries so called #[strong ORM] such
+        It differs #[em a lot] from other popular libraries so called #[abbr(title='object relation mapper') ORM] such
         #[+link('http://docs.sequelizejs.com/', 'Sequelize')] or #[+link('http://bookshelfjs.org/', 'Bookshelf')].
-        They usually come with a lot of features
-        (schema management, migrations, validations, different sql dialects, model instances, etc) and more complex API's / code base
-        (we are usually talking about more than 200 api functions and more than 10/20 thousands of source lines of code).
-        However, ship-hold focuses on a limited set of features while remaining extensible (builders are just functions !)
+        They come with a wide range of features:
+        schema management, migrations, validations, different sql dialects, model instances, etc. But it comes at the price of very complex API's / code base
+        (we are usually talking about more than #[em 200] API functions and more than #[em 10/20 thousands] source lines of code).
+        Ship-hold, however, focuses on a limited set of features while remaining #[em extensible].
+
     h2#getting-started Getting started
+
     h3#installation Installation
+
     p.
-        run in your terminal #[code.shell npm install ship-hold] (assuming you have #[+link('https://npmjs.org', 'npm')] installed)
+        run in your terminal #[code.shell npm install --save ship-hold] (assuming you have #[+link('https://npmjs.org', 'npm')] installed)
+
     h3#initialisation initialisation
-    p Pass database connection information to the ship-hold factory
+
+    p Pass database connection information to the ship-hold factory. Every option the driver #[+link('https://node-postgres.com','pg')] takes can be passed.
 
     +codeblock
         include:highlight(lang='javascript') ./snippets/init.js
     p.
-        Every option the driver #[+link('https://node-postgres.com','pg')] takes can be passed.
-        That's it ! You can start to query your database.
+        That's it! You can start to query your database.
 
     +codeblock
         include:highlight(lang='javascript') ./snippets/query-example.js
@@ -38,11 +45,11 @@ block content
 
     p.
         We recommend first to read the documentation in the order shown by the table of content. Once you are familiar with the different sections you
-        can jump directly from one topic to another one as you would do in a #[em API reference] document.
+        can jump directly from one topic to another one as one would do in a #[em API reference] document.
 
     p.
-        It is not mandatory to read the #[+link('performances','performance section')] in order to use ship-hold.
+        It is not mandatory to read the #[+link('performances','performances section')] in order to use ship-hold.
         However we highly recommend it to understand how complex queries are generated and when they should be avoided.
 
     p.tip.
-        All the examples in the documentation use a database defined by the #[+link('annexes','initialization script')] defined in the annexes
+        All the examples in the documentation use a database defined by the #[+link('annexes','initialization script')] in the annexes section

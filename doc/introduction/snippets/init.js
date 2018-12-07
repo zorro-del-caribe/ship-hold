@@ -1,6 +1,6 @@
 const {shiphold} = require('ship-hold');
 const sh = shiphold({
-    hostname: '192.168.99.100',
+    hostname: '127.0.0.1',
     username: 'docker',
     password: 'docker',
     database: 'dev'

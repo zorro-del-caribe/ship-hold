@@ -177,7 +177,7 @@ module.exports = function (sh) {
             const builder = Users
                 .select('id', 'name')
                 .orderBy('id')
-                .include({builder: Phones.select('id', 'user_id'), as: 'p'});
+                .include({value: Phones.select('id', 'user_id'), as: 'p'});
 
             const users = await builder.run();
             t.deepEqual(users, expected);
@@ -252,7 +252,7 @@ module.exports = function (sh) {
             const builder = Phones
                 .select('id', 'number', 'user_id')
                 .orderBy('id')
-                .include({builder: Users.select('id', 'name'), as: 'holder'});
+                .include({value: Users.select('id', 'name'), as: 'holder'});
 
             const users = await builder.run();
             t.deepEqual(users, expected);
@@ -340,7 +340,7 @@ module.exports = function (sh) {
                 .select('id', 'name')
                 .orderBy('id')
                 .include({
-                    builder: Products.select('id', 'sku', 'user_id').orderBy('id'),
+                    value: Products.select('id', 'sku', 'user_id').orderBy('id'),
                     as: 'pds'
                 });
 
@@ -370,10 +370,10 @@ module.exports = function (sh) {
                 .select('id', 'name')
                 .orderBy('id')
                 .include({
-                    builder: Products.select('id', 'sku', 'price', 'user_id').where('price', '>', 20).orderBy('id'),
+                    value: Products.select('id', 'sku', 'price', 'user_id').where('price', '>', 20).orderBy('id'),
                     as: 'expensive'
                 }, {
-                    builder: Products.select('id', 'sku', 'price', 'user_id').where('price', '<=', 20).orderBy('id'),
+                    value: Products.select('id', 'sku', 'price', 'user_id').where('price', '<=', 20).orderBy('id'),
                     as: 'cheap'
                 });
 
@@ -581,7 +581,7 @@ module.exports = function (sh) {
             const builder = await Products
                 .select('id', 'title', 'user_id')
                 .orderBy('id')
-                .include({builder: Users.select('id', 'name'), as: 'holder'});
+                .include({value: Users.select('id', 'name'), as: 'holder'});
 
             const products = await builder.run();
 
@@ -704,10 +704,10 @@ module.exports = function (sh) {
                 .orderBy('id')
                 .include(
                     {
-                        builder: Accounts.select().where('balance', '>', 0).orderBy('id'),
+                        value: Accounts.select().where('balance', '>', 0).orderBy('id'),
                         as: 'positive'
                     }, {
-                        builder: Accounts.select().where('balance', '<', 0).orderBy('id'),
+                        value: Accounts.select().where('balance', '<', 0).orderBy('id'),
                         as: 'negative'
                     });
 

@@ -1,5 +1,5 @@
 import { normaliseInclude } from './utils';
-import { changeFromRelation } from './relations';
+import { morphBuilder } from './relations';
 export const withInclude = (aliasToService, sh) => {
     return (target) => {
         const include = withInclude(aliasToService, sh);
@@ -15,11 +15,11 @@ export const withInclude = (aliasToService, sh) => {
             clone(deep = true) {
                 const clone = include(originalClone());
                 if (deep === true && this.inclusions.length) {
-                    clone.include(...this.inclusions.map(({ as, builder }) => {
-                        const relationClone = builder.clone();
+                    clone.include(...this.inclusions.map(({ as, value }) => {
+                        const relationClone = value.clone();
                         return {
                             as,
-                            builder: relationClone
+                            value: relationClone
                         };
                     }));
                 }
@@ -29,10 +29,10 @@ export const withInclude = (aliasToService, sh) => {
                 const clone = this.clone();
                 const fullRelationsList = [{
                         as: target.cte,
-                        builder: clone
+                        value: clone
                     }, ...clone.inclusions];
                 clone.inclusions.splice(0); // empty list
-                return include(fullRelationsList.reduce(changeFromRelation(sh), clone));
+                return include(fullRelationsList.reduce(morphBuilder(sh), clone));
             },
             build(params, offset) {
                 if (this.inclusions.length === 0) {

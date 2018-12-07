@@ -7,7 +7,7 @@ export const serviceRegistry = (builders: ShipHoldBuilders): ServiceRegistry => 
     const registry = new Map<string, EntityService>();
     const getService = (name: string) => {
         if (registry.has(name) === false) {
-            throw new Error(`could not find the model ${name}`);
+            throw new Error(`could not find the service ${name}`);
         }
         return registry.get(name);
     };

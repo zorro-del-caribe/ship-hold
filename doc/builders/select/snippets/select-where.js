@@ -1,8 +1,8 @@
 sh
     .select()
     .from('posts')
-    .where('posts.user_id',42)
-    .and('published_at','>',new Date(2010,1,1))
+    .where('posts.user_id', 42)
+    .and('published_at', '>', new Date(2010, 1, 1))
     .build();
 
 //{ text:

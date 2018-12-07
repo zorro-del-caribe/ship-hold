@@ -5,7 +5,7 @@ export const serviceRegistry = (builders) => {
     const registry = new Map();
     const getService = (name) => {
         if (registry.has(name) === false) {
-            throw new Error(`could not find the model ${name}`);
+            throw new Error(`could not find the service ${name}`);
         }
         return registry.get(name);
     };

@@ -6,17 +6,17 @@ div#main-navigation-container
     nav
         ul
             li.top
-                +navigationLink('introduction','Introduction')
+                +navigationLink('./','Introduction')
                 ul
                     li
-                        +navigationLink('introduction#getting-started','Getting started')
+                        +navigationLink('./#getting-started','Getting started')
                         ul
                             li.leaf
-                                +navigationLink('introduction#installation','Installation')
+                                +navigationLink('./#installation','Installation')
                             li.leaf
-                                +navigationLink('introduction#initialisation','Initialisation')
+                                +navigationLink('./#initialisation','Initialisation')
                     li
-                        +navigationLink('introduction#how-to-read','How to read this documentation')
+                        +navigationLink('./#how-to-read','How to read this documentation')
             li.top
                 +navigationLink('builders','Builders')
                 ul
@@ -103,4 +103,52 @@ div#main-navigation-container
                         ul
                             li.leaf
                                 +navigationLink('builders/select#limit', '.limit(size, offset)')
+
+            li.top
+                +navigationLink('builders/conditions','Conditions builder')
+                ul
+                    li
+                        +navigationLink('builders/conditions#factories','Factories')
+            li.top
+                +navigationLink('run-queries','Run queries')
+                ul
+                    li
+                        +navigationLink('run-queries#run','.run(params?:object)')
+                    li
+                        +navigationLink('run-queries#debug','.debug(params?:object)')
+                    li
+                        +navigationLink('run-queries#stream','.stream(sink: Generator, params?:object)')
+            li.top
+                +navigationLink('services','Services')
+                ul
+                    li
+                        +navigationLink('services#create-a-service','Create a service')
+                        ul
+                            li.leaf
+                                +navigationLink('services#service','.service(keyOrDef)')
+                    li
+                        +navigationLink('services#service-builders','Service builders')
+                        ul
+                            li.leaf
+                                +navigationLink('services#insert','.insert(...args)')
+                            li.leaf
+                                +navigationLink('services#update','.update(prosMap)')
+                            li.leaf
+                                +navigationLink('services#delete','.delete()')
+                            li.leaf
+                                +navigationLink('services#select','.select(...args)')
+                li
+                    +navigationLink('services#create-relations','Create Relations')
+                    ul
+                        li.leaf
+                            +navigationLink('services#one-to-one','One to one')
+                        li.leaf
+                            +navigationLink('services#one-to-many','One to many')
+                        li.leaf
+                            +navigationLink('services#many-to-many','Many to many')
+                li
+                    +navigationLink('services#query-with-associations','Queries with associations')
+                    ul
+                        li.leaf
+                            +navigationLink('services#include','.include(...associations)')
 
