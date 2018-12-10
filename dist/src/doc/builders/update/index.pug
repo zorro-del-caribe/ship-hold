@@ -1,0 +1,63 @@
+extends ../../common/main
+
+include ../../common/mixins
+
+block content
+    h1#update-builder Update Builder
+
+    p.
+        The update builder allows you to create #[+link('https://devdocs.io/postgresql~10/sql-update','UPDATE queries')], to update a set of rows
+        in your database.
+    article
+        h2.method#update .update(tableName: pointer)
+
+        p.
+            The update builder takes the name of the table to update as argument, eventually with an alias.
+
+    article
+        h2.method#set .set(map: objectOrString, value: any)
+
+        p.
+            The #[em set] method allows you to specify the column(s) to update and their(its) new value(s).
+            If you use the version with two arguments, the first one will be a string pointer to the column to update and the second one the new value.
+            You can call multiple times the #[em set] method if you have various columns to update
+
+        p.
+            If you use the version with one argument (the map object), it will be equivalent to call the first version of the method with each key/value pair
+
+        +codeblock
+            include:highlight(lang='javascript') snippets/update-set.js
+
+        p.tip.
+            Of course, both version support #[+link('builders#parameterized-query','parameterized queries')].
+
+    article
+        h2.method#from .from(...pointers[])
+
+        p.
+            The #[em from] method allows you to use others table columns in the #[+link('builders/update#where','where')] clause or in the new set value.
+
+        +codeblock
+            include:highlight(lang='javascript') snippets/update-from.js
+
+    article
+        h2.mtehod#where .where(leftOperand, ?operator, ?rightOperand)
+
+        p.
+            This method returns a proxy of a condition builder which will be revoked whenever you call a method which does not belong to the condition builder.
+            See #[+link('builders/conditions','conditions builder')] for more details. You use it to create where clause in your update query
+
+        +codeblock
+            include:highlight(lang='javascript') snippets/update-where.js
+
+    article
+        h2.method#returning .returning(...properties: pointers[])
+        p.
+            Specify a returning close to your update query. It is useful if you want to get back the freshly updated rows
+
+        +codeblock
+            include:highlight(lang='javascript') snippets/update-returning.js
+
+        p.tip.
+            You can use the #[code '*'] character if you wish to return all the columns the updated rows.
+

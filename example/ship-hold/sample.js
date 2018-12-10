@@ -3,8 +3,8 @@ const {Pool} = require('pg');
 const {Users, Posts, Tags, Comments, sh} = require('../scripts/ship-hold');
 const {toJson} = require('ship-hold-querybuilder');
 
-const {hostname: host, username: user, password, database} = require('../config/db');
-const pg = new Pool({host, user, password, database});
+// const {hostname: host, username: user, password, database} = require('../config/db');
+// const pg = new Pool({host, user, password, database});
 
 (async function () {
     try {
@@ -15,12 +15,12 @@ const pg = new Pool({host, user, password, database});
         //         FROM (SELECT * FROM "posts" ORDER BY "published_at" DESC LIMIT 5) as "posts" JOIN "users" ON "posts"."user_id" = "users"."user_id"
         // `)).rows;
 
-        const posts = await Posts
+        await Posts
             .select()
-            .orderBy('published_at','desc')
-            .limit(5)
             .include(Users)
-            .run()
+            .debug()
+
+        // console.log(JSON.stringify(posts))
 
         // const posts = await sh.select('posts.*', {
         //     value: toJson('"users".*'),
@@ -34,7 +34,7 @@ const pg = new Pool({host, user, password, database});
         //     .on('posts.user_id', '"users"."user_id"')
         //     .run();
 
-        console.log(`executed in ${Date.now() - now}ms`);
+        // console.log(`executed in ${Date.now() - now}ms`);
         // console.log(JSON.stringify(posts))
 
     } catch (e) {

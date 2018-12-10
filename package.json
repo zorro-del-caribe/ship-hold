@@ -1,7 +1,7 @@
 {
   "name": "ship-hold",
   "version": "2.0.0",
-  "description": "data access framework for postgres sql",
+  "description": "data access framework for PostgreSQL",
   "main": "./dist/bundle/index",
   "module": "./dist/bundle/module",
   "types": "./dist/declartions/index.d.ts",
@@ -17,8 +17,8 @@
     "test:int": "node ./test/integrations/index.js",
     "test:unit": "node ./test/units/index.js",
     "test:ci": "(npm run test:unit | tap-set-exit) && (npm run test:int | tap-set-exit)",
-    "doc:build": "node ./doc/scripts/compile.js && cp -r ./doc/resources ./dist/doc",
-    "build:clean": "rm -rf ./dist && mkdir -p ./dist/bundle ./dist/declarations ./dist/doc && cp -r ./src ./dist/src",
+    "doc:build": "node ./src/doc/scripts/compile.js && cp -r ./src/doc/resources ./docs",
+    "build:clean": "rm -rf ./dist && mkdir -p ./dist/bundle ./dist/declarations && cp -r ./src ./dist/src",
     "build:compile": "tsc",
     "build:bundle": "rollup -c ./rollup/build.js",
     "build": "npm run build:clean && npm run build:compile && npm run build:bundle && npm run doc:build"
@@ -31,11 +31,14 @@
     "data",
     "relational",
     "postgresql",
+    "postgre",
     "postgres",
     "database",
     "sql",
     "ship-hold",
-    "pg"
+    "pg",
+    "rdbs",
+    "querybuilder"
   ],
   "engines": {
     "node": ">=6.0.0"
@@ -43,11 +46,8 @@
   "author": "Laurent RENARD",
   "license": "MIT",
   "dependencies": {
-    "knex": "^0.15.2",
-    "objection": "^1.4.0",
     "pg": "^7.7.1",
     "pg-query-stream": "^1.1.2",
-    "sequelize": "^4.41.2",
     "ship-hold-querybuilder": "^2.0.0"
   },
   "devDependencies": {

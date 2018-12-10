@@ -1,0 +1,27 @@
+doctype html
+html(lang='en')
+    head
+        title Ship-hold | #{title}
+        base(href='/ship-hold/docs/')
+        meta(charset='utf8')
+        meta(name='description'  content='documentation website for ship-hold project, a postgres data layer access library for nodejs')
+        meta(name="viewport" content="width=device-width, initial-scale=1.0")
+        meta(name='keywords', content='postgres, nodejs, javascript, sql, database, postgresql')
+        link(rel='stylesheet' type='text/css' href='resources/theme.css')
+        link(rel='stylesheet' type='text/css' href='resources/darkula.css')
+        link(rel='icon', href='resources/ship-hold-logo.svg')
+        script(src='resources/app.js' async=true)
+    body
+        header
+            //a.visually-hidden(href='./#main') Skip to content
+            button#menu-toggle(type='button' aria-haspopup='true' aria-expanded='true' aria-controls='header-wrapper') close navigation
+            div#header-wrapper(role='menu')
+                div#logo-wrapper
+                    img(alt='ship-hold logo', src='resources/ship-hold-logo.svg')
+                    div
+                        span SHIP
+                        span -
+                        span HOLD
+                include ./navigation
+        main#main
+            block content

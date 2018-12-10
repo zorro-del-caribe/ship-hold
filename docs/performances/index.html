@@ -1,0 +1,136 @@
+<!DOCTYPE html><html lang="en"><head><title>Ship-hold | Performances</title><base href="/ship-hold/docs/"><meta charset="utf8"><meta name="description" content="documentation website for ship-hold project, a postgres data layer access library for nodejs"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="keywords" content="postgres, nodejs, javascript, sql, database, postgresql"><link rel="stylesheet" type="text/css" href="resources/theme.css"><link rel="stylesheet" type="text/css" href="resources/darkula.css"><link rel="icon" href="resources/ship-hold-logo.svg"><script src="resources/app.js" async></script></head><body><header><!--a.visually-hidden(href='./#main') Skip to content--><button id="menu-toggle" type="button" aria-haspopup="true" aria-expanded="true" aria-controls="header-wrapper">close navigation</button><div id="header-wrapper" role="menu"><div id="logo-wrapper"><img alt="ship-hold logo" src="resources/ship-hold-logo.svg"><div><span>SHIP</span><span>-</span><span>HOLD</span></div></div><div id="main-navigation-container"><nav><ul><li class="top"><a href="./index.html"><span>Introduction</span></a><ul><li><a href="./index.html#getting-started"><span>Getting started</span></a><ul><li class="leaf"><a href="./index.html#installation"><span>Installation</span></a></li><li class="leaf"><a href="./index.html#initialisation"><span>Initialisation</span></a></li></ul></li><li><a href="./index.html#how-to-read"><span>How to read this documentation</span></a></li></ul></li><li class="top"><a href="builders/index.html"><span>Builders</span></a><ul><li><a href="builders/index.html#build"><span>.build()</span></a><ul><li class="leaf"><a href="builders/index.html#parameterized-query"><span>Parameterized queries</span></a></li></ul></li><li><a href="builders/index.html#clone"><span>.clone()</span></a></li><li><a href="builders/index.html#with"><span>.with(as, build)</span></a></li><li><a href="builders/index.html#common-types"><span>Common types</span></a><ul><li class="leaf"><a href="builders/index.html#pointers"><span>Pointers</span></a></li><li class="leaf"><a href="builders/index.html#values"><span>Values</span></a></li></ul></li></ul></li><li class="top"><a href="builders/insert/index.html"><span>INSERT builder</span></a><ul><li><a href="builders/insert/index.html#insert"><span>.insert(map,...othersProps)</span></a></li><li><a href="builders/insert/index.html#into"><span>.into(tableName)</span></a></li><li><a href="builders/insert/index.html#values"><span>.values(rows)</span></a></li><li><a href="builders/insert/index.html#returning"><span>.returning(...properties)</span></a></li></ul></li><li class="top"><a href="builders/update/index.html"><span>UPDATE builder</span></a><ul><li><a href="builders/update/index.html#update"><span>.update(tableName)</span></a></li><li><a href="builders/update/index.html#set"><span>.set(mapOrString, ?value)</span></a></li><li><a href="builders/update/index.html#from"><span>.from(...pointers)</span></a></li><li><a href="builders/update/index.html#where"><span>.where(leftOperand, operator, rightOperand)</span></a></li><li><a href="builders/update/index.html#returning"><span>.returning(...properties)</span></a></li></ul></li><li class="top"><a href="builders/delete/index.html"><span>DELETE builder</span></a><ul><li><a href="builders/delete/index.html#delete"><span>.delete(tableName)</span></a></li><li><a href="builders/delete/index.html#using"><span>.using(...pointers)</span></a></li><li><a href="builders/delete/index.html#where"><span>.where(leftOperand, operator, rightOperand)</span></a></li><li><a href="builders/delete/index.html#returning"><span>.returning(...properties)</span></a></li></ul></li><li class="top"><a href="builders/select/index.html"><span>SELECT builder</span></a><ul><li><a href="builders/select/index.html#select"><span>.select(...pointers)</span></a></li><li><a href="builders/select/index.html#from"><span>.from(...pointers)</span></a></li><li><a href="builders/select/index.html#joins"><span>Joins</span></a><ul><li class="leaf"><a href="builders/select/index.html#join"><span>.join(table, leftOp, rightOp)</span></a></li><li class="leaf"><a href="builders/select/index.html#left-join"><span>.leftJoin(table, leftOp, rightOp)</span></a></li><li class="leaf"><a href="builders/select/index.html#right-join"><span>rightJoin(table, leftOp, rightOp)</span></a></li><li class="leaf"><a href="builders/select/index.html#on"><span>.on(leftOperand, operator, rightOperand)</span></a></li></ul></li><li><a href="builders/select/index.html#group"><span>Group</span></a><ul><li class="leaf"><a href="builders/select/index.html#group-by"><span>.groupBy(...columns)</span></a></li><li class="leaf"><a href="builders/select/index.html#having"><span>.having(leftOp, operator, rightOp)</span></a></li></ul></li><li><a href="builders/select/index.html#where"><span>.where(leftOp, operator, rightOp)</span></a></li><li><a href="builders/select/index.html#pagination"><span>Pagination</span></a><ul><li class="leaf"><a href="builders/select/index.html#limit"><span>.limit(size, offset)</span></a></li></ul></li></ul></li><li class="top"><a href="builders/conditions/index.html"><span>Conditions builder</span></a><ul><li><a href="builders/conditions/index.html#factories"><span>Factories</span></a></li></ul></li><li class="top"><a href="run-queries/index.html"><span>Run queries</span></a><ul><li><a href="run-queries/index.html#run"><span>.run(params?:object)</span></a></li><li><a href="run-queries/index.html#debug"><span>.debug(params?:object)</span></a></li><li><a href="run-queries/index.html#stream"><span>.stream(sink: Generator, params?:object)</span></a></li></ul></li><li class="top"><a href="services/index.html"><span>Services</span></a><ul><li><a href="services/index.html#create-a-service"><span>Create a service</span></a><ul><li class="leaf"><a href="services/index.html#service"><span>.service(keyOrDef)</span></a></li></ul></li><li><a href="services/index.html#service-builders"><span>Service builders</span></a><ul><li class="leaf"><a href="services/index.html#insert"><span>.insert(...args)</span></a></li><li class="leaf"><a href="services/index.html#update"><span>.update(prosMap)</span></a></li><li class="leaf"><a href="services/index.html#delete"><span>.delete()</span></a></li><li class="leaf"><a href="services/index.html#select"><span>.select(...args)</span></a></li></ul></li></ul><li><a href="services/index.html#create-relations"><span>Create Relations</span></a><ul><li class="leaf"><a href="services/index.html#one-to-one"><span>One to one</span></a></li><li class="leaf"><a href="services/index.html#one-to-many"><span>One to many</span></a></li><li class="leaf"><a href="services/index.html#many-to-many"><span>Many to many</span></a></li></ul></li><li><a href="services#query-with-associations/index.html"><span>Queries with associations</span></a><ul><li class="leaf"><a href="services/index.html#include"><span>.include(...associations)</span></a></li></ul></li></li><li class="top"><a href="performances/index.html"><span>Performances</span></a><ul><li><a href="performances/index.html#result"><span>Result</span></a></li><li><a href="performances/index.html#why"><span>The good</span></a></li><li><a href="performances/index.html#where"><span>The bad</span></a></li></ul></li><li class="top"><a href="annexes/index.html"><span>Annexes</span></a><ul><li><a href="annexes/index.html#db-script"><span>Database script</span></a></li></ul></li></ul></nav></div></div></header><main id="main"><h1 id="performances">Performances</h1><p>Comparing fairly different data access libraries would be a bit complicated as the performances may vary for a wide range of reasons,
+mainly related to the database itself:
+the size of the tables, the indexes created, etc.
+However ship hold repository contains an <a href="https://github/zorro-del-caribe/ship-hold/">example folder</a> in
+which you can find some <i>real</i> use cases for our publishing platform with implementations for various libraries. This is not a benchmark,
+it is meant to give you a toy application to compare the different user experiences and test how (in)efficient queries with associations can be.
+Therefore queries are monitored and execution time is measured.
+</p><p>  The listed pretty common use cases are the following:</p><ul><li><p>Create a home page where we want to display the latest posts (10) including the three last published comments with their author's data,
+the tags related to each posts and the posts authors' data.</p></li><li><p>Create a user profile page where we want to display the latest comments (5) of a given user including some reference data to the post in which the comment
+took place.
+We also want to get the five last posts published by the user including the tags for each post.</p></li><li><p>Create a list of posts for a given tag. We want to list the five most recent posts including the data related to the author, and the three last comments.
+
+</p></li></ul><article><h2 id="result">Result</h2><p>With a data set of 100 000 users, 20 000 posts, 120 000 comments and around 200 tags, I get on my machine this kind of result.
+No index has been added, which is somehow unrealistic, but as the nature of queries generated by the different libraries is very different,
+that would make it even more complicated to compare. Of course you are invited to run your tests with indexes.
+</p><table><caption>execution time of listed use cases with different libraries</caption><tbody><tr><th scope="col">Case</th><th scope="col">ship-hold</th><th scope="col">sequelize</th><th scope="col">objection</th></tr><tr><th scope="row">latest posts</th><td>55ms</td><td>149ms</td><td>111ms</td></tr><tr><th scope="row">user profile</th><td>53ms</td><td>102ms</td><td>81ms</td></tr><tr><th scope="row">posts by tag</th><td>164ms</td><td>ERROR</td><td>338ms</td></tr></tbody></table></article><article><h2 id="why">Why ?</h2><p>Why does ship hold appear to perform so well compared to well established libraries ?
+</p><p>First of all, ship-hold remains a quite low level abstraction and does not do much other than building a SQL query, handing it to <i>pg</i> driver, and forward the response to
+you application code. That's why if you run a query directly with the driver or through ship-hold, you will get quite similar result:
+</p><blockquote>Get five last articles including their authors' data</blockquote><pre class="hljs"><code>pg.query(<span class="hljs-string">`SELECT "posts".*, to_json("users".*) as "author"
+                FROM 
+            (SELECT * FROM "posts" ORDER BY "published_at" DESC LIMIT 5) as "posts" 
+                JOIN "users" 
+        ON "posts"."user_id" = "users"."user_id"
+`</span>);
+
+<span class="hljs-comment">// &gt; 18ms</span>
+
+
+sh.select(<span class="hljs-string">'posts.*'</span>, {
+    <span class="hljs-attr">value</span>: toJson(<span class="hljs-string">'"users".*'</span>),
+    <span class="hljs-attr">as</span>: <span class="hljs-string">'author'</span>
+})
+    .from({
+        <span class="hljs-attr">value</span>: sh.select()
+            .from(<span class="hljs-string">'posts'</span>)
+            .orderBy(<span class="hljs-string">'published_at'</span>, <span class="hljs-string">'desc'</span>)
+            .limit(<span class="hljs-number">5</span>), <span class="hljs-attr">as</span>: <span class="hljs-string">'posts'</span>
+    })
+    .join(<span class="hljs-string">'users'</span>)
+    .on(<span class="hljs-string">'posts.user_id'</span>, <span class="hljs-string">'"users"."user_id"'</span>)
+    .run();
+
+<span class="hljs-comment">// &gt; 23ms</span>
+
+<span class="hljs-comment">// This one will actually generate different type of query but will get the same result</span>
+Posts
+    .select()
+    .orderBy(<span class="hljs-string">'published_at'</span>, <span class="hljs-string">'desc'</span>)
+    .limit(<span class="hljs-number">5</span>)
+    .include(Users)
+    .run();
+
+<span class="hljs-comment">// &gt; 26ms</span>
+
+<span class="hljs-comment">// As indication, with Sequelize I get something like 76ms</span>
+</code></pre><p>On the other hand, ORM usually do few things such as creating model instances from the rows, etc.
+<strong>That is why you would use them after all</strong> !
+</p><p>Second point, is that ship-hold only works with one database engine (Postgres) and tries a much as possible
+to rely on the database features rather than implementing an equivalent on the Javascript side. <strong>SQL is very powerful !</strong>(and often under used).
+For example, in ship-hold, queries with associations would result in a unique query to the database,
+and even the aggregation is done in that query.
+Other libraries would send various queries, buffer the result and aggregate the result in Javascript.
+</p><p>I see many advantages in processing that way:
+</p><ul><li><p>It reduces <em>a lot</em> the amount of code to write and makes ship-hold a lightweight framework
+compared to the others. Moreover the code required for aggregation for example, may be quite complicated and bug prone: less code, less problems!</p></li><li><p>Database makers strive to improve performances, and write usually faster code in C++, with better algorithms that I personally could do on the JS side.
+Any performance improvement on the database engine would therefore improve ship-hold.</p></li><li><p>Join queries, and sub queries carry a part of redundant data. If you do the aggregation at the database level, I <em>suspect</em> that less data would need to
+go throw the wires which might improve the performances compared to a solution where data is buffered on the JS side and cleaned/aggregated.
+It could be especially true if your database is on a remote server.</p></li></ul></article><article><h2 id="where">Where would ship hold perform not so well ?</h2><p>Even though I am trying to sell ship-hold to you, I must be honest. When I built ship-hold, I did not have performances particularly in mind.
+I tend to favor first user experience, simplicity of the code and extensible abstractions. The relative good performances is more or less an accident.
+As any software, at some point you have to make some trade of. This section will explain when ship-hold might not perform well.
+</p><p>When you perform a query including associations, ship-hold uses behind the scene <a href="https://devdocs.io/postgresql~10/queries-with#QUERIES-WITH-SELECT">Common Table Expressions</a>.
+CTE are useful in many ways but their main advantage is the readability they provide. They are eagerly evaluated (once only) and can be referenced in other part of the query (a bit like variable).
+This is very useful when you want to build a query recursively which is the case when you have many associations fetched at many levels of depth.
+</p><p>On the other hand, CTE might not be simplified by Postgres query planner as their inline equivalent (at least for now). The fact that CTE are eagerly evaluated can also be a
+disadvantage
+</p><p>If you run the following code
+</p><pre class="hljs"><code>Posts
+    .select()
+    .orderBy(<span class="hljs-string">'published_at'</span>,<span class="hljs-string">'desc'</span>)
+    .where(<span class="hljs-string">'user_id'</span>, <span class="hljs-number">42</span>)
+    .limit(<span class="hljs-number">5</span>)
+    .include(Comments, Users)
+    .debug();
+</code></pre><p>You will get the following SQL
+</p><pre class="hljs"><code><span class="hljs-keyword">WITH</span>
+    <span class="hljs-string">"Posts"</span> <span class="hljs-keyword">AS</span> (<span class="hljs-keyword">SELECT</span> * <span class="hljs-keyword">FROM</span> <span class="hljs-string">"posts"</span> <span class="hljs-keyword">WHERE</span> <span class="hljs-string">"user_id"</span> = <span class="hljs-number">42</span> <span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> <span class="hljs-string">"published_at"</span> <span class="hljs-keyword">DESC</span> <span class="hljs-keyword">LIMIT</span> <span class="hljs-number">5</span>),
+    <span class="hljs-string">"comments"</span> <span class="hljs-keyword">AS</span> (<span class="hljs-keyword">SELECT</span> * <span class="hljs-keyword">FROM</span> <span class="hljs-string">"comments"</span> <span class="hljs-keyword">WHERE</span> <span class="hljs-string">"comments"</span>.<span class="hljs-string">"post_id"</span> <span class="hljs-keyword">IN</span> (<span class="hljs-keyword">SELECT</span> <span class="hljs-string">"post_id"</span> <span class="hljs-keyword">FROM</span> <span class="hljs-string">"Posts"</span>)),
+    <span class="hljs-string">"author"</span> <span class="hljs-keyword">AS</span> (<span class="hljs-keyword">SELECT</span> * <span class="hljs-keyword">FROM</span> <span class="hljs-string">"users"</span> <span class="hljs-keyword">WHERE</span> <span class="hljs-string">"users"</span>.<span class="hljs-string">"user_id"</span> <span class="hljs-keyword">IN</span> (<span class="hljs-keyword">SELECT</span> <span class="hljs-string">"user_id"</span> <span class="hljs-keyword">FROM</span> <span class="hljs-string">"Posts"</span>))
+<span class="hljs-keyword">SELECT</span>
+    <span class="hljs-string">"Posts"</span>.*,
+    (<span class="hljs-keyword">SELECT</span> (<span class="hljs-keyword">COALESCE</span>(json_agg(<span class="hljs-string">"comments"</span>.*),<span class="hljs-string">'[]'</span>::<span class="hljs-keyword">json</span>)) <span class="hljs-keyword">AS</span> <span class="hljs-string">"comments"</span>
+        <span class="hljs-keyword">FROM</span> (<span class="hljs-keyword">SELECT</span> * <span class="hljs-keyword">FROM</span> <span class="hljs-string">"comments"</span> <span class="hljs-keyword">WHERE</span> <span class="hljs-string">"comments"</span>.<span class="hljs-string">"post_id"</span> = <span class="hljs-string">"Posts"</span>.<span class="hljs-string">"post_id"</span>) <span class="hljs-keyword">AS</span> <span class="hljs-string">"comments"</span>),
+    (<span class="hljs-keyword">SELECT</span> (to_json(<span class="hljs-string">"author"</span>.*)) <span class="hljs-keyword">AS</span> <span class="hljs-string">"author"</span>
+        <span class="hljs-keyword">FROM</span> <span class="hljs-string">"author"</span> <span class="hljs-keyword">WHERE</span> <span class="hljs-string">"author"</span>.<span class="hljs-string">"user_id"</span> = <span class="hljs-string">"Posts"</span>.<span class="hljs-string">"user_id"</span>) <span class="hljs-keyword">AS</span> <span class="hljs-string">"author"</span>
+<span class="hljs-keyword">FROM</span> <span class="hljs-string">"Posts"</span> <span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> <span class="hljs-string">"published_at"</span> <span class="hljs-keyword">DESC</span>
+</code></pre><p>This query will have a <a href="https://devdocs.io/postgresql~10/sql-explain">cost</a> relatively low. The first CTE <code>"Posts"</code> is referenced quite few times but only evaluated once.
+Moreover the scope of the query (posts whose author's id is 42) narrows down a lot the scope of the others dependant CTEs and sub queries.
+</p><p>To sum up, when you quickly narrows down the scope of a select with include (by applying a pagination on the main builder for example), ship-hold's query will perform quite well.
+</p><p>Now let's go back to <a href="run-queries#stream">the example where we wanted to create a dump files of all our posts</a>.
+We had an impressive result there. But let's write our code with inclusions now
+</p><pre class="hljs"><code>Posts
+    .select()
+    .include(Users)
+    .stream(<span class="hljs-function"><span class="hljs-keyword">function</span>* (<span class="hljs-params"></span>) </span>{
+        <span class="hljs-keyword">let</span> first = <span class="hljs-literal">true</span>;
+        <span class="hljs-keyword">try</span> {
+            <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'['</span>);
+            <span class="hljs-keyword">while</span> (<span class="hljs-literal">true</span>) {
+                <span class="hljs-keyword">const</span> r = <span class="hljs-keyword">yield</span>;
+                <span class="hljs-keyword">if</span> (first) {
+                    <span class="hljs-built_in">console</span>.log(<span class="hljs-built_in">JSON</span>.stringify(r));
+                } <span class="hljs-keyword">else</span> {
+                    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">','</span> + <span class="hljs-built_in">JSON</span>.stringify(r));
+                }
+                first = <span class="hljs-literal">false</span>;
+            }
+        } <span class="hljs-keyword">catch</span> (e) {
+            <span class="hljs-keyword">throw</span> e;
+        } <span class="hljs-keyword">finally</span> {
+            <span class="hljs-built_in">console</span>.log(<span class="hljs-string">']'</span>);
+        }
+    });
+</code></pre><p>This time, it took us <strong>52 seconds</strong> to create the dump file (50x slower) !
+Let's have a look at the SQL
+</p><pre class="hljs"><code><span class="hljs-keyword">WITH</span>
+    <span class="hljs-string">"Posts"</span> <span class="hljs-keyword">AS</span> (<span class="hljs-keyword">SELECT</span> * <span class="hljs-keyword">FROM</span> <span class="hljs-string">"posts"</span>),
+    <span class="hljs-string">"author"</span> <span class="hljs-keyword">AS</span> (<span class="hljs-keyword">SELECT</span> * <span class="hljs-keyword">FROM</span> <span class="hljs-string">"users"</span> <span class="hljs-keyword">WHERE</span> <span class="hljs-string">"users"</span>.<span class="hljs-string">"user_id"</span> <span class="hljs-keyword">IN</span> (<span class="hljs-keyword">SELECT</span> <span class="hljs-string">"user_id"</span> <span class="hljs-keyword">FROM</span> <span class="hljs-string">"Posts"</span>))
+<span class="hljs-keyword">SELECT</span>
+    <span class="hljs-string">"Posts"</span>.*,
+    (<span class="hljs-keyword">SELECT</span> (to_json(<span class="hljs-string">"author"</span>.*)) <span class="hljs-keyword">AS</span> <span class="hljs-string">"author"</span> <span class="hljs-keyword">FROM</span> <span class="hljs-string">"author"</span> <span class="hljs-keyword">WHERE</span> <span class="hljs-string">"author"</span>.<span class="hljs-string">"user_id"</span> = <span class="hljs-string">"Posts"</span>.<span class="hljs-string">"user_id"</span>) <span class="hljs-keyword">AS</span> <span class="hljs-string">"author"</span>
+<span class="hljs-keyword">FROM</span> <span class="hljs-string">"Posts"</span>
+</code></pre><p>The first CTE is useless: it basically returns the whole posts table and worst, the second evaluates whether an id is in an array of 20 000 items.
+In fact it will returns all the users who are also authors (about 8000). Finally our sub query (the last select) will have to match 20 000 posts to those 8000 users.
+No wonder it takes time !
+</p><p>To sum up, if your main query (the main builder) would probably returns a big subset, avoid query with inclusions. Luckily for us, ship-hold remains
+flexible and you are not out of tools when you spot such a case and need to workaround the issue.</p></article></main></body></html>

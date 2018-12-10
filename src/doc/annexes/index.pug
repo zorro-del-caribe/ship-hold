@@ -1,0 +1,11 @@
+extends ../common/main
+include ../common/mixins
+
+block content
+    h1#annexes Annexes
+    h2#db-script Database script
+    p.
+        All the examples mentioned in this documentation use a database generated with the following script.
+
+    +codeblock
+        include:highlight(lang='sql') snippets/script.sql

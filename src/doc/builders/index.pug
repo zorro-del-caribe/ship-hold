@@ -1,0 +1,103 @@
+extends ../common/main
+include ../common/mixins
+
+block content
+    h1#builders Builders
+    p.
+        A ship-hold instance provides a #[strong builder] for each common database operation: #[+link('builders/insert','INSERT')],
+        #[+link('builders/update','UPDATE')], #[+link('builders/delete','DELETE')] and #[+link('builders/select','SELECT')]; but also a #[+link('builders/conditions','conditions builder')]
+        to create more sophisticated conditions.
+
+    p.
+        You will notice while reading this documentation that ship hold API closely mirrors the #[+link('https://devdocs.io/postgreSQL~10-syntax/','SQL syntax')]. This is on purpose to reduce the cognitive effort if you already know some SQL.
+        At first, it may seem less obvious to call a #[i select] function rather than a #[i findAll] one. But with time and especially if you learn SQL, you will undoubtedly see the benefits.
+        Usually you can write a query as you would write it in SQL but by chaining function calls instead. Moreover using functions as base abstraction brings #[em a lot] of possibilities to build on top:
+        composition, partial application, decoration etc to name a few.
+
+    p.tip.
+        Usually the call order does not really matter but it is recommended to follow the SQL grammar syntax
+
+    article
+        h2.method#build .build()
+        p.
+            Every builder comes with a #[strong build] method to output the generated SQL. This is just string manipulation and does not need any database connection.
+
+        +codeblock
+            include:highlight(lang='javascript') snippets/example.js
+
+        h3#parameterized-query Parameterized queries
+
+        p.
+            If you look at our previous example, you'll see the build method outputs an object whose #[code text] property has the generated SQL.
+            But there is also a #[code values] properties. This is because ship-hold allows you to execute #[strong parameterized queries] to reduce
+            your exposure to #[strong SQL injections].
+
+        p.
+            To use parameters in your request just pass pointer strings prefixed with the dollar sign. You can then pass the actual parameter values
+            as an object map to the build method (or any other run method mentioned in the #[+link('run-queries','run queries section')])
+
+        +codeblock
+            include:highlight(lang='javascript') snippets/parameterized.js
+    article
+        h2.method#clone .clone()
+
+        p.
+            Every builder comes with a #[code clone] method which allows you to make a copy of an existing builder while leaving it untouched. It is
+            useful to avoid side effects when you use a builder as parameter of another builder.
+
+        +codeblock
+            include:highlight(lang='javascript') snippets/clone.js
+
+    article
+        h2.method#with .with(alias: string, builder: Builder)
+
+        p.
+            SELECT, UPDATE, DELETE and INSERT builders have the #[code with] method which lets you create
+            #[+link('https://devdocs.io/postgreSQL~10/queries-with#QUERIES-WITH-SELECT','Common Table Expression')] statements. You pass the alias
+            as first argument and a builder as second argument
+
+        +codeblock
+            include:highlight(lang='javascript') snippets/cte.js
+
+        p.tip.
+            You can chain #[code with] calls to create several common table expressions !
+
+    article
+
+        h2#common-types Common types
+
+        p The documentation often refers to some common types defined below
+
+        h3#pointers Pointers
+
+        p Pointers are SQL entities which can design a column, a table or any expression that can enter into a SELECT clause.
+
+        p.
+            If a pointer is a string it will automatically be wrapped within quotes following the postgres dialect. Also, any expression marked with a dot "." will be split
+            and every part will be wrapped as well.
+
+        p.
+            A pointer can also be an object with a #[code value] property and a #[code as] property. In this case the #[code as] will be
+            used as an alias for the value
+
+        +codeblock
+            include:highlight(lang='javascript') snippets/pointers.js
+
+        p.tip.
+            You will see the #[+link('builders/conditions', 'conditions builder')] in details but note the first operand of the where clause
+            is by default a pointer whereas the second is by default a value. It means if you want to set the second operand as a pointer, you
+            will need to wrap it within quotes yourself.
+
+        h3#values Values
+
+        p.
+            Values refer to any assignable value type: string, array, number, json, subquery. They will be casted by the pg driver.
+            They are often used as the second operand of a condition
+
+        +codeblock
+            include:highlight(lang='javascript') snippets/values.js
+
+
+
+
+

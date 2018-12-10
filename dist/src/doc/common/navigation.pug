@@ -1,0 +1,167 @@
+mixin navigationLink(path, label)
+    a(href=path)
+        span !{label}
+
+div#main-navigation-container
+    nav
+        ul
+            li.top
+                +navigationLink('./index.html','Introduction')
+                ul
+                    li
+                        +navigationLink('./index.html#getting-started','Getting started')
+                        ul
+                            li.leaf
+                                +navigationLink('./index.html#installation','Installation')
+                            li.leaf
+                                +navigationLink('./index.html#initialisation','Initialisation')
+                    li
+                        +navigationLink('./index.html#how-to-read','How to read this documentation')
+            li.top
+                +navigationLink('builders/index.html','Builders')
+                ul
+                    li
+                        +navigationLink('builders/index.html#build','.build()')
+                        ul
+                            li.leaf
+                                +navigationLink('builders/index.html#parameterized-query', 'Parameterized queries')
+                    li
+                        +navigationLink('builders/index.html#clone','.clone()')
+                    li
+                        +navigationLink('builders/index.html#with','.with(as, build)')
+                    li
+                        +navigationLink('builders/index.html#common-types','Common types')
+                        ul
+                            li.leaf
+                                +navigationLink('builders/index.html#pointers', 'Pointers')
+                            li.leaf
+                                +navigationLink('builders/index.html#values', 'Values')
+            li.top
+                +navigationLink('builders/insert/index.html','INSERT builder')
+                ul
+                    li
+                        +navigationLink('builders/insert/index.html#insert','.insert(map,...othersProps)')
+                    li
+                        +navigationLink('builders/insert/index.html#into','.into(tableName)')
+                    li
+                        +navigationLink('builders/insert/index.html#values','.values(rows)')
+                    li
+                        +navigationLink('builders/insert/index.html#returning','.returning(...properties)')
+            li.top
+                +navigationLink('builders/update/index.html','UPDATE builder')
+                ul
+                    li
+                        +navigationLink('builders/update/index.html#update','.update(tableName)')
+                    li
+                        +navigationLink('builders/update/index.html#set','.set(mapOrString, ?value)')
+                    li
+                        +navigationLink('builders/update/index.html#from','.from(...pointers)')
+                    li
+                        +navigationLink('builders/update/index.html#where','.where(leftOperand, operator, rightOperand)')
+                    li
+                        +navigationLink('builders/update/index.html#returning','.returning(...properties)')       li
+            li.top
+                +navigationLink('builders/delete/index.html','DELETE builder')
+                ul
+                    li
+                        +navigationLink('builders/delete/index.html#delete','.delete(tableName)')
+                    li
+                        +navigationLink('builders/delete/index.html#using','.using(...pointers)')
+                    li
+                        +navigationLink('builders/delete/index.html#where','.where(leftOperand, operator, rightOperand)')
+                    li
+                        +navigationLink('builders/delete/index.html#returning','.returning(...properties)')
+            li.top
+                +navigationLink('builders/select/index.html','SELECT builder')
+                ul
+                    li
+                        +navigationLink('builders/select/index.html#select','.select(...pointers)')
+                    li
+                        +navigationLink('builders/select/index.html#from','.from(...pointers)')
+                    li
+                        +navigationLink('builders/select/index.html#joins','Joins')
+                        ul
+                            li.leaf
+                                +navigationLink('builders/select/index.html#join', '.join(table, leftOp, rightOp)')
+                            li.leaf
+                                +navigationLink('builders/select/index.html#left-join', '.leftJoin(table, leftOp, rightOp)')
+                            li.leaf
+                                +navigationLink('builders/select/index.html#right-join', 'rightJoin(table, leftOp, rightOp)')
+                            li.leaf
+                                +navigationLink('builders/select/index.html#on', '.on(leftOperand, operator, rightOperand)')
+                    li
+                        +navigationLink('builders/select/index.html#group','Group')
+                        ul
+                            li.leaf
+                                +navigationLink('builders/select/index.html#group-by', '.groupBy(...columns)')
+                            li.leaf
+                                +navigationLink('builders/select/index.html#having', '.having(leftOp, operator, rightOp)')
+                    li
+                        +navigationLink('builders/select/index.html#where','.where(leftOp, operator, rightOp)')
+                    li
+                        +navigationLink('builders/select/index.html#pagination','Pagination')
+                        ul
+                            li.leaf
+                                +navigationLink('builders/select/index.html#limit', '.limit(size, offset)')
+
+            li.top
+                +navigationLink('builders/conditions/index.html','Conditions builder')
+                ul
+                    li
+                        +navigationLink('builders/conditions/index.html#factories','Factories')
+            li.top
+                +navigationLink('run-queries/index.html','Run queries')
+                ul
+                    li
+                        +navigationLink('run-queries/index.html#run','.run(params?:object)')
+                    li
+                        +navigationLink('run-queries/index.html#debug','.debug(params?:object)')
+                    li
+                        +navigationLink('run-queries/index.html#stream','.stream(sink: Generator, params?:object)')
+            li.top
+                +navigationLink('services/index.html','Services')
+                ul
+                    li
+                        +navigationLink('services/index.html#create-a-service','Create a service')
+                        ul
+                            li.leaf
+                                +navigationLink('services/index.html#service','.service(keyOrDef)')
+                    li
+                        +navigationLink('services/index.html#service-builders','Service builders')
+                        ul
+                            li.leaf
+                                +navigationLink('services/index.html#insert','.insert(...args)')
+                            li.leaf
+                                +navigationLink('services/index.html#update','.update(prosMap)')
+                            li.leaf
+                                +navigationLink('services/index.html#delete','.delete()')
+                            li.leaf
+                                +navigationLink('services/index.html#select','.select(...args)')
+                li
+                    +navigationLink('services/index.html#create-relations','Create Relations')
+                    ul
+                        li.leaf
+                            +navigationLink('services/index.html#one-to-one','One to one')
+                        li.leaf
+                            +navigationLink('services/index.html#one-to-many','One to many')
+                        li.leaf
+                            +navigationLink('services/index.html#many-to-many','Many to many')
+                li
+                    +navigationLink('services#query-with-associations/index.html','Queries with associations')
+                    ul
+                        li.leaf
+                            +navigationLink('services/index.html#include','.include(...associations)')
+            li.top
+                +navigationLink('performances/index.html','Performances')
+                ul
+                    li
+                        +navigationLink('performances/index.html#result','Result')
+                    li
+                        +navigationLink('performances/index.html#why','The good')
+                    li
+                        +navigationLink('performances/index.html#where','The bad')
+            li.top
+                +navigationLink('annexes/index.html','Annexes')
+                ul
+                    li
+                        +navigationLink('annexes/index.html#db-script','Database script')
