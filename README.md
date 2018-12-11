@@ -12,10 +12,10 @@ It also allows you to create convenient services and relations between them in o
 It is actually the **only** library I know of which has it right when it comes to pagination and nested pagination!
 
 It differs a lot from other popular libraries so called ORM such
-[Sequelize](http://docs.sequelizejs.com/) or [Bookshelf]('http://bookshelfjs.org/').
+[Sequelize](http://docs.sequelizejs.com/) or [Bookshelf](http://bookshelfjs.org/).
 They come with a wide range of features:
 schema management, migrations, validations, different sql dialects, model instances, etc. But it comes at the price of very complex API's / code base
 (we are usually talking about more than 200 API functions and more than 10/20 thousands source lines of code).
-Ship-hold, however, focuses on a limited set of features while remaining #[em extensible].
+Ship-hold, however, focuses on a limited set of features while remaining extensible.
 
 Visit the [Documentation website](https://ship-hold.com) for more details

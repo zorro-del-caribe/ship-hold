@@ -1,6 +1,6 @@
-const test = require('zora');
+const {parallels} = require('./util');
 
-module.exports = function (sh) {
+module.exports = function (sh, test) {
     let usersFixture;
     let productsFixture;
     let phonesFixture;
@@ -44,8 +44,7 @@ module.exports = function (sh) {
         return {Users, Products, Phones, Accounts};
     }
 
-    return test('select with include', async t => {
-
+    return test('select with include', parallels(async t => {
         await t.test('add user fixture', async t => {
             const {query} = sh;
             const {rows} = await query(`INSERT INTO users_association_select(name, age) 
@@ -923,5 +922,5 @@ module.exports = function (sh) {
 
             t.deepEqual(actual, expected);
         });
-    });
+    }));
 };

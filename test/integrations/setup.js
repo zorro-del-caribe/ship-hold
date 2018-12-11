@@ -74,6 +74,9 @@ module.exports = async function (sh) {
     PRIMARY KEY (user_id, account_id)
     );
     `);
+
+        return sh;
+
     } catch (e) {
         console.error(e);
         sh.stop();

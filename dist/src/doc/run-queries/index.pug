@@ -6,7 +6,7 @@ block content
     h1#run-queries Run queries
 
     p.
-        So far we have only seen how to output the generated SQL of a builder thanks to the #[+link('builders#build','build method')].
+        So far we have only seen how to output the generated SQL of a builder thanks to the #[+link('builders/index.html#build','build method')].
         Obviously, at some point you will want to run your query against a true database. Depending on your use case and your preferences
         one or the other of the following methods will be more adapted.
 
@@ -33,7 +33,7 @@ block content
         h2#debug .debug(params?:object)
 
         p.
-            This method is exactly the same than #[+link('run-queries#run','run method')], but il will also print in the console the result of
+            This method is exactly the same than #[+link('run-queries/index.html#run','run method')], but il will also print in the console the result of
             #[code build] (ie with the SQL query used).
 
     article
@@ -46,7 +46,7 @@ block content
             for example if you want to build an ORM, you could create here model instances from the rows.
 
         p.
-            The first argument is a generator as data sink. You can have a look at that #[+link('','excellent book')] if you want more details.
+            The first argument is a generator as data sink. You can have a look at that #[+link('https://exploringjs.com','excellent book')] if you want more details.
             The second argument will be an object map with the parameters' values if you want to use a parameterized query.
 
         p.tip.

@@ -4,8 +4,8 @@ include ../common/mixins
 block content
     h1#builders Builders
     p.
-        A ship-hold instance provides a #[strong builder] for each common database operation: #[+link('builders/insert','INSERT')],
-        #[+link('builders/update','UPDATE')], #[+link('builders/delete','DELETE')] and #[+link('builders/select','SELECT')]; but also a #[+link('builders/conditions','conditions builder')]
+        A ship-hold instance provides a #[strong builder] for each common database operation: #[+link('builders/insert/index.html','INSERT')],
+        #[+link('builders/update/index.html','UPDATE')], #[+link('builders/delete/index.html','DELETE')] and #[+link('builders/select/index.html','SELECT')]; but also a #[+link('builders/conditions/index.html','conditions builder')]
         to create more sophisticated conditions.
 
     p.
@@ -16,7 +16,6 @@ block content
 
     p.tip.
         Usually the call order does not really matter but it is recommended to follow the SQL grammar syntax
-
     article
         h2.method#build .build()
         p.
@@ -34,7 +33,7 @@ block content
 
         p.
             To use parameters in your request just pass pointer strings prefixed with the dollar sign. You can then pass the actual parameter values
-            as an object map to the build method (or any other run method mentioned in the #[+link('run-queries','run queries section')])
+            as an object map to the build method (or any other run method mentioned in the #[+link('run-queries/index.html','run queries section')])
 
         +codeblock
             include:highlight(lang='javascript') snippets/parameterized.js
@@ -84,7 +83,7 @@ block content
             include:highlight(lang='javascript') snippets/pointers.js
 
         p.tip.
-            You will see the #[+link('builders/conditions', 'conditions builder')] in details but note the first operand of the where clause
+            You will see the #[+link('builders/conditions/index.html', 'conditions builder')] in details but note the first operand of the where clause
             is by default a pointer whereas the second is by default a value. It means if you want to set the second operand as a pointer, you
             will need to wrap it within quotes yourself.
 
@@ -96,8 +95,3 @@ block content
 
         +codeblock
             include:highlight(lang='javascript') snippets/values.js
-
-
-
-
-

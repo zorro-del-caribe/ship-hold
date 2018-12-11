@@ -13,7 +13,7 @@ block content
         h2.method#select .select(...columns:Pointers[])
 
         p.
-            The select builder factory takes as argument a list of #[+link('builders#pointers','pointers')] with or without
+            The select builder factory takes as argument a list of #[+link('builders/index.html#pointers','pointers')] with or without
             alias. You can also use any aggregation function.
 
         +codeblock
@@ -30,7 +30,7 @@ block content
         h2.method#from .from(...tables:Pointers[])
 
         p.
-            This method allows you to specify a list of tables. It takes the same kind of arguments as the #[+link('builders/select#select','select')]
+            This method allows you to specify a list of tables. It takes the same kind of arguments as the #[+link('builders/select/index.html#select','select')]
             method.
 
         +codeblock
@@ -43,8 +43,8 @@ block content
         h2#joins Joins
 
         p.
-            There are few methods to join table together. They take the same arguments as the #[+link('builders/select#from','from method')].
-            You usually call the #[+link('builders/select#on','on method')] after you have joined a table to apply a join condition but you can
+            There are few methods to join table together. They take the same arguments as the #[+link('builders/select/index.html#from','from method')].
+            You usually call the #[+link('builders/select/index.html#on','on method')] after you have joined a table to apply a join condition but you can
             also pass a #[em leftOperand] and a #[em rightOperand] for usual join equality condition
 
         h3#join .join(table: Pointer, operator?, rightOperand?)
@@ -69,7 +69,7 @@ block content
 
         p.
             This method returns a proxy of a condition builder which will be revoked whenever you call a method which does not belong to the condition builder.
-            See #[+link('builders/conditions','conditions builder')] for more details. You use it to create a join condition on a particular join
+            See #[+link('builders/conditions/index.html','conditions builder')] for more details. You use it to create a join condition on a particular join
 
         +codeblock
             include:highlight(lang='javascript') snippets/select-join.js
@@ -91,8 +91,8 @@ block content
         h3.method#having .having(leftOperand: Pointer, operator?, rightOperand?)
 
         p.
-            This method allows you to apply a filter on grouped rows. It defers from #[+link('builders/select#where','the where clause')] which
-            applies the filter #[strong before] the groups are formed. In the same way as the #[+link('builders/select#where','the where method')] it returns a
+            This method allows you to apply a filter on grouped rows. It defers from #[+link('builders/select/index.html#where','the where clause')] which
+            applies the filter #[strong before] the groups are formed. In the same way as the #[+link('builders/select/index.html#where','the where method')] it returns a
             proxied condition builder so you can chain conditions
 
         +codeblock
@@ -103,7 +103,7 @@ block content
 
         p.
             This method returns a proxy of a condition builder which will be revoked whenever you call a method which does not belong to the condition builder.
-            See #[+link('builders/conditions','conditions builder')] for more details. You use it to create where clause in your select query
+            See #[+link('builders/conditions/index.html','conditions builder')] for more details. You use it to create where clause in your select query
 
         +codeblock
             include:highlight(lang='javascript') snippets/select-where.js

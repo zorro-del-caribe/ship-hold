@@ -1,12 +1,12 @@
-const test = require('zora');
+const {parallels} = require('./util');
 
-module.exports = function (sh) {
+module.exports = function (sh, test) {
     const createService = () => sh.service({
         table: 'users_insert',
         name: 'Users'
     });
 
-    return test('insert', async t => {
+    return test('insert', parallels(async t => {
         await t.test('add a user and return it', async t => {
             const [user] = await createService()
                 .insert({age: '$age', name: '$name'})
@@ -32,7 +32,6 @@ module.exports = function (sh) {
                 .run();
             t.deepEqual(user, {id: 3, name: 'devil', age: 666});
         });
-
-    });
+    }));
 };
 

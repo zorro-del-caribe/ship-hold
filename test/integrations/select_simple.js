@@ -1,17 +1,15 @@
-const test = require('zora');
+const {parallels} = require('./util');
 
-module.exports = function (sh) {
-
+module.exports = function (sh, test) {
     let fixtures;
     const fixtureFactory = items => (filterFunc = x => true) => items.map(i => Object.assign({}, i)).filter(filterFunc);
 
     const createService = () => sh.service({
         table: 'users_simple_select',
         name: 'Users'
-
     });
 
-    return test('select_simple', async t => {
+    return test('select_simple', parallels(async t => {
         await t.test('add fixture', async t => {
             const {query} = sh;
             const result = await query(`INSERT INTO users_simple_select(name, age) 
@@ -158,5 +156,5 @@ module.exports = function (sh) {
 
             t.deepEqual(users, fixtures().splice(1, 2));
         });
-    });
+    }));
 };

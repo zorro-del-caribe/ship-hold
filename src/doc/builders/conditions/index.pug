@@ -7,12 +7,12 @@ block content
 
     p.
         The conditions builder allows you to create condition expression with logical operators such #[em AND] and #[em OR].
-        The first argument (or left operand) will be by default considered as a #[+link('builders#pointers','pointer')]. The second argument is an SQL operator which will allows you to
-        perform an actual comparison. The third argument is a #[+link('builders#values','value')] by default, which implies that if you want to use a pointer instead, you will need to wrap
+        The first argument (or left operand) will be by default considered as a #[+link('builders/index.html#pointers','pointer')]. The second argument is an SQL operator which will allows you to
+        perform an actual comparison. The third argument is a #[+link('builders/index.html#values','value')] by default, which implies that if you want to use a pointer instead, you will need to wrap
         it within quotes yourself. If you use the condition function with two arguments only (left operand and right operand), the operator will be #[code =] (equals).
 
     p.tip.
-        You can pass a conditions builder to another one (as well as others builders, like a #[+link('builders/select','select builder')]), It this
+        You can pass a conditions builder to another one (as well as others builders, like a #[+link('builders/select/index.html','select builder')]), It this
         case it will be considered as a sub expression and therefore will be between parentheses.
 
     +codeblock
@@ -26,7 +26,7 @@ block content
 
         p.
             The second way will occur more often. It is by calling a method of a builder which returns a #[strong proxied] conditions builder:
-            #[+link('builders/select#where','select.where')] or #[+link('builders/select#on','select.on')] are good examples.
+            #[+link('builders/select/index.html#where','select.where')] or #[+link('builders/select/index.html#on','select.on')] are good examples.
             Using a proxy let you conveniently call the conditions builder methods as if they were part of the main builder.
             Whenever a method or a property which does not belong to the conditions builder is called, the proxy is revoked.
 

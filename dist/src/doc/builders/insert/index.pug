@@ -13,14 +13,14 @@ block content
 
         p.
             The insert builder factory can be used with either an object or a list of property strings. You use it with a list of strings to define
-            the columns of you insert query. You'll need therefore to supply some values later with #[+link('builders/insert/#values','values')] method
+            the columns of you insert query. You'll need therefore to supply some values later with #[+link('builders/insert/index.html#values','values')] method
 
         +codeblock
             include:highlight(lang='javascript') snippets/insert-value-simple.js
 
         p.
             The version with an object map is simply equivalent to a call with a list of strings whose values are the keys of the object and then
-            a call to #[+link('builders/insert/#values','values')] with the object values as query values. It will likely be more convenient if you wish to insert a single row.
+            a call to #[+link('builders/insert/index.html#values','values')] with the object values as query values. It will likely be more convenient if you wish to insert a single row.
 
         +codeblock
             include:highlight(lang='javascript') snippets/insert-value-object.js

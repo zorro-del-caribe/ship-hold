@@ -20,7 +20,7 @@ block content
 
         p.
             If you pass a service definition you can also pass a #[code primaryKey] property (default will be #[code 'id']) and a #[code name] property.
-            The #[code primaryKey] property is mainly used in #[+link('services#query-with-associations','queries with associations')].
+            The #[code primaryKey] property is mainly used in #[+link('services/index.html#query-with-associations','queries with associations')].
             The #[code name] property is used as a key in a service registry and as alias for common table expressions in some queries.
             If not provided it will be based on the table name putting the first letter of each word in capital.
 
@@ -39,7 +39,7 @@ block content
         h2#service-builders Service builders
 
         p.
-            Service builders are standard #[+link('builders','ship hold builders')] with some light syntax differences.
+            Service builders are standard #[+link('builders/index.html','ship hold builders')] with some light syntax differences.
 
         article
             h3.method#insert .insert(...args)
@@ -74,14 +74,10 @@ block content
 
             p.
                 A #[i select] builder created with a service simply binds the builder to the service table. It also has
-                an #[code include] method. You can refer to the #[+link('services#create-relations','relations')] section for more details.
+                an #[code include] method. You can refer to the #[+link('services/index.html#create-relations','relations')] section for more details.
 
             +codeblock
                 include:highlight(lang='javascript') snippets/service-select.js
-
-
-
-
     article
         h2#create-relations Create Relations
 
@@ -107,7 +103,7 @@ block content
             h3#one-to-many Define a one-to-many relationship
 
             p.
-                This kind of relationship happens in the same condition as the #[+link('services#one-to-one','one-to-one')], but your data model allows an item of the holder to have several items
+                This kind of relationship happens in the same condition as the #[+link('services/index.html#one-to-one','one-to-one')], but your data model allows an item of the holder to have several items
                 of the target reference it.
             p.
                 #[code hasMany] takes as arguments the service related to the #[em target] table and an #[em alias] which will be used as property when aggregating the data.
@@ -175,7 +171,7 @@ block content
                 You #[strong have to include in your select clauses the required primary keys and foreign keys]. ship-hold does not know much about your table columns, it just does what you are asking for.
 
             p.
-                You can also perform nested include. However the cost on the database will be higher although ship-hold #[+link('performances','performs quite well')].
+                You can also perform nested include. However the cost on the database will be higher although ship-hold #[+link('performances/index.html','performs quite well')].
 
             p.
                 One last things good to know is that you can overwrite the aliases defined by your relations providing instead of a builder an object

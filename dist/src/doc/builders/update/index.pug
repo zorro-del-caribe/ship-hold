@@ -29,13 +29,13 @@ block content
             include:highlight(lang='javascript') snippets/update-set.js
 
         p.tip.
-            Of course, both version support #[+link('builders#parameterized-query','parameterized queries')].
+            Of course, both version support #[+link('builders/index.html#parameterized-query','parameterized queries')].
 
     article
         h2.method#from .from(...pointers[])
 
         p.
-            The #[em from] method allows you to use others table columns in the #[+link('builders/update#where','where')] clause or in the new set value.
+            The #[em from] method allows you to use others table columns in the #[+link('builders/update/index.html#where','where')] clause or in the new set value.
 
         +codeblock
             include:highlight(lang='javascript') snippets/update-from.js
@@ -45,7 +45,7 @@ block content
 
         p.
             This method returns a proxy of a condition builder which will be revoked whenever you call a method which does not belong to the condition builder.
-            See #[+link('builders/conditions','conditions builder')] for more details. You use it to create where clause in your update query
+            See #[+link('builders/conditions/index.html','conditions builder')] for more details. You use it to create where clause in your update query
 
         +codeblock
             include:highlight(lang='javascript') snippets/update-where.js

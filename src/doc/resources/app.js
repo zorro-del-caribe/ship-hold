@@ -10,7 +10,6 @@ toggle.addEventListener('click', ev => {
     header.classList.toggle('hidden', !open);
     body.classList.toggle('full-screen', !open);
 });
-
 // if ('serviceWorker' in navigator) {
 //     navigator.serviceWorker.register('service-worker.js');
 // }

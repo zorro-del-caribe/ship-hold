@@ -1,13 +1,13 @@
-const test = require('zora');
 const {count} = require('ship-hold-querybuilder');
+const {parallels} = require('./util');
 
-module.exports = function (sh) {
+module.exports = function (sh, test) {
     const createService = () => sh.service({
         table: 'users_delete',
         name: 'Users'
     });
 
-    return test('delete', async t => {
+    return test('delete', parallels(async t => {
         await t.test('add fixture', async t => {
             const {query} = sh;
             const result = await query(`INSERT INTO users_delete(name, age) 
@@ -59,6 +59,6 @@ module.exports = function (sh) {
 
             t.equal(+(remainingAfter.count), 0, 'should not have any Laurent after');
         });
-    });
+    }));
 };
 

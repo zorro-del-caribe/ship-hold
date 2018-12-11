@@ -27,15 +27,20 @@ body * {
     box-sizing: inherit;
 }
 
+ul {
+    margin: 0;
+}
+
 main {
-    flex-grow: 1;
-    margin: 0 auto;
-    padding: 1em;
     color: var(--color);
+    flex-grow: 1;
     display: flex;
     flex-direction: column;
-    max-width: 60rem;
+    margin: 0 auto;
+    align-items: stretch;
+    padding: 1em;
     overflow: hidden;
+    max-width: 60rem;
 }
 
 main a {
@@ -118,6 +123,14 @@ header.hidden {
     box-shadow: none;
 }
 
+a.github {
+    color: var(--theme-secondary-color);
+}
+
+a.github:hover, a.github:focus {
+    background: var(--theme-secondary-color);
+}
+
 #menu-toggle {
     align-self: flex-end;
     background: white;
@@ -168,7 +181,7 @@ header.hidden {
     color: var(--theme-gray);
 }
 
-header nav ul {
+nav ul {
     list-style: none;
     font-size: 97%;
     padding: 0 0.5em;
@@ -181,6 +194,12 @@ li.top > a {
 
 li.leaf > a {
     font-weight: lighter;
+}
+
+header nav {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
 }
 
 header li {
@@ -206,7 +225,7 @@ header a:hover > span, header a:focus > span {
 
 pre.hljs {
     border-left: 4px solid var(--theme-primary-color);
-    border-right: 4px solid var(--theme-secondary-color);
+    border-right: 4px solid var(--theme-primary-color);
     width: 100%;
     display: inline-block;
 }

@@ -1,6 +1,6 @@
-const test = require('zora');
+const {parallels} = require('./util');
 
-module.exports = function (sh) {
+module.exports = function (sh, test) {
 
     let fixtures;
     const fixtureFactory = (items) => (filterFunc = x => true) => items.map(i => Object.assign({}, i)).filter(filterFunc);
@@ -10,7 +10,7 @@ module.exports = function (sh) {
         name: 'Users'
     });
 
-    return test('update', async t => {
+    return test('update', parallels(async t => {
 
         await t.test('add fixture', async t => {
             const {query} = sh;
@@ -57,5 +57,5 @@ module.exports = function (sh) {
 
             t.deepEqual(users, fixtures(t => t.name === 'Jesus').map(i => Object.assign({}, i, {name: 'not updated anymore'})));
         });
-    });
+    }));
 };
