@@ -3,6 +3,16 @@
 [![CircleCI](https://circleci.com/gh/zorro-del-caribe/ship-hold.svg?style=svg)](https://circleci.com/gh/zorro-del-caribe/ship-hold)
 [![Gitter](https://badges.gitter.im/zorro-del-caribe/ship-hold.svg)](https://gitter.im/zorro-del-caribe/ship-hold?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
+<div align="center">
+	<br>
+	<div>
+		<img src="docs/ressources/ship-hold-logo.svg" alt="ship-hold logo">
+	</div>
+	<br>
+	<br>
+	<br>
+</div>
+
 **ship-hold** is a small and fast data access framework for [Postgres](https://www.postgresql.org) relational database, developed for the
 [Nodejs](https://nodejs.org/) environment.
 
