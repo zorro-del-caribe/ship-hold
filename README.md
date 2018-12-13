@@ -6,7 +6,7 @@
 <div align="center">
 	<br>
 	<div>
-		<img src="docs/ressources/ship-hold-logo.svg" alt="ship-hold logo">
+		<img src="docs/resources/ship-hold-logo.svg" alt="ship-hold logo">
 	</div>
 	<br>
 	<br>
