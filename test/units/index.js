@@ -3,5 +3,5 @@ require('./select');
 require('./delete');
 require('./update');
 require('./insert');
-require('./model-registry');
+require('./service-registry');
 require('./builders');

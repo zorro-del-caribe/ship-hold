@@ -61,5 +61,6 @@
     "tap-set-exit": "^1.1.1",
     "typescript": "^3.2.1",
     "zora": "^2.0.1"
-  }
+  },
+  "homepage": "https://ship-hold.com"
 }

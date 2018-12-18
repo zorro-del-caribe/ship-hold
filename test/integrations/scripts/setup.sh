@@ -1,4 +1,4 @@
 #!/bin/sh
 # Run postgres container as daemon and create a test db
 echo "Starting DB..."
-docker run --name db -d -e POSTGRES_PASSWORD=docker -e POSTGRES_USER=docker -e POSTGRES_DB=ship-hold-test -p 5432:5432 postgres:latest
+docker run --name ship-hold -d -e POSTGRES_PASSWORD=docker -e POSTGRES_USER=docker -e POSTGRES_DB=ship-hold-test -p 5432:5432 postgres:latest

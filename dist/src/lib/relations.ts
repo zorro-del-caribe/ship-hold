@@ -1,6 +1,5 @@
 import {
     jsonAgg,
-    SelectBuilder,
     toJson,
     coalesce,
     compositeNode,
@@ -156,6 +155,7 @@ const oneToMany = (targetBuilder: SelectServiceBuilder, relation: InclusionInput
 
 const createRelationBuilder = (pivotAlias: string, alias: string, targetPivotKey: string, relationBuilder: SelectServiceBuilder) => {
     const {service} = relationBuilder;
+    //todo might worth use polymorphic this type instead (https://devdocs.io/typescript/handbook/advanced-types#polymorphic-this-types)
     const builder = <SelectServiceBuilder>service.rawSelect(`("${pivotAlias}"."${alias}").*`, `"${pivotAlias}"."${targetPivotKey}"`).from(pivotAlias);
 
     // pass the inclusions along
@@ -191,12 +191,12 @@ const manyToMany = (targetBuilder: SelectServiceBuilder, relation: InclusionInpu
 
     const relationInJoin = relationBuilder.clone(false);
 
-    const pivotWith = (<SelectBuilder>sh
+    const pivotWith = sh
         .select(`"${pivotTable}"."${targetPivotKey}"`, `"${pivotTable}"."${relationPivotKey}"`, {
             value: `"${alias}"`,
             as: alias
         })
-        .from(pivotTable))
+        .from(pivotTable)
         .where(`"${pivotTable}"."${targetPivotKey}"`, SQLComparisonOperator.IN, sh.select(targetPrimaryKey).from(targetName))
         .join({value: relationInJoin, as: alias})
         .on(`"${pivotTable}"."${relationPivotKey}"`, `"${alias}"."${relationPrimaryKey}"`)

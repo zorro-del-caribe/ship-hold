@@ -18,6 +18,8 @@ export const service = <T>(definition: EntityDefinition, sh: ShipHoldBuilders): 
 
     let setAsServiceB;
 
+    //todo might worth use polymorphic this type instead to explicitly cast
+    // (https://devdocs.io/typescript/handbook/advanced-types#polymorphic-this-types)
     const ServicePrototype = Object.assign({
             rawSelect: (...args) => {
                 return setAsServiceB(include(<SelectServiceBuilder>sh

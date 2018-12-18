@@ -1,14 +1,11 @@
 import {
-    DeleteServiceBuilder,
     EntityService,
-    InsertServiceBuilder,
-    SelectServiceBuilder,
-    UpdateServiceBuilder
+    ServiceBuilder,
 } from '../interfaces';
 import {Builder} from 'ship-hold-querybuilder';
 
 interface WithServiceBuilderMixin {
-    <T extends Builder>(builder: T, table?: string): SelectServiceBuilder | InsertServiceBuilder | UpdateServiceBuilder | DeleteServiceBuilder;
+    <T extends Builder>(builder: T, table?: string): ServiceBuilder;
 }
 
 /**

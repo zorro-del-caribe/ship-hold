@@ -4,7 +4,7 @@ import {
     ConditionsBuilder, DeleteBuilder, InsertBuilder,
     NodeParam,
     SelectBuilder,
-    SQLComparisonOperator, SQLQuery,
+    SQLComparisonOperator,
     UpdateBuilder
 } from 'ship-hold-querybuilder';
 import {InclusionInput, WithRelations} from './relations';
@@ -49,6 +49,8 @@ export interface DeleteServiceBuilder extends DeleteBuilder, WithQueryRunner, En
 
 export interface InsertServiceBuilder extends InsertBuilder, WithQueryRunner, EntityBuilder {
 }
+
+export type ServiceBuilder = SelectServiceBuilder | UpdateServiceBuilder | DeleteServiceBuilder | InsertServiceBuilder;
 
 export interface EntityService extends WithConditionsBuilderFactory, WithRelations<EntityService> {
     readonly definition: EntityDefinition;

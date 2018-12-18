@@ -31,6 +31,7 @@ export interface DeleteServiceBuilder extends DeleteBuilder, WithQueryRunner, En
 }
 export interface InsertServiceBuilder extends InsertBuilder, WithQueryRunner, EntityBuilder {
 }
+export declare type ServiceBuilder = SelectServiceBuilder | UpdateServiceBuilder | DeleteServiceBuilder | InsertServiceBuilder;
 export interface EntityService extends WithConditionsBuilderFactory, WithRelations<EntityService> {
     readonly definition: EntityDefinition;
     rawSelect: (...args: NodeParam<any>[]) => SelectServiceBuilder;

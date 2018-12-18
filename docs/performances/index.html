@@ -60,14 +60,14 @@ to rely on the database features rather than implementing an equivalent on the J
 For example, in ship-hold, queries with associations would result in a unique query to the database,
 and even the aggregation is done in that query.
 Other libraries would send various queries, buffer the result and aggregate the result in Javascript.
-</p><p>I see many advantages in processing that way:
+</p><p>I see many advantages in proceeding that way:
 </p><ul><li><p>It reduces <em>a lot</em> the amount of code to write and makes ship-hold a lightweight framework
 compared to the others. Moreover the code required for aggregation for example, may be quite complicated and bug prone: less code, less problems!</p></li><li><p>Database makers strive to improve performances, and write usually faster code in C++, with better algorithms that I personally could do on the JS side.
 Any performance improvement on the database engine would therefore improve ship-hold.</p></li><li><p>Join queries, and sub queries carry a part of redundant data. If you do the aggregation at the database level, I <em>suspect</em> that less data would need to
 go throw the wires which might improve the performances compared to a solution where data is buffered on the JS side and cleaned/aggregated.
 It could be especially true if your database is on a remote server.</p></li></ul></article><article><h2 id="where">Where would ship hold perform not so well ?</h2><p>Even though I am trying to sell ship-hold to you, I must be honest. When I built ship-hold, I did not have performances particularly in mind.
 I tend to favor first user experience, simplicity of the code and extensible abstractions. The relative good performances is more or less an accident.
-As any software, at some point you have to make some trade of. This section will explain when ship-hold might not perform well.
+As any software, at some point you have to make some trade-offs. This section will explain when ship-hold might not perform well.
 </p><p>When you perform a query including associations, ship-hold uses behind the scene <a href="https://devdocs.io/postgresql~10/queries-with#QUERIES-WITH-SELECT">Common Table Expressions</a>.
 CTE are useful in many ways but their main advantage is the readability they provide. They are eagerly evaluated (once only) and can be referenced in other part of the query (a bit like variable).
 This is very useful when you want to build a query recursively which is the case when you have many associations fetched at many levels of depth.

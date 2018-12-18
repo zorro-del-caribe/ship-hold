@@ -1,7 +1,7 @@
-import { DeleteServiceBuilder, EntityService, InsertServiceBuilder, SelectServiceBuilder, UpdateServiceBuilder } from '../interfaces';
+import { EntityService, ServiceBuilder } from '../interfaces';
 import { Builder } from 'ship-hold-querybuilder';
 interface WithServiceBuilderMixin {
-    <T extends Builder>(builder: T, table?: string): SelectServiceBuilder | InsertServiceBuilder | UpdateServiceBuilder | DeleteServiceBuilder;
+    <T extends Builder>(builder: T, table?: string): ServiceBuilder;
 }
 /**
  * Create a functional mixin to be applied to a builder to pass metadata related to the service and context the builder was generated with

@@ -19,6 +19,13 @@ test('services should be singletons', t => {
     t.equal(service, registry.service('foo'), 'should refer to the same reference');
 });
 
+test('should pass default value', t => {
+    const registry = shiphold({});
+    const service = registry.service({table: 'users'});
+    t.equal(service.definition.primaryKey, 'id', 'default primaryKey should be "id"');
+    t.equal(service.definition.name, 'Users', 'default name should be a camel case version of the table name');
+});
+
 test('registry should be iterable', t => {
     const registry = shiphold({});
 

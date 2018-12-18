@@ -178,9 +178,8 @@ const normaliseInclude = (aliasToService, targetBuilder) => (rel) => {
     };
 };
 const uppercaseTheFirstLetter = (word) => {
-    const copy = word;
-    copy[0].toUpperCase();
-    return copy;
+    const [first, ...rest] = word;
+    return [first.toUpperCase(), ...rest].join('');
 };
 const toCamelCase = (input) => {
     return input
@@ -314,6 +313,7 @@ const oneToMany = (targetBuilder, relation, sh) => {
 };
 const createRelationBuilder = (pivotAlias, alias, targetPivotKey, relationBuilder) => {
     const { service } = relationBuilder;
+    //todo might worth use polymorphic this type instead (https://devdocs.io/typescript/handbook/advanced-types#polymorphic-this-types)
     const builder = service.rawSelect(`("${pivotAlias}"."${alias}").*`, `"${pivotAlias}"."${targetPivotKey}"`).from(pivotAlias);
     // pass the inclusions along
     builder.include(...relationBuilder.inclusions);
@@ -428,6 +428,8 @@ const service = (definition, sh) => {
     const aliasToService = new Map();
     const include = withInclude(aliasToService, sh);
     let setAsServiceB;
+    //todo might worth use polymorphic this type instead to explicitly cast
+    // (https://devdocs.io/typescript/handbook/advanced-types#polymorphic-this-types)
     const ServicePrototype = Object.assign({
         rawSelect: (...args) => {
             return setAsServiceB(include(sh
