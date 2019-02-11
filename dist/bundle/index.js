@@ -3,8 +3,8 @@
 Object.defineProperty(exports, '__esModule', { value: true });
 
 var pg = require('pg');
-var QueryStream = require('pg-query-stream');
 var shipHoldQuerybuilder = require('ship-hold-querybuilder');
+var QueryStream = require('pg-query-stream');
 
 const createPoolConnection = (conf) => {
     const pool = new pg.Pool(conf);

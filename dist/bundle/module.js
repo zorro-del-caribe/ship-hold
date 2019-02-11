@@ -1,6 +1,6 @@
 import { Pool } from 'pg';
+import { select, update, delete, insert, condition, toJson, coalesce, jsonAgg, compositeNode } from 'ship-hold-querybuilder';
 import * as QueryStream from 'pg-query-stream';
-import { select, insert, update, condition, delete, jsonAgg, toJson, coalesce, compositeNode } from 'ship-hold-querybuilder';
 
 const createPoolConnection = (conf) => {
     const pool = new Pool(conf);
