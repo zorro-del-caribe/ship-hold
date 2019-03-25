@@ -46,20 +46,20 @@
   "author": "Laurent RENARD",
   "license": "MIT",
   "dependencies": {
-    "pg": "^7.8.0",
+    "pg": "^7.9.0",
     "pg-query-stream": "^2.0.0",
     "ship-hold-querybuilder": "^2.0.0"
   },
   "devDependencies": {
-    "@types/node": "^10.12.24",
-    "@types/pg": "^7.4.11",
+    "@types/node": "^10.14.3",
+    "@types/pg": "^7.4.14",
     "@types/pg-query-stream": "^1.0.2",
     "jstransformer-highlight": "^2.0.0",
     "mkdirp": "^0.5.1",
     "pug": "^2.0.3",
-    "rollup": "^1.1.2",
+    "rollup": "^1.7.3",
     "tap-set-exit": "^1.1.1",
-    "typescript": "^3.3.3",
+    "typescript": "^3.3.4000",
     "zora": "^2.0.1"
   },
   "homepage": "https://ship-hold.com"

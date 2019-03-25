@@ -1,5 +1,5 @@
 import { Pool } from 'pg';
-import { select, update, delete, insert, condition, toJson, coalesce, jsonAgg, compositeNode } from 'ship-hold-querybuilder';
+import { select, update, delete as delete$1, insert, condition, toJson, coalesce, jsonAgg, compositeNode } from 'ship-hold-querybuilder';
 import * as QueryStream from 'pg-query-stream';
 
 const createPoolConnection = (conf) => {
@@ -83,7 +83,7 @@ const buildersFactory = (pool) => {
     return {
         select: (...args) => runnable(select(...args)),
         update: (...args) => runnable(update(...args)),
-        delete: (...args) => runnable(delete(...args)),
+        delete: (...args) => runnable(delete$1(...args)),
         insert: (...args) => runnable(insert(...args)),
         if: (...args) => condition().if(...args)
     };
