@@ -34,7 +34,7 @@ module.exports = function (sh, test) {
                 .select(count('*'))
                 .run();
 
-            t.deepEqual(remaining, {count: 3});
+            t.deepEqual(+remaining.count, 3);
         });
 
         await t.test('delete without service', async t => {
