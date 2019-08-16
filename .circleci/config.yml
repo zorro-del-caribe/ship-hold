@@ -30,6 +30,6 @@ jobs:
           key: v1-dependencies-{{ checksum "package.json" }}
 
       # run tests!
-      - run: npm run test:unit | tap-set-exit
-      - run: npm run test:int | tap-set-exit
+      - run: npm run test:unit
+      - run: npm run test:int
   
