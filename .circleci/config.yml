@@ -30,6 +30,5 @@ jobs:
           key: v1-dependencies-{{ checksum "package.json" }}
 
       # run tests!
-      - run: npm run test:unit
-      - run: npm run test:int
-  
+      - run: npm run test:unit | ./node_modules/.bin/faucet
+      - run: npm run test:int | ./node_modules/.bin/faucet
