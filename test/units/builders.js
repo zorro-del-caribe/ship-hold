@@ -1,4 +1,4 @@
-const test = require('zora');
+const {test} = require('zora');
 const {shiphold} = require('../../dist/bundle');
 
 test('builder factory should return builders', t => {

@@ -16,7 +16,6 @@
     "test": "npm run test:unit && npm run test:int",
     "test:int": "node ./test/integrations/index.js",
     "test:unit": "node ./test/units/index.js",
-    "test:ci": "(npm run test:unit | tap-set-exit) && (npm run test:int | tap-set-exit)",
     "doc:build": "node ./src/doc/scripts/compile.js && cp -r ./src/doc/resources ./docs",
     "build:clean": "rm -rf ./dist && mkdir -p ./dist/bundle ./dist/declarations && cp -r ./src ./dist/src",
     "build:compile": "tsc",
@@ -46,21 +45,21 @@
   "author": "Laurent RENARD",
   "license": "MIT",
   "dependencies": {
-    "pg": "^7.9.0",
+    "pg": "^7.12.1",
     "pg-query-stream": "^2.0.0",
     "ship-hold-querybuilder": "^2.0.0"
   },
   "devDependencies": {
-    "@types/node": "^10.14.3",
+    "@types/node": "^12.7.2",
     "@types/pg": "^7.4.14",
     "@types/pg-query-stream": "^1.0.2",
+    "faucet": "0.0.1",
     "jstransformer-highlight": "^2.0.0",
     "mkdirp": "^0.5.1",
-    "pug": "^2.0.3",
-    "rollup": "^1.7.3",
-    "tap-set-exit": "^1.1.1",
-    "typescript": "^3.3.4000",
-    "zora": "^2.0.1"
+    "pug": "^2.0.4",
+    "rollup": "^1.19.4",
+    "typescript": "^3.5.3",
+    "zora": "^3.0.2"
   },
   "homepage": "https://ship-hold.com"
 }

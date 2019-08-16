@@ -1,5 +1,5 @@
 const {shiphold} = require('../../dist/bundle');
-const test = require('zora');
+const {test} = require('zora');
 
 test('service registry', t => {
     const sh = shiphold();

@@ -5,22 +5,26 @@
 version: 2
 jobs:
   build:
-    environment:
-      - POSTGRES_USER=root
-      - POSTGRES_DB=circle_test
-      - POSTGRES_PASSWORD=root
     docker:
-      - image: circleci/node:9
+      - image: circleci/node:10
+        environment:
+          - POSTGRES_USER=root
+          - POSTGRES_DB=circle_test
+          - POSTGRES_PASSWORD=root
       - image: circleci/postgres:10
+        environment:
+          - POSTGRES_USER=root
+          - POSTGRES_DB=circle_test
+          - POSTGRES_PASSWORD=root
     steps:
       - checkout
 
       # Download and cache dependencies
       - restore_cache:
           keys:
-          - v1-dependencies-{{ checksum "package.json" }}
-          # fallback to using the latest cache if no exact match is found
-          - v1-dependencies-
+            - v1-dependencies-{{ checksum "package.json" }}
+            # fallback to using the latest cache if no exact match is found
+            - v1-dependencies-
 
       - run: npm install
 
@@ -30,6 +34,5 @@ jobs:
           key: v1-dependencies-{{ checksum "package.json" }}
 
       # run tests!
-      - run: npm run test:ci
-
-  
+      - run: npm run test:unit | ./node_modules/.bin/faucet
+      - run: npm run test:int | ./node_modules/.bin/faucet
