@@ -10,7 +10,7 @@ jobs:
       - POSTGRES_DB=circle_test
       - POSTGRES_PASSWORD=root
     docker:
-      - image: circleci/node:9
+      - image: circleci/node:10
       - image: circleci/postgres:10
     steps:
       - checkout

@@ -16,7 +16,7 @@
     "test": "npm run test:unit && npm run test:int",
     "test:int": "node ./test/integrations/index.js",
     "test:unit": "node ./test/units/index.js",
-    "test:ci": "(npm run test:unit | tap-set-exit) && (npm run test:int | tap-set-exit)",
+    "test:ci": "set -o pipefail; (npm run test:unit | tap-set-exit) && (npm run test:int | tap-set-exit)",
     "doc:build": "node ./src/doc/scripts/compile.js && cp -r ./src/doc/resources ./docs",
     "build:clean": "rm -rf ./dist && mkdir -p ./dist/bundle ./dist/declarations && cp -r ./src ./dist/src",
     "build:compile": "tsc",
