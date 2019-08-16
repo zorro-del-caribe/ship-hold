@@ -6,7 +6,7 @@ const shInstance = shiphold({
     password: process.env.POSTGRES_PASSWORD || 'docker',
     database: process.env.POSTGRES_DB || 'ship-hold-test'
 });
-const test = require('zora');
+const {test} = require('zora');
 
 const testFiles = [
     './delete.js',

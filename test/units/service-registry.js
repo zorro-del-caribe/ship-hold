@@ -1,4 +1,4 @@
-const test = require('zora');
+const {test} = require('zora');
 const {shiphold} = require('../../dist/bundle');
 
 test('should create a service when a definition argument is passed', t => {
