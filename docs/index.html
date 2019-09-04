@@ -14,7 +14,7 @@ Ship-hold, however, focuses on a limited set of features while remaining <em>ext
 </p><h2 id="getting-started">Getting started</h2><h3 id="installation">Installation</h3><p>run in your terminal <code class="shell">npm install --save ship-hold</code> (assuming you have <a href="https://npmjs.org">npm</a> installed)
 </p><h3 id="initialisation">initialisation</h3><p>Pass database connection information to the ship-hold factory. Every option the driver <a href="https://node-postgres.com">pg</a> takes can be passed.</p><pre class="hljs"><code><span class="hljs-keyword">const</span> {shiphold} = <span class="hljs-built_in">require</span>(<span class="hljs-string">'ship-hold'</span>);
 <span class="hljs-keyword">const</span> sh = shiphold({
-    <span class="hljs-attr">hostname</span>: <span class="hljs-string">'127.0.0.1'</span>,
+    <span class="hljs-attr">host</span>: <span class="hljs-string">'127.0.0.1'</span>,
     <span class="hljs-attr">user</span>: <span class="hljs-string">'docker'</span>,
     <span class="hljs-attr">password</span>: <span class="hljs-string">'docker'</span>,
     <span class="hljs-attr">database</span>: <span class="hljs-string">'dev'</span>
