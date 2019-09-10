@@ -7,8 +7,6 @@ export const service = (definition, sh) => {
     const aliasToService = new Map();
     const include = withInclude(aliasToService, sh);
     let setAsServiceB;
-    //todo might worth use polymorphic this type instead to explicitly cast
-    // (https://devdocs.io/typescript/handbook/advanced-types#polymorphic-this-types)
     const ServicePrototype = Object.assign({
         rawSelect: (...args) => {
             return setAsServiceB(include(sh

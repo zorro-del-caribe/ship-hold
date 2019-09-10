@@ -1,10 +1,7 @@
-import {
-    EntityService,
-    ServiceBuilder,
-} from '../interfaces';
+import {EntityService, ServiceBuilder,} from '../interfaces';
 import {Builder} from 'ship-hold-querybuilder';
 
-interface WithServiceBuilderMixin {
+export interface WithServiceBuilderMixin {
     <T extends Builder>(builder: T, table?: string): ServiceBuilder;
 }
 
@@ -18,7 +15,7 @@ export const setAsServiceBuilder = (service: EntityService): WithServiceBuilderM
 
     const {table, primaryKey} = service.definition;
 
-    return <T extends Builder>(builder: T, tableName = table) => Object.defineProperties(builder, {
+    return <T extends Builder>(builder: T, tableName: string = table) => Object.defineProperties(builder, {
         service: {value: service, enumerable: true},
         cte: {value: tableName, enumerable: true, writable: true},
         primaryKey: {value: primaryKey, enumerable: true}

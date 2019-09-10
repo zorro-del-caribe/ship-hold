@@ -1,6 +1,6 @@
 import { EntityService, ServiceBuilder } from '../interfaces';
 import { Builder } from 'ship-hold-querybuilder';
-interface WithServiceBuilderMixin {
+export interface WithServiceBuilderMixin {
     <T extends Builder>(builder: T, table?: string): ServiceBuilder;
 }
 /**
@@ -10,4 +10,3 @@ interface WithServiceBuilderMixin {
  * @returns {WithServiceBuilderMixin}
  */
 export declare const setAsServiceBuilder: (service: EntityService) => WithServiceBuilderMixin;
-export {};

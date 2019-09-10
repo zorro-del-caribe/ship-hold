@@ -15,7 +15,7 @@ import {
 } from '../interfaces';
 import {setAsServiceBuilder} from './with-service-builder-mixin';
 
-export const morphBuilder = (sh: ShipHoldBuilders) => (targetBuilder: SelectServiceBuilder, relation: InclusionInput) => {
+export const morphBuilder = (sh: ShipHoldBuilders) => (targetBuilder: SelectServiceBuilder, relation: InclusionInput): SelectServiceBuilder => {
     const {value: relationBuilder} = relation;
 
     if (targetBuilder === relationBuilder) {
@@ -115,8 +115,8 @@ const movePaginationNode = (from: Builder, to: Builder) => {
     to.node('limit', limit);
 };
 
-const coalesceAggregation = (arg) => coalesce([jsonAgg(arg), `'[]'::json`]); // we return empty array instead of null
-const oneToMany = (targetBuilder: SelectServiceBuilder, relation: InclusionInput, sh) => {
+const coalesceAggregation = (arg:any) => coalesce([jsonAgg(arg), `'[]'::json`]); // we return empty array instead of null
+const oneToMany = (targetBuilder: SelectServiceBuilder, relation: InclusionInput, sh: ShipHoldBuilders) => {
     const {value: relationBuilder, as} = relation;
     const {foreignKey} = <BelongsToRelationDefinition>relationBuilder.service.getRelationWith(targetBuilder.service);
     const {cte: targetName, primaryKey} = targetBuilder;
@@ -155,7 +155,6 @@ const oneToMany = (targetBuilder: SelectServiceBuilder, relation: InclusionInput
 
 const createRelationBuilder = (pivotAlias: string, alias: string, targetPivotKey: string, relationBuilder: SelectServiceBuilder) => {
     const {service} = relationBuilder;
-    //todo might worth use polymorphic this type instead (https://devdocs.io/typescript/handbook/advanced-types#polymorphic-this-types)
     const builder = <SelectServiceBuilder>service.rawSelect(`("${pivotAlias}"."${alias}").*`, `"${pivotAlias}"."${targetPivotKey}"`).from(pivotAlias);
 
     // pass the inclusions along
@@ -164,7 +163,7 @@ const createRelationBuilder = (pivotAlias: string, alias: string, targetPivotKey
     return builder;
 };
 
-const aggregateAndClean = (arg, toRemove) => coalesce([jsonAgg(`to_jsonb(${arg}) - '${toRemove}'`), `'[]'::json`]);
+const aggregateAndClean = (arg:any, toRemove:any) => coalesce([jsonAgg(`to_jsonb(${arg}) - '${toRemove}'`), `'[]'::json`]);
 const manyToMany = (targetBuilder: SelectServiceBuilder, relation: InclusionInput, sh: ShipHoldBuilders) => {
     const {value: relationBuilder, as: alias} = relation;
     const {pivotKey: targetPivotKey, pivotTable} = <BelongsToManyRelationDefinition>targetBuilder.service.getRelationWith(relationBuilder.service);
@@ -221,7 +220,7 @@ const manyToMany = (targetBuilder: SelectServiceBuilder, relation: InclusionInpu
         .with(alias, relationWith);
 };
 
-const self = (builder: SelectServiceBuilder, sh) => {
+const self = (builder: SelectServiceBuilder, sh: ShipHoldBuilders): SelectServiceBuilder => {
     const name = builder.service.definition.name;
     const setAsServiceB = setAsServiceBuilder(builder.service);
 
@@ -232,5 +231,5 @@ const self = (builder: SelectServiceBuilder, sh) => {
     // We need to re apply pagination settings to ensure pagination works for complex queries etc.
     targetBuilder.node('orderBy', builder.node('orderBy'));
 
-    return targetBuilder;
+    return <SelectServiceBuilder>targetBuilder;
 };

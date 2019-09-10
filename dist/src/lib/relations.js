@@ -110,7 +110,6 @@ const oneToMany = (targetBuilder, relation, sh) => {
 };
 const createRelationBuilder = (pivotAlias, alias, targetPivotKey, relationBuilder) => {
     const { service } = relationBuilder;
-    //todo might worth use polymorphic this type instead (https://devdocs.io/typescript/handbook/advanced-types#polymorphic-this-types)
     const builder = service.rawSelect(`("${pivotAlias}"."${alias}").*`, `"${pivotAlias}"."${targetPivotKey}"`).from(pivotAlias);
     // pass the inclusions along
     builder.include(...relationBuilder.inclusions);

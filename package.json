@@ -47,19 +47,19 @@
   "dependencies": {
     "pg": "^7.12.1",
     "pg-query-stream": "^2.0.0",
-    "ship-hold-querybuilder": "^2.0.0"
+    "ship-hold-querybuilder": "^2.0.1"
   },
   "devDependencies": {
-    "@types/node": "^12.7.2",
-    "@types/pg": "^7.4.14",
-    "@types/pg-query-stream": "^1.0.2",
+    "@types/node": "^12.7.4",
+    "@types/pg": "^7.11.1",
+    "@types/pg-query-stream": "^1.0.3",
     "faucet": "0.0.1",
     "jstransformer-highlight": "^2.0.0",
     "mkdirp": "^0.5.1",
     "pug": "^2.0.4",
-    "rollup": "^1.19.4",
-    "typescript": "^3.5.3",
-    "zora": "^3.0.2"
+    "rollup": "^1.21.2",
+    "typescript": "^3.6.2",
+    "zora": "^3.0.3"
   },
   "homepage": "https://ship-hold.com"
 }

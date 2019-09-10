@@ -43,7 +43,7 @@ export const withQueryRunner = (pool: DBConnectionsPool): WithQueryRunnerMixin =
             return this.run(params, offset);
         },
         run(this: RunnableQueryBuilder, params = {}, offset = 1) {
-            const rows = [];
+            const rows: any[] = [];
             return new Promise((resolve, reject) => {
                 // @ts-ignore
                 this.stream(function* () {

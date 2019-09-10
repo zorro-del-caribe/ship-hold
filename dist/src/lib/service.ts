@@ -8,7 +8,7 @@ import {
     ShipHoldBuilders
 } from '../interfaces';
 import {withInclude} from './with-include-builder-mixin';
-import {setAsServiceBuilder} from './with-service-builder-mixin';
+import {setAsServiceBuilder, WithServiceBuilderMixin} from './with-service-builder-mixin';
 
 export const service = <T>(definition: EntityDefinition, sh: ShipHoldBuilders): EntityService => {
     const {table} = definition;
@@ -16,23 +16,21 @@ export const service = <T>(definition: EntityDefinition, sh: ShipHoldBuilders): 
     const aliasToService = new Map<string, EntityService>();
     const include = withInclude(aliasToService, sh);
 
-    let setAsServiceB;
+    let setAsServiceB: WithServiceBuilderMixin;
 
-    //todo might worth use polymorphic this type instead to explicitly cast
-    // (https://devdocs.io/typescript/handbook/advanced-types#polymorphic-this-types)
     const ServicePrototype = Object.assign({
-            rawSelect: (...args) => {
+            rawSelect: (...args: any[]) => {
                 return setAsServiceB(include(<SelectServiceBuilder>sh
                     .select(...args)));
             },
 
-            select: (...args) => {
+            select: (...args: any[]) => {
                 return setAsServiceB(include(<SelectServiceBuilder>sh
                     .select(...args)
                     .from(table)));
             },
 
-            insert: (...args) => setAsServiceB(<InsertBuilder>sh
+            insert: (...args: any[]) => setAsServiceB(<InsertBuilder>sh
                 .insert(...args)
                 .into(table)
                 .returning('*')),
@@ -51,7 +49,7 @@ export const service = <T>(definition: EntityDefinition, sh: ShipHoldBuilders): 
 
             delete: () => setAsServiceB(sh.delete(table)),
 
-            if: (leftOperand, ...rest) => sh.if(leftOperand, ...rest)
+            if: (leftOperand: any, ...rest: any[]) => sh.if(leftOperand, ...rest)
         },
         withRelation(serviceToRelation, aliasToService)
     );

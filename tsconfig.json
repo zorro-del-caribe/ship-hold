@@ -5,7 +5,7 @@
     ],
     "module": "es2015",
     "moduleResolution": "node",
-    "noImplicitAny": false,
+    "noImplicitAny": true,
     "preserveConstEnums": true,
     "declaration": true,
     "declarationDir": "dist/declarations",
