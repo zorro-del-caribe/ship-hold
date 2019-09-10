@@ -1,6 +1,6 @@
 {
   "name": "ship-hold",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "data access framework for PostgreSQL",
   "main": "./dist/bundle/index",
   "module": "./dist/bundle/module",
