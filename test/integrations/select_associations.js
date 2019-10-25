@@ -1,6 +1,6 @@
-const {parallels} = require('./util');
+const {wrapWithShipHold} = require('../util.js');
 
-module.exports = function (sh, test) {
+export default wrapWithShipHold(async function (t, sh) {
     let usersFixture;
     let productsFixture;
     let phonesFixture;
@@ -44,10 +44,52 @@ module.exports = function (sh, test) {
         return {Users, Products, Phones, Accounts};
     }
 
-    return test('select with include', parallels(async t => {
-        await t.test('add user fixture', async t => {
-            const {query} = sh;
-            const {rows} = await query(`INSERT INTO users_association_select(name, age) 
+    await t.test(`create schema`, async t => {
+        await sh.query(`DROP TABLE IF EXISTS
+          users_association_select,
+            products_association_select,
+            phones_association_select,
+            accounts_association_select,
+            users_accounts_association_select
+        ;`);
+        await sh.query(`
+        CREATE TABLE users_association_select (
+            id serial PRIMARY KEY,
+            age integer,
+            name varchar(100)
+        );
+
+        CREATE TABLE products_association_select (
+            id serial PRIMARY KEY,
+            price double precision,
+            sku varchar(3),
+            title varchar(100),
+            user_id integer REFERENCES users_association_select
+        );
+
+        CREATE TABLE phones_association_select (
+            id serial PRIMARY KEY,
+            number varchar(100),
+            user_id integer REFERENCES users_association_select
+        );
+
+        CREATE TABLE accounts_association_select (
+            id serial PRIMARY KEY,
+            balance double precision
+        );
+
+        CREATE TABLE users_accounts_association_select (
+            user_id integer REFERENCES users_association_select,
+            account_id integer REFERENCES accounts_association_select,
+            PRIMARY KEY (user_id, account_id)
+        );
+        `);
+        t.ok(true, `schema created`);
+    });
+
+    await t.test('add user fixture', async t => {
+        const {query} = sh;
+        const {rows} = await query(`INSERT INTO users_association_select(name, age) 
       VALUES 
       ('Laurent',29),
       ('Jesus', 2016),
@@ -57,14 +99,14 @@ module.exports = function (sh, test) {
       ('Francoise',58)
       RETURNING *`);
 
-            usersFixture = fixtureFactory(rows);
+        usersFixture = fixtureFactory(rows);
 
-            t.equal(rows.length, 6);
-        });
+        t.equal(rows.length, 6);
+    });
 
-        await t.test('add products fixture', async t => {
-            const {query} = sh;
-            const {rows} = await query(`INSERT INTO products_association_select(price, sku,title,user_id) 
+    await t.test('add products fixture', async t => {
+        const {query} = sh;
+        const {rows} = await query(`INSERT INTO products_association_select(price, sku,title,user_id) 
       VALUES 
       (9.99,'sgl','sun glasses',2),
       (49.5,'kbd','key board',1),
@@ -76,28 +118,28 @@ module.exports = function (sh, test) {
 
       RETURNING *`);
 
-            productsFixture = fixtureFactory(rows);
+        productsFixture = fixtureFactory(rows);
 
-            t.equal(rows.length, 7, 'should have created 7 products');
-        });
+        t.equal(rows.length, 7, 'should have created 7 products');
+    });
 
-        await t.test('add phones fixture', async t => {
-            const {query} = sh;
-            const {rows} = await query(`INSERT INTO phones_association_select(number,user_id)
+    await t.test('add phones fixture', async t => {
+        const {query} = sh;
+        const {rows} = await query(`INSERT INTO phones_association_select(number,user_id)
       VALUES ('123456789',1),('987654321',3) RETURNING *`);
-            phonesFixture = fixtureFactory(rows);
-            t.equal(rows.length, 2, 'should have two rows');
-        });
+        phonesFixture = fixtureFactory(rows);
+        t.equal(rows.length, 2, 'should have two rows');
+    });
 
-        await t.test('add accounts fixture', async t => {
-            const {query} = sh;
-            const queryText = `INSERT INTO accounts_association_select(balance) VALUES
+    await t.test('add accounts fixture', async t => {
+        const {query} = sh;
+        const queryText = `INSERT INTO accounts_association_select(balance) VALUES
     (200.42),
     (-20.56),
     (42.42),
     (51.2)
     RETURNING *`;
-            const pivotq = `INSERT INTO users_accounts_association_select(user_id,account_id) VALUES
+        const pivotq = `INSERT INTO users_accounts_association_select(user_id,account_id) VALUES
     (1,1),
     (1,2),
     (2,1),
@@ -107,11 +149,13 @@ module.exports = function (sh, test) {
       RETURNING *
     `;
 
-            const {rows} = await query(queryText);
-            t.equal(rows.length, 4, 'should have inserted 4 accounts');
-            const {rows: pivotRows} = await query(pivotq);
-            t.equal(pivotRows.length, 6, 'should have inserted 6 relations');
-        });
+        const {rows} = await query(queryText);
+        t.equal(rows.length, 4, 'should have inserted 4 accounts');
+        const {rows: pivotRows} = await query(pivotq);
+        t.equal(pivotRows.length, 6, 'should have inserted 6 relations');
+    });
+
+    return Promise.all([
 
         // ONE HAS ONE
 
@@ -129,8 +173,7 @@ module.exports = function (sh, test) {
 
             const users = await builder.run();
             t.deepEqual(users, expected);
-        });
-
+        }),
         t.test('one has one: load all users with their phone number (builder notations)', async t => {
             const {Users, Phones} = createServices();
             const expected = usersFixture()
@@ -142,8 +185,7 @@ module.exports = function (sh, test) {
 
             const users = await builder.run();
             t.deepEqual(users, expected);
-        });
-
+        }),
         t.test('one has one: load all users with their phone number (builder notations), using select fields ', async t => {
             const {Users, Phones} = createServices();
             const expected = usersFixture()
@@ -161,8 +203,7 @@ module.exports = function (sh, test) {
 
             const users = await builder.run();
             t.deepEqual(users, expected);
-        });
-
+        }),
         t.test('one has one: load all users with their phone number with custom alias', async t => {
             const {Users, Phones} = createServices();
             const expected = usersFixture()
@@ -180,8 +221,7 @@ module.exports = function (sh, test) {
 
             const users = await builder.run();
             t.deepEqual(users, expected);
-        });
-
+        }),
         t.test('one has one: load all users with their phone number (string notation)', async t => {
             const {Users} = createServices();
             const expected = usersFixture()
@@ -193,7 +233,7 @@ module.exports = function (sh, test) {
 
             const users = await builder.run();
             t.deepEqual(users, expected);
-        });
+        }),
 
         // ONE BELONGS TO ONE
 
@@ -210,8 +250,7 @@ module.exports = function (sh, test) {
 
             const phones = await builder.run();
             t.deepEqual(phones, expected);
-        });
-
+        }),
         t.test('one belongs to one: load all the phones with their owner (builder notations)', async t => {
             const {Users, Phones} = createServices();
             const expected = phonesFixture()
@@ -223,8 +262,7 @@ module.exports = function (sh, test) {
 
             const phones = await builder.run();
             t.deepEqual(phones, expected);
-        });
-
+        }),
         t.test('one belongs to one: load all the phones with their owner (builder notations), using select fields ', async t => {
             const {Users, Phones} = createServices();
             const expected = phonesFixture()
@@ -239,8 +277,7 @@ module.exports = function (sh, test) {
 
             const users = await builder.run();
             t.deepEqual(users, expected);
-        });
-
+        }),
         t.test('one belongs to one: load all the phones with their owner with custom alias', async t => {
             const {Users, Phones} = createServices();
             const expected = phonesFixture()
@@ -255,8 +292,7 @@ module.exports = function (sh, test) {
 
             const users = await builder.run();
             t.deepEqual(users, expected);
-        });
-
+        }),
         t.test('one belongs to one: load all the phones with their owner (string notation)', async t => {
             const {Phones} = createServices();
             const expected = phonesFixture()
@@ -268,7 +304,7 @@ module.exports = function (sh, test) {
 
             const users = await builder.run();
             t.deepEqual(users, expected);
-        });
+        }),
 
         // ONE HAS MANY
 
@@ -278,7 +314,6 @@ module.exports = function (sh, test) {
                 .select()
                 .orderBy('id')
                 .include(Products);
-
 
             const users = await builder.run();
 
@@ -291,8 +326,7 @@ module.exports = function (sh, test) {
             expected[5].products = [];
 
             t.deepEqual(users, expected);
-        });
-
+        }),
         t.test('one to Many: load al users with their products (string notation)', async t => {
             const {Users} = createServices();
             const builder = Users
@@ -304,8 +338,7 @@ module.exports = function (sh, test) {
                 products: productsFixture(p => p.user_id === u.id)
             }));
             t.deepEqual(users, expected);
-        });
-
+        }),
         t.test('one to many: specify fields (builder notation)', async t => {
             const {Users, Products} = createServices();
             const builder = Users
@@ -331,8 +364,7 @@ module.exports = function (sh, test) {
                 {name: 'Olivier', id: 5, products: []},
                 {name: 'Francoise', id: 6, products: []}
             ]);
-        });
-
+        }),
         t.test('one to many: with custom alias', async t => {
             const {Users, Products} = createServices();
             const builder = Users
@@ -361,8 +393,7 @@ module.exports = function (sh, test) {
                 {name: 'Olivier', id: 5, pds: []},
                 {name: 'Francoise', id: 6, pds: []}
             ]);
-        });
-
+        }),
         t.test('one to many: including several times the same service with different aliases', async t => {
             const {Users, Products} = createServices();
             const builder = Users
@@ -405,8 +436,7 @@ module.exports = function (sh, test) {
                     {'id': 5, 'name': 'Olivier', 'expensive': [], 'cheap': []},
                     {'id': 6, 'name': 'Francoise', 'expensive': [], 'cheap': []}]
             );
-        });
-
+        }),
         t.test('one to many: filter on target service', async t => {
             const {Users, Products} = createServices();
             const builder = Users
@@ -424,8 +454,7 @@ module.exports = function (sh, test) {
                     user_id: 1
                 }]
             }]);
-        });
-
+        }),
         t.test('one to many: order and limit on target service', async t => {
             const {Users, Products} = createServices();
             const builder = Users
@@ -450,8 +479,7 @@ module.exports = function (sh, test) {
 
             const users = await builder.run();
             t.deepEqual(users, expected);
-        });
-
+        }),
         t.test('one to many: filter on included service', async t => {
             const {Users, Products} = createServices();
             const expected = [
@@ -465,8 +493,7 @@ module.exports = function (sh, test) {
             const users = await builder.run();
 
             t.deepEqual(users, expected);
-        });
-
+        }),
         t.test('one to many: order and limit on include service', async t => {
             const {Users, Products} = createServices();
             const expected = [
@@ -475,7 +502,7 @@ module.exports = function (sh, test) {
                 {id: 2, name: 'Jesus', products: [{id: 1, sku: 'sgl', user_id: 2}]},
                 {id: 1, name: 'Laurent', products: [{id: 7, sku: 'twl', user_id: 1}]},
                 {id: 5, name: 'Olivier', products: []},
-                {id: 3, name: 'Raymond', products: []},
+                {id: 3, name: 'Raymond', products: []}
             ];
 
             const builder = Users
@@ -489,7 +516,7 @@ module.exports = function (sh, test) {
             const users = await builder.run();
 
             t.deepEqual(users, expected);
-        });
+        }),
 
         // MANY HAS ONE
 
@@ -506,8 +533,7 @@ module.exports = function (sh, test) {
 
             const products = await builder.run();
             t.deepEqual(products, expected);
-        });
-
+        }),
         t.test('many to one: specify fields (builder notation)', async t => {
             const {Products, Users} = createServices();
             const expected = productsFixture()
@@ -530,8 +556,7 @@ module.exports = function (sh, test) {
             const products = await builder.run();
 
             t.deepEqual(products, expected);
-        });
-
+        }),
         t.test('many to one: filter on target service', async t => {
             const {Products, Users} = createServices();
             const expected = [{id: 5, title: 'white dress', user_id: 4, owner: {id: 4, name: 'Blandine'}}];
@@ -543,8 +568,7 @@ module.exports = function (sh, test) {
             const products = await builder.run();
 
             t.deepEqual(products, expected);
-        });
-
+        }),
         t.test('many to one: order and limit on target service', async t => {
             const {Products, Users} = createServices();
             const expected = [
@@ -561,8 +585,7 @@ module.exports = function (sh, test) {
             const actual = await builder.run();
 
             t.deepEqual(actual, expected);
-        });
-
+        }),
         t.test('many to one: specify fields (builder notation)', async t => {
             const {Products, Users} = createServices();
             const expected = productsFixture()
@@ -585,7 +608,7 @@ module.exports = function (sh, test) {
             const products = await builder.run();
 
             t.deepEqual(products, expected);
-        });
+        }),
 
         // MANY BELONGS TO MANY
 
@@ -601,7 +624,7 @@ module.exports = function (sh, test) {
                 {id: 3, name: 'Raymond', accounts: []},
                 {id: 4, name: 'Blandine', accounts: []},
                 {id: 5, name: 'Olivier', accounts: [{id: 1, balance: 200.42}]},
-                {id: 6, name: 'Francoise', accounts: []},
+                {id: 6, name: 'Francoise', accounts: []}
             ];
             const builder = Users
                 .select('id', 'name')
@@ -611,8 +634,7 @@ module.exports = function (sh, test) {
             const users = await builder.run();
             t.deepEqual(users, expected);
 
-        });
-
+        }),
         t.test('many to many: filter on base service', async t => {
             const {Users, Accounts} = createServices();
             const builder = Users
@@ -626,8 +648,7 @@ module.exports = function (sh, test) {
                 name: 'Laurent',
                 accounts: [{id: 1, balance: 200.42}, {id: 2, balance: -20.56}]
             }]);
-        });
-
+        }),
         t.test('many to many: filter on include', async t => {
             const {Users, Accounts} = createServices();
             const expected = [
@@ -650,8 +671,7 @@ module.exports = function (sh, test) {
             const actual = await builder.run();
 
             t.deepEqual(actual, expected);
-        });
-
+        }),
         t.test('many to many: order and limit on included service', async t => {
             const {Users, Accounts} = createServices();
             const expected = [
@@ -664,7 +684,7 @@ module.exports = function (sh, test) {
                 {id: 3, name: 'Raymond', accounts: []},
                 {id: 4, name: 'Blandine', accounts: []},
                 {id: 5, name: 'Olivier', accounts: [{id: 1, balance: 200.42}]},
-                {id: 6, name: 'Francoise', accounts: []},
+                {id: 6, name: 'Francoise', accounts: []}
             ];
             const builder = Users
                 .select('id', 'name')
@@ -673,8 +693,7 @@ module.exports = function (sh, test) {
 
             const users = await builder.run();
             t.deepEqual(users, expected);
-        });
-
+        }),
         t.test('many to many: load multiple times the service with custom aliases', async t => {
             const {Users, Accounts} = createServices();
             const expected = [{
@@ -713,9 +732,9 @@ module.exports = function (sh, test) {
             const actual = await builder.run();
 
             t.deepEqual(actual, expected);
-        });
+        }),
 
-// MIX
+        // MIX
 
         t.test('combo', async t => {
             const {Users, Products, Phones, Accounts} = createServices();
@@ -751,8 +770,7 @@ module.exports = function (sh, test) {
 
             const users = await builder.run();
             t.deepEqual(users, expected);
-        });
-
+        }),
         t.test('include multiple services', async t => {
             const {Users, Products, Phones} = createServices();
             const expected = [{
@@ -772,8 +790,7 @@ module.exports = function (sh, test) {
 
             const actual = await builder.run();
             t.deepEqual(actual, expected);
-        });
-
+        }),
         t.test('nested include', async t => {
             const {Phones, Users, Products} = createServices();
             const expected = [{
@@ -807,8 +824,7 @@ module.exports = function (sh, test) {
 
             const phones = await builder.run();
             t.deepEqual(phones, expected);
-        });
-
+        }),
         t.test('multiple service at nested level', async t => {
             const {Products, Users, Accounts} = createServices();
             const expected = [{
@@ -840,8 +856,7 @@ module.exports = function (sh, test) {
 
             const products = await builder.run({id: 2});
             t.deepEqual(products, expected);
-        });
-
+        }),
         t.test('pagination on nested include: one to many', async t => {
             const {Users, Products, Accounts} = createServices();
 
@@ -853,7 +868,7 @@ module.exports = function (sh, test) {
                     id: 4,
                     name: 'Blandine',
                     products: [{id: 5, sku: 'wdr', user_id: 4, owner: {id: 4, name: 'Blandine'}}]
-                },
+                }
             ];
 
             const builder = Users
@@ -871,8 +886,7 @@ module.exports = function (sh, test) {
             const actual = await builder.run();
 
             t.deepEqual(actual, expected);
-        });
-
+        }),
         t.test('pagination on nested include: many to many', async t => {
             const {Users, Accounts} = createServices();
 
@@ -903,7 +917,7 @@ module.exports = function (sh, test) {
                         ]
                     }]
                 },
-                {id: 3, name: 'Raymond', accounts: []},
+                {id: 3, name: 'Raymond', accounts: []}
             ];
 
             const builder = Users
@@ -921,6 +935,6 @@ module.exports = function (sh, test) {
             const actual = await builder.run();
 
             t.deepEqual(actual, expected);
-        });
-    }));
-};
+        })
+    ]);
+});

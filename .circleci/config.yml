@@ -6,7 +6,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: circleci/node:10
+      - image: circleci/node:latest
         environment:
           - POSTGRES_USER=root
           - POSTGRES_DB=circle_test
@@ -34,5 +34,4 @@ jobs:
           key: v1-dependencies-{{ checksum "package.json" }}
 
       # run tests!
-      - run: npm run test:unit | ./node_modules/.bin/faucet
-      - run: npm run test:int | ./node_modules/.bin/faucet
+      - npm test
