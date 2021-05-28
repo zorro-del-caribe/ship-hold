@@ -54,7 +54,7 @@
     "jstransformer-highlight": "^2.0.0",
     "mkdirp": "^0.5.1",
     "pta": "^0.1.0",
-    "pug": "^2.0.4",
+    "pug": "^3.0.1",
     "rollup": "^1.25.2",
     "typescript": "^3.6.4"
   },
