@@ -24,4 +24,4 @@ schema management, migrations, validations, different sql dialects, model instan
 (we are usually talking about more than 200 API functions and more than 10/20 thousands source lines of code).
 Ship-hold, however, focuses on a limited set of features while remaining extensible.
 
-Visit the [Documentation website](https://ship-hold.com) for more details
+Visit the [Documentation website](http://zorro-del-caribe.github.io/ship-hold/) for more details
